@@ -1,0 +1,16 @@
+{
+  "expo": {
+    "name": "KEEPIT",
+    "slug": "keepit-fe",
+    "scheme": "keepit",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "userInterfaceStyle": "automatic",
+    "ios": {
+      "supportsTablet": true
+    },
+    "android": {
+      "edgeToEdgeEnabled": true
+    }
+  }
+}
