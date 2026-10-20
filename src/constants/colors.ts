@@ -2,6 +2,7 @@
 export const COLORS = {
   // Main
   primary: '#5AA9E6',
+  primaryLight: '#EAF4FC',
 
   // Text
   text: '#1F2937',
@@ -14,6 +15,7 @@ export const COLORS = {
   border: '#D1D5DB',
 
   // Danger
+  alert: '#EF4444',
   dangerBg: '#FCA5A5',
   dangerText: '#7F1D1D',
 

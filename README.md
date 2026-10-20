@@ -102,6 +102,7 @@ Figma에서 확인된 주요 컬러:
 | Figma Token | HEX |
 |---|---|
 | primary | #5AA9E6 |
+| primary-light | #EAF4FC |
 | white | #FFFFFF |
 | text | #1F2937 |
 | text-sub | #6B7280 |
@@ -109,6 +110,7 @@ Figma에서 확인된 주요 컬러:
 | bg-gray | #F3F4F6 |
 | border | #D1D5DB |
 | line | #E5E7EB |
+| alert | #EF4444 |
 | danger-bg | #FCA5A5 |
 | danger-text | #7F1D1D |
 
