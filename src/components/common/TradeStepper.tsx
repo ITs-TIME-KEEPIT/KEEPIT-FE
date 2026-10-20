@@ -109,3 +109,13 @@ const styles = StyleSheet.create({
     color: COLORS.textPlaceholder,
   },
 });
+
+/*
+TradeStepper 사용법 - 최종 배포 시 주석은 삭제 예정
+
+거래 진행 단계 표시. `신청 → 수락 → 전달 → 수령 → 반납 → 완료` 6단계.
+
+import TradeStepper, { TRADE_STEPS, TradeStep } from '../../components/clothing/TradeStepper';
+
+<TradeStepper current="전달" /> -> 현재 단계가 '전달'인 경우.
+*/

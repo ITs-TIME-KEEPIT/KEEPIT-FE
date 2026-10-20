@@ -121,3 +121,25 @@ const styles = StyleSheet.create({
     gap: 4,
   },
 });
+
+/* 
+ClothCard 사용법 - 최종 배포 시 주석은 삭제 예정
+
+옷 목록 아이템. 하단 구분선이 있어 리스트로 이어 붙여서 사용 가능.
+
+import ClothCard from '../../components/clothing/ClothCard';
+
+<ClothCard
+  imageUrl="https://..."
+  title="하객룩 네이비 원피스"
+  region="마포구"
+  category="원피스"
+  size="M"
+  price={25000}
+  badges={[
+    { label: '세탁 포함' },
+    { label: '택배 가능', tone: 'gray' },
+  ]}
+  onPress={() => navigation.navigate('Detail', { id })}
+/>
+*/

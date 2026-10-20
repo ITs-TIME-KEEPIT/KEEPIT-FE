@@ -100,3 +100,15 @@ const styles = StyleSheet.create({
     fontFamily: 'Pretendard-SemiBold',
   },
 });
+
+/* 
+TabBar 사용법 - 최종 배포 시 주석은 삭제 예정
+
+하단 탭바. 홈 / 내 거래 / 마이 3개 탭. 하단 SafeArea(홈 인디케이터) 여백은 자동 포함됩니다.
+
+import TabBar, { TabKey } from '../../components/common/TabBar';
+
+const [tab, setTab] = useState<TabKey>('home');
+
+<TabBar active={tab} onPressTab={setTab} />
+*/

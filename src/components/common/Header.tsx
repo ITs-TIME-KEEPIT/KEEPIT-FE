@@ -163,3 +163,25 @@ const styles = StyleSheet.create({
     tintColor: COLORS.text,
   },
 });
+
+/* 
+Header 사용법 - 최종 배포 시 주석은 삭제 예정
+
+화면 상단 헤더. 높이 56, 너비 100%.
+
+import Header from '../../components/common/Header';
+
+1. 홈: 지역명 + 검색/알림
+<Header
+  location="마포구"
+  onPressLocation={() => {}}
+  onPressSearch={() => {}}
+  onPressBell={() => {}}
+/>
+
+2. 뒤로가기 + 현제 페이지 제목 (<)
+<Header type="back" title="상세" onPressLeft={() => navigation.goBack()} />
+
+3. 닫기 + 현재 페이지 제목 (x)
+<Header type="close" title="등록하기" onPressLeft={() => navigation.goBack()} />
+*/

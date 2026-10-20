@@ -61,3 +61,14 @@ const styles = StyleSheet.create({
     borderColor: COLORS.line,
   },
 });
+
+/*
+Badge 사용법 - 최종 배포 시 주석은 삭제 예정
+
+import Badge from '../../components/common/Badge';
+
+<Badge label="세탁 포함" /> -> 기본 색상 뱃지 (PrimaryLight 배경, Primary 글자색)
+<Badge label="택배 가능" tone="gray" /> -> 회색 뱃지
+<Badge label="NEW" tone="alert" /> -> 빨간 뱃지
+<Badge label="대여중" tone="outline" /> -> 흰색 뱃지, 테두리 있음
+*/
