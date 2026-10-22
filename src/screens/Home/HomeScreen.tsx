@@ -1,5 +1,260 @@
-import { View, Text, StyleSheet } from 'react-native';
+import React, { useState } from 'react';
+import {
+  View,
+  Text,
+  Image,
+  Pressable,
+  ScrollView,
+  FlatList,
+  StyleSheet,
+  Alert,
+} from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+
+import { COLORS } from '../../constants/colors';
+
+import Header from '../../components/common/Header';
+import TabBar from '../../components/common/TabBar';
+import ChipButton from '../../components/common/ChipButton';
+import ChipActiveButton from '../../components/common/ChipActiveButton';
+import ClothCard from '../../components/clothing/ClothCard';
+
+type Category = '상의' | '하의' | '원피스' | '아우터' | '잡화';
+type Size = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'FREE';
+
+type ClothItem = {
+  id: string;
+  title: string;
+  region: string;
+  category: Category;
+  size: Size;
+  price: number;
+  laundryIncluded: boolean;
+  shippingAvailable: boolean;
+  imageUrl?: string;
+};
+
+const CATEGORIES = ['전체', '상의', '하의', '원피스', '아우터', '잡화'] as const;
+
+// 임시 데이터 - 백엔드 연동 시 교체
+const MOCK_CLOTHES: ClothItem[] = [
+  { id: '1', title: '하객룩 네이비 원피스', region: '마포구', category: '원피스', size: 'M', price: 25000, laundryIncluded: true, shippingAvailable: true },
+  { id: '2', title: '블랙 새틴 파티 드레스', region: '합정동', category: '원피스', size: 'M', price: 30000, laundryIncluded: true, shippingAvailable: true },
+  { id: '3', title: '린넨 셔츠 원피스', region: '연남동', category: '원피스', size: 'FREE', price: 15000, laundryIncluded: true, shippingAvailable: true },
+  { id: '4', title: '트위드 셋업 재킷', region: '마포구', category: '아우터', size: 'L', price: 35000, laundryIncluded: true, shippingAvailable: true },
+  { id: '5', title: '로고 그래픽 티셔츠', region: '성산동', category: '상의', size: 'L', price: 5000, laundryIncluded: true, shippingAvailable: true },
+];
+
+const showPreparing = (message: string) => Alert.alert('준비 중', message);
+
 export default function HomeScreen() {
-  return <View style={styles.container}><Text>KEEPIT · 홈 UI 작업 예정</Text></View>;
+  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>('전체');
+
+  const clothes =
+    category === '전체'
+      ? MOCK_CLOTHES
+      : MOCK_CLOTHES.filter((item) => item.category === category);
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      <Header location="전체" />
+
+      {/* 필터 바 */}
+      <View style={styles.filterBar}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          style={styles.chipScroll}
+          contentContainerStyle={styles.chips}
+        >
+          {CATEGORIES.map((item) =>
+            item === category ? (
+              <ChipActiveButton key={item} title={item} onPress={() => setCategory(item)} />
+            ) : (
+              <ChipButton key={item} title={item} onPress={() => setCategory(item)} />
+            ),
+          )}
+        </ScrollView>
+
+        <View style={styles.divider} />
+
+        <View style={styles.tools}>
+          <Pressable accessibilityRole="button" accessibilityLabel="날짜 선택" style={styles.toolButton}>
+            <Image source={require('../../../assets/icons/calendar.png')} style={styles.toolIcon} resizeMode="contain" />
+          </Pressable>
+          <Pressable accessibilityRole="button" accessibilityLabel="상세 필터" style={styles.toolButton}>
+            <Image source={require('../../../assets/icons/filter.png')} style={styles.toolIcon} resizeMode="contain" />
+          </Pressable>
+        </View>
+      </View>
+
+      {/* 옷 목록 + FAB */}
+      <View style={styles.listArea}>
+        <FlatList
+          data={clothes}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.listContent}
+          renderItem={({ item }) => (
+            <ClothCard
+              imageUrl={item.imageUrl}
+              title={item.title}
+              region={item.region}
+              category={item.category}
+              size={item.size}
+              price={item.price}
+              badges={[
+                ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
+                ...(item.shippingAvailable ? [{ label: '택배 가능', tone: 'gray' as const }] : []),
+              ]}
+              onPress={() => showPreparing('옷 상세 화면은 준비 중이에요.')}
+            />
+          )}
+          // TODO: 캐릭터 시안 확정 후 디자인 적용
+          ListEmptyComponent={
+            <View style={styles.empty}>
+              <Text style={styles.emptyTitle}>
+                조건에 맞는 옷이 없어요
+              </Text>
+              <Text style={styles.emptySub}>
+                날짜나 카테고리를 바꿔보세요
+              </Text>
+            </View>
+          }
+        />
+
+        <Pressable
+          onPress={() =>
+            showPreparing('옷 등록 화면은 준비 중이에요.\n카메라 연동과 함께 추가될 예정이에요.')
+          }
+          accessibilityRole="button"
+          style={styles.fab}
+        >
+          <Image source={require('../../../assets/icons/plus.png')} style={styles.fabIcon} resizeMode="contain" />
+          <Text style={styles.fabText}>옷 올리기</Text>
+        </Pressable>
+      </View>
+
+      {/* 다른 탭 화면이 아직 없어 홈만 활성 */}
+      <TabBar active="home" onPressTab={() => {}} />
+    </SafeAreaView>
+  );
 }
-const styles = StyleSheet.create({ container: { flex: 1, justifyContent: 'center', alignItems: 'center' } });
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: COLORS.white,
+  },
+
+  filterBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingHorizontal: 16,
+    paddingTop: 4,
+    paddingBottom: 12,
+  },
+
+  chipScroll: {
+    flex: 1,
+  },
+
+  chips: {
+    alignItems: 'center',
+    gap: 6,
+  },
+
+  divider: {
+    width: 1,
+    height: 20,
+    backgroundColor: COLORS.line,
+  },
+
+  tools: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+
+  toolButton: {
+    width: 34,
+    height: 34,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: COLORS.white,
+    borderWidth: 1,
+    borderColor: COLORS.line,
+    borderRadius: 999,
+  },
+
+  toolIcon: {
+    width: 20,
+    height: 20,
+    tintColor: COLORS.text,
+  },
+
+  listArea: {
+    flex: 1,
+  },
+
+  listContent: {
+    paddingBottom: 80, // FAB에 마지막 카드가 가려지지 않도록
+  },
+
+  empty: {
+    alignItems: 'center',
+    paddingTop: 80,
+    gap: 4,
+  },
+
+  emptyTitle: {
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 16,
+    lineHeight: 22.4,
+    color: COLORS.text,
+    includeFontPadding: false,
+  },
+
+  emptySub: {
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    lineHeight: 19.6,
+    color: COLORS.textSub,
+    includeFontPadding: false,
+  },
+
+  fab: {
+    position: 'absolute',
+    right: 16,
+    bottom: 16,
+    height: 48,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    paddingLeft: 16,
+    paddingRight: 18,
+    paddingVertical: 12,
+    backgroundColor: COLORS.primary,
+    borderRadius: 999,
+
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.18,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+
+  fabIcon: {
+    width: 24,
+    height: 24,
+    tintColor: COLORS.white,
+  },
+
+  fabText: {
+    fontFamily: 'Pretendard-Bold',
+    fontSize: 15,
+    lineHeight: 21.75,
+    letterSpacing: 0,
+    color: COLORS.white,
+    includeFontPadding: false,
+  },
+});
