@@ -4,6 +4,8 @@ import {
   Pressable,
   Text,
   StyleSheet,
+  StyleProp,
+  ViewStyle,
 } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
@@ -11,17 +13,19 @@ import { COLORS } from '../../constants/colors';
 interface SecondaryButtonProps {
   title?: string;
   onPress: () => void;
+  style?: StyleProp<ViewStyle>;
 }
 
 export default function SecondaryButton({
   title = 'Button',
   onPress,
+  style,
 }: SecondaryButtonProps) {
   return (
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      style={styles.button}
+      style={[styles.button, style]}
     >
       <Text style={styles.label}>
         {title}

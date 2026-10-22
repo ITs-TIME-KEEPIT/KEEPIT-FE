@@ -18,42 +18,24 @@ import TabBar from '../../components/common/TabBar';
 import ChipButton from '../../components/common/ChipButton';
 import ChipActiveButton from '../../components/common/ChipActiveButton';
 import ClothCard from '../../components/clothing/ClothCard';
+import FilterSheet from '../../components/bottomSheet/FilterSheet';
 
-type Category = '상의' | '하의' | '원피스' | '아우터' | '잡화';
-type Size = 'XS' | 'S' | 'M' | 'L' | 'XL' | 'FREE';
+import { CATEGORIES } from '../../constants/clothing';
+import { INITIAL_FILTER } from '../../types/filter';
+import type { DetailFilter } from '../../types/filter';
+import { MOCK_CLOTH_ITEMS } from '../../mocks/clothItems';
+import { filterClothItems } from '../../utils/filterClothItems';
 
-type ClothItem = {
-  id: string;
-  title: string;
-  region: string;
-  category: Category;
-  size: Size;
-  price: number;
-  laundryIncluded: boolean;
-  shippingAvailable: boolean;
-  imageUrl?: string;
-};
-
-const CATEGORIES = ['전체', '상의', '하의', '원피스', '아우터', '잡화'] as const;
-
-// 임시 데이터 - 백엔드 연동 시 교체
-const MOCK_CLOTHES: ClothItem[] = [
-  { id: '1', title: '하객룩 네이비 원피스', region: '마포구', category: '원피스', size: 'M', price: 25000, laundryIncluded: true, shippingAvailable: true },
-  { id: '2', title: '블랙 새틴 파티 드레스', region: '합정동', category: '원피스', size: 'M', price: 30000, laundryIncluded: true, shippingAvailable: true },
-  { id: '3', title: '린넨 셔츠 원피스', region: '연남동', category: '원피스', size: 'FREE', price: 15000, laundryIncluded: true, shippingAvailable: true },
-  { id: '4', title: '트위드 셋업 재킷', region: '마포구', category: '아우터', size: 'L', price: 35000, laundryIncluded: true, shippingAvailable: true },
-  { id: '5', title: '로고 그래픽 티셔츠', region: '성산동', category: '상의', size: 'L', price: 5000, laundryIncluded: true, shippingAvailable: true },
-];
+const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
 
 const showPreparing = (message: string) => Alert.alert('준비 중', message);
 
 export default function HomeScreen() {
-  const [category, setCategory] = useState<(typeof CATEGORIES)[number]>('전체');
+  const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
+  const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
+  const [filterOpen, setFilterOpen] = useState(false);
 
-  const clothes =
-    category === '전체'
-      ? MOCK_CLOTHES
-      : MOCK_CLOTHES.filter((item) => item.category === category);
+  const clothes = filterClothItems(MOCK_CLOTH_ITEMS, category, appliedFilter);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -67,7 +49,7 @@ export default function HomeScreen() {
           style={styles.chipScroll}
           contentContainerStyle={styles.chips}
         >
-          {CATEGORIES.map((item) =>
+          {CATEGORY_CHIPS.map((item) =>
             item === category ? (
               <ChipActiveButton key={item} title={item} onPress={() => setCategory(item)} />
             ) : (
@@ -82,7 +64,12 @@ export default function HomeScreen() {
           <Pressable accessibilityRole="button" accessibilityLabel="날짜 선택" style={styles.toolButton}>
             <Image source={require('../../../assets/icons/calendar.png')} style={styles.toolIcon} resizeMode="contain" />
           </Pressable>
-          <Pressable accessibilityRole="button" accessibilityLabel="상세 필터" style={styles.toolButton}>
+          <Pressable
+            onPress={() => setFilterOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="상세 필터"
+            style={styles.toolButton}
+          >
             <Image source={require('../../../assets/icons/filter.png')} style={styles.toolIcon} resizeMode="contain" />
           </Pressable>
         </View>
@@ -133,6 +120,17 @@ export default function HomeScreen() {
           <Text style={styles.fabText}>옷 올리기</Text>
         </Pressable>
       </View>
+
+      <FilterSheet
+        visible={filterOpen}
+        value={appliedFilter}
+        countFor={(filter) => filterClothItems(MOCK_CLOTH_ITEMS, category, filter).length}
+        onApply={(filter) => {
+          setAppliedFilter(filter);
+          setFilterOpen(false);
+        }}
+        onClose={() => setFilterOpen(false)}
+      />
 
       {/* 다른 탭 화면이 아직 없어 홈만 활성 */}
       <TabBar active="home" onPressTab={() => {}} />

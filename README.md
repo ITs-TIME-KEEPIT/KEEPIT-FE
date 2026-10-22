@@ -46,16 +46,40 @@ KEEPIT-FE/
 │   └── PULL_REQUEST_TEMPLATE.md
 │
 ├── assets/
-│   └── fonts/
-│       └── Pretendard-*.otf
+│   ├── fonts/
+│   │   └── Pretendard-*.otf
+│   └── icons/
+│       └── *.png
 │
 ├── src/
 │   ├── components/
 │   │   ├── common/
-│   │   └── clothing/
+│   │   ├── clothing/
+│   │   │   ├── ClothCard.tsx
+│   │   │   ├── ColorChip.tsx
+│   │   │   └── ColorChipGroup.tsx
+│   │   └── bottomSheet/
+│   │       ├── BottomSheet.tsx
+│   │       ├── FilterSheet.tsx
+│   │       └── filter/
+│   │           ├── PriceTab.tsx
+│   │           ├── SizeTab.tsx
+│   │           ├── ColorTab.tsx
+│   │           └── RangeSlider.tsx
 │   │
 │   ├── constants/
-│   │   └── colors.ts
+│   │   ├── colors.ts
+│   │   └── clothing.ts
+│   │
+│   ├── types/
+│   │   ├── clothing.ts
+│   │   └── filter.ts
+│   │
+│   ├── mocks/
+│   │   └── clothItems.ts
+│   │
+│   ├── utils/
+│   │   └── filterClothItems.ts
 │   │
 │   ├── navigation/
 │   │   └── RootNavigator.tsx
@@ -63,7 +87,8 @@ KEEPIT-FE/
 │   └── screens/
 │       ├── Auth/
 │       │   ├── LoginScreen.tsx
-│       │   └── SignupScreen.tsx
+│       │   ├── SignupScreen.tsx
+│       │   └── ProfileSetupScreen.tsx
 │       └── Home/
 │           └── HomeScreen.tsx
 │
@@ -77,13 +102,19 @@ KEEPIT-FE/
 폴더별 역할:
 
 - `components/common/`: 버튼, 입력창, 체크박스 등 공통 UI
-- `components/clothing/`: 의류 관련 공통 UI
-- `constants/`: 디자인 컬러 등 공통 상수
+- `components/clothing/`: 의류 관련 공통 UI (옷 카드, 컬러칩)
+- `components/bottomSheet/`: 바텀시트 공통 틀과 화면별 시트
+  - `filter/`: 홈 상세 필터 시트 전용 탭·슬라이더
+- `constants/`: 디자인 컬러, 옷 카테고리·사이즈·컬러 목록 등 공통 상수
+- `types/`: 공통 TypeScript 타입
+- `mocks/`: 백엔드 연동 전 UI 확인용 임시 데이터
+- `utils/`: 공통 함수 (필터링 등)
 - `navigation/`: 화면 이동 및 네비게이션
 - `screens/`: 실제 페이지 단위 화면
 - `assets/fonts/`: Pretendard 폰트 파일
+- `assets/icons/`: Figma 아이콘 에셋
 
-현재 사용하지 않는 폴더는 미리 만들지 않습니다. 검색·대여·마이페이지, API 통신, 공통 타입·훅·유틸리티 등은 해당 작업을 시작할 때 추가합니다.
+현재 사용하지 않는 폴더는 미리 만들지 않습니다. 검색·대여·마이페이지, API 통신, 공통 훅 등은 해당 작업을 시작할 때 추가합니다.
 
 빈 폴더에 있는 `.gitkeep`은 Git에서 폴더 구조를 유지하기 위한 파일입니다.
 

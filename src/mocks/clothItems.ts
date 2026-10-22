@@ -1,0 +1,98 @@
+import type { ClothItem } from '../types/clothing';
+
+/*
+ * 백엔드 연동 전 임시 데이터
+ * 카테고리·가격·사이즈·컬러 필터 동작을 확인할 수 있도록 값을 고르게 섞었습니다.
+ * API 연동 후에는 이 파일 대신 서버 응답을 사용합니다.
+ */
+
+export const MOCK_CLOTH_ITEMS: ClothItem[] = [
+  {
+    id: '1',
+    title: '하객룩 네이비 원피스',
+    region: '마포구',
+    category: '원피스',
+    size: 'M',
+    colors: ['navy'],
+    price: 25000,
+    laundryIncluded: true,
+    shippingAvailable: true,
+  },
+  {
+    id: '2',
+    title: '블랙 새틴 파티 드레스',
+    region: '마포구',
+    category: '원피스',
+    size: 'S',
+    colors: ['black'],
+    price: 30000,
+    laundryIncluded: true,
+    shippingAvailable: false,
+  },
+  {
+    id: '3',
+    title: '린넨 셔츠 원피스',
+    region: '서대문구',
+    category: '원피스',
+    size: 'FREE',
+    colors: ['beige'],
+    price: 15000,
+    laundryIncluded: false,
+    shippingAvailable: true,
+  },
+  {
+    id: '4',
+    title: '트위드 셋업 재킷',
+    region: '마포구',
+    category: '아우터',
+    size: 'L',
+    colors: ['gray', 'white'],
+    price: 35000,
+    laundryIncluded: true,
+    shippingAvailable: true,
+  },
+  {
+    id: '5',
+    title: '로고 그래픽 티셔츠',
+    region: '성동구',
+    category: '상의',
+    size: 'L',
+    colors: ['white'],
+    price: 5000,
+    laundryIncluded: false,
+    shippingAvailable: true,
+  },
+  {
+    id: '6',
+    title: '와이드 울 슬랙스',
+    region: '마포구',
+    category: '하의',
+    size: 'M',
+    colors: ['gray'],
+    price: 18000,
+    laundryIncluded: true,
+    shippingAvailable: false,
+  },
+  {
+    id: '7',
+    title: '플라워 패턴 블라우스',
+    region: '동작구',
+    category: '상의',
+    size: 'XS',
+    colors: ['pink', 'etc'],
+    price: 9000,
+    laundryIncluded: false,
+    shippingAvailable: false,
+  },
+  {
+    id: '8',
+    title: '미니 크로스백',
+    region: '서초구',
+    category: '잡화',
+    size: 'FREE',
+    colors: ['brown'],
+    price: 52000,
+    laundryIncluded: false,
+    shippingAvailable: true,
+  },
+];

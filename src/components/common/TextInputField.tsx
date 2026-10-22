@@ -18,6 +18,7 @@ interface TextInputFieldProps {
   secureTextEntry?: boolean;
   keyboardType?: KeyboardTypeOptions;
   editable?: boolean;
+  onBlur?: () => void;
 }
 
 export default function TextInputField({
@@ -28,6 +29,7 @@ export default function TextInputField({
   secureTextEntry = false,
   keyboardType = 'default',
   editable = true,
+  onBlur,
 }: TextInputFieldProps) {
   return (
     <View style={styles.container}>
@@ -44,6 +46,7 @@ export default function TextInputField({
         secureTextEntry={secureTextEntry}
         keyboardType={keyboardType}
         editable={editable}
+        onBlur={onBlur}
         accessibilityLabel={label}
       />
     </View>
