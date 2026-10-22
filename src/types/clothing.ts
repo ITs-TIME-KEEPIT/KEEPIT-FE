@@ -1,6 +1,6 @@
 import type { Category, ColorKey, Size } from '../constants/clothing';
 
-/** 홈 목록·검색 결과·프로필 목록에 쓰이는 옷 정보 */
+/* 홈 목록·검색 결과·프로필 목록에 쓰이는 옷 정보 */
 export type ClothItem = {
   id: string;
   title: string;
