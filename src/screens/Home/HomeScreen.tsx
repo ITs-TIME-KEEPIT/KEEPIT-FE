@@ -18,11 +18,14 @@ import TabBar from '../../components/common/TabBar';
 import ChipButton from '../../components/common/ChipButton';
 import ChipActiveButton from '../../components/common/ChipActiveButton';
 import ClothCard from '../../components/clothing/ClothCard';
-import FilterSheet from '../../components/bottomSheet/FilterSheet';
+import FilterSheet from '../../components/bottomsheet/FilterSheet';
+import RegionSheet from '../../components/bottomsheet/RegionSheet';
+import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
 
 import { CATEGORIES } from '../../constants/clothing';
+import type { Region } from '../../constants/regions';
 import { INITIAL_FILTER } from '../../types/filter';
-import type { DetailFilter } from '../../types/filter';
+import type { DateRange, DetailFilter } from '../../types/filter';
 import { MOCK_CLOTH_ITEMS } from '../../mocks/clothItems';
 import { filterClothItems } from '../../utils/filterClothItems';
 
@@ -34,12 +37,20 @@ export default function HomeScreen() {
   const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
+  const [region, setRegion] = useState<Region>(null);
+  const [regionOpen, setRegionOpen] = useState(false);
+  // shortcut: 더미 데이터에 예약 날짜가 없어 기간은 목록에 반영하지 않음, API 연동 시 filterClothItems에 추가
+  const [dateRange, setDateRange] = useState<DateRange>(null);
+  const [dateOpen, setDateOpen] = useState(false);
 
-  const clothes = filterClothItems(MOCK_CLOTH_ITEMS, category, appliedFilter);
+  const clothes = filterClothItems(MOCK_CLOTH_ITEMS, category, appliedFilter, region);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-      <Header location="전체" />
+      <Header
+        location={region?.district ?? '전체'}
+        onPressLocation={() => setRegionOpen(true)}
+      />
 
       {/* 필터 바 */}
       <View style={styles.filterBar}>
@@ -61,7 +72,12 @@ export default function HomeScreen() {
         <View style={styles.divider} />
 
         <View style={styles.tools}>
-          <Pressable accessibilityRole="button" accessibilityLabel="날짜 선택" style={styles.toolButton}>
+          <Pressable
+            onPress={() => setDateOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="날짜 선택"
+            style={styles.toolButton}
+          >
             <Image source={require('../../../assets/icons/calendar.png')} style={styles.toolIcon} resizeMode="contain" />
           </Pressable>
           <Pressable
@@ -124,12 +140,33 @@ export default function HomeScreen() {
       <FilterSheet
         visible={filterOpen}
         value={appliedFilter}
-        countFor={(filter) => filterClothItems(MOCK_CLOTH_ITEMS, category, filter).length}
+        countFor={(filter) => filterClothItems(MOCK_CLOTH_ITEMS, category, filter, region).length}
         onApply={(filter) => {
           setAppliedFilter(filter);
           setFilterOpen(false);
         }}
         onClose={() => setFilterOpen(false)}
+      />
+
+      <RegionSheet
+        visible={regionOpen}
+        value={region}
+        showAll
+        onSelect={(next) => {
+          setRegion(next);
+          setRegionOpen(false);
+        }}
+        onClose={() => setRegionOpen(false)}
+      />
+
+      <DateRangeSheet
+        visible={dateOpen}
+        value={dateRange}
+        onApply={(range) => {
+          setDateRange(range);
+          setDateOpen(false);
+        }}
+        onClose={() => setDateOpen(false)}
       />
 
       {/* 다른 탭 화면이 아직 없어 홈만 활성 */}
