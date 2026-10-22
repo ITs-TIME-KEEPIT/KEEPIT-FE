@@ -113,20 +113,3 @@ const styles = StyleSheet.create({
     tintColor: COLORS.text,
   },
 });
-
-/*
-BottomSheet 사용법 - 최종 배포 시 주석은 삭제 예정
-
-아래에서 올라오는 시트 틀 (dim + 흰 패널 + 제목 행). dim과 ✕를 누르면 onClose.
-
-import BottomSheet from '../../components/bottomSheet/BottomSheet';
-
-<BottomSheet
-  visible={open}
-  title="필터"
-  onClose={() => setOpen(false)}
-  footer={<CtaButton title="적용" onPress={...} />}
->
-  ...내용
-</BottomSheet>
-*/

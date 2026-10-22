@@ -58,9 +58,11 @@ KEEPIT-FE/
 │   │   │   ├── ClothCard.tsx
 │   │   │   ├── ColorChip.tsx
 │   │   │   └── ColorChipGroup.tsx
-│   │   └── bottomSheet/
+│   │   └── bottomsheet/
 │   │       ├── BottomSheet.tsx
 │   │       ├── FilterSheet.tsx
+│   │       ├── RegionSheet.tsx
+│   │       ├── DateRangeSheet.tsx
 │   │       └── filter/
 │   │           ├── PriceTab.tsx
 │   │           ├── SizeTab.tsx
@@ -69,7 +71,8 @@ KEEPIT-FE/
 │   │
 │   ├── constants/
 │   │   ├── colors.ts
-│   │   └── clothing.ts
+│   │   ├── clothing.ts
+│   │   └── regions.ts
 │   │
 │   ├── types/
 │   │   ├── clothing.ts
@@ -101,11 +104,11 @@ KEEPIT-FE/
 
 폴더별 역할:
 
-- `components/common/`: 버튼, 입력창, 체크박스 등 공통 UI
+- `components/common/`: 버튼, 입력창, 체크박스, 기간 선택 달력(`DateRangeCalendar`) 등 공통 UI
 - `components/clothing/`: 의류 관련 공통 UI (옷 카드, 컬러칩)
-- `components/bottomSheet/`: 바텀시트 공통 틀과 화면별 시트
+- `components/bottomsheet/`: 바텀시트 공통 틀과 화면별 시트 (상세 필터, 지역 선택, 날짜 선택)
   - `filter/`: 홈 상세 필터 시트 전용 탭·슬라이더
-- `constants/`: 디자인 컬러, 옷 카테고리·사이즈·컬러 목록 등 공통 상수
+- `constants/`: 디자인 컬러, 옷 카테고리·사이즈·컬러 목록, 지역 목록 등 공통 상수
 - `types/`: 공통 TypeScript 타입
 - `mocks/`: 백엔드 연동 전 UI 확인용 임시 데이터
 - `utils/`: 공통 함수 (필터링 등)
