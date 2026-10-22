@@ -58,7 +58,7 @@ KEEPIT-FE/
 │   │   │   ├── ClothCard.tsx
 │   │   │   ├── ColorChip.tsx
 │   │   │   └── ColorChipGroup.tsx
-│   │   └── bottomSheet/
+│   │   └── bottomsheet/
 │   │       ├── BottomSheet.tsx
 │   │       ├── FilterSheet.tsx
 │   │       └── filter/
@@ -103,7 +103,7 @@ KEEPIT-FE/
 
 - `components/common/`: 버튼, 입력창, 체크박스 등 공통 UI
 - `components/clothing/`: 의류 관련 공통 UI (옷 카드, 컬러칩)
-- `components/bottomSheet/`: 바텀시트 공통 틀과 화면별 시트
+- `components/bottomsheet/`: 바텀시트 공통 틀과 화면별 시트
   - `filter/`: 홈 상세 필터 시트 전용 탭·슬라이더
 - `constants/`: 디자인 컬러, 옷 카테고리·사이즈·컬러 목록 등 공통 상수
 - `types/`: 공통 TypeScript 타입
