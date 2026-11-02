@@ -34,8 +34,7 @@ export default function TabBar({
       style={[
         styles.container,
         {
-          height: 64 + bottom,
-          paddingBottom: 8 + bottom,
+          bottom: Math.max(bottom, 24),
         },
       ]}
     >
@@ -49,7 +48,7 @@ export default function TabBar({
             onPress={() => onPressTab(key)}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
-            style={styles.tab}
+            style={[styles.tab, isActive && styles.tabActive]}
           >
             <Image
               source={icon}
@@ -68,12 +67,22 @@ export default function TabBar({
 
 const styles = StyleSheet.create({
   container: {
-    width: '100%',
+    position: 'absolute',
+    left: 25,
+    right: 25,
+    height: 68,
+    padding: 4,
+    borderRadius: 40,
     flexDirection: 'row',
 
-    backgroundColor: COLORS.white,
+    backgroundColor: 'rgba(255,255,255,0.92)',
     borderTopWidth: 1,
-    borderTopColor: COLORS.line,
+    borderTopColor: COLORS.glassLine,
+    shadowColor: COLORS.black,
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 16,
+    elevation: 8,
   },
 
   tab: {
@@ -83,15 +92,20 @@ const styles = StyleSheet.create({
     gap: 2,
   },
 
+  tabActive: {
+    borderRadius: 32,
+    backgroundColor: COLORS.glassActive,
+  },
+
   icon: {
     width: 24,
     height: 24,
   },
 
   label: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 11,
-    lineHeight: 15.4,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 12,
+    lineHeight: 17.4,
     letterSpacing: 0,
     includeFontPadding: false,
   },

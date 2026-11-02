@@ -35,7 +35,7 @@ export default function AreaInputField({
       <TextInput
         style={styles.input}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textPlaceholder}
+        placeholderTextColor={COLORS.textSub}
         value={value}
         onChangeText={onChangeText}
         editable={editable}
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
@@ -72,15 +72,15 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingTop: 12,
     paddingBottom: 12,
     paddingHorizontal: 14,
 
     fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
 

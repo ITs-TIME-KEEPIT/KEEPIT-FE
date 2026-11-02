@@ -138,7 +138,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
 
   inputBox: {
     width: '100%',
-    height: 47,
+    height: 46,
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingVertical: 12,
     paddingHorizontal: 14,
@@ -170,15 +170,15 @@ const styles = StyleSheet.create({
   inputText: {
     flex: 1,
     fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
   },
 
   placeholder: {
-    color: COLORS.textPlaceholder,
+    color: COLORS.textSub,
   },
 
   arrow: {
@@ -195,7 +195,7 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     zIndex: 100,
     elevation: 5,
@@ -215,8 +215,8 @@ const styles = StyleSheet.create({
 
   optionText: {
     fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20.3,
     color: COLORS.text,
     includeFontPadding: false,
   },

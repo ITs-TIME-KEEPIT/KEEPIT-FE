@@ -43,13 +43,13 @@ const styles = StyleSheet.create({
     gap: 4,
 
     backgroundColor: COLORS.dangerBg,
-    borderRadius: 6,
+    borderRadius: 12,
   },
 
   label: {
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.dangerText,
     includeFontPadding: false,

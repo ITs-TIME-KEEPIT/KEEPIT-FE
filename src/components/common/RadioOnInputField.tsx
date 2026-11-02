@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Pretendard-Regular',
     fontSize: 15,
-    lineHeight: 21,
+    lineHeight: 21.75,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,

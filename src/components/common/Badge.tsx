@@ -27,14 +27,14 @@ export default function Badge({
 const styles = StyleSheet.create({
   badge: {
     alignSelf: 'flex-start',
-    paddingVertical: 3,
+    paddingVertical: 4,
     paddingHorizontal: 6,
-    borderRadius: 4,
+    borderRadius: 6,
     overflow: 'hidden',
 
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 12,
-    lineHeight: 16.8,
+    lineHeight: 17.4,
     letterSpacing: 0,
     includeFontPadding: false,
   },
@@ -50,8 +50,8 @@ const styles = StyleSheet.create({
   },
 
   alert: {
-    backgroundColor: COLORS.alert,
-    color: COLORS.white,
+    backgroundColor: COLORS.dangerBg,
+    color: COLORS.alert,
   },
 
   outline: {

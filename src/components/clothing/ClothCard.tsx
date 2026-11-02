@@ -43,12 +43,14 @@ export default function ClothCard({
       />
 
       <View style={styles.info}>
+        <View style={styles.heading}>
         <Text style={styles.title} numberOfLines={1}>
           {title}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
           {[region, category, size].join(' · ')}
         </Text>
+        </View>
         <Text style={styles.price}>
           {price.toLocaleString('ko-KR')}원
         </Text>
@@ -72,7 +74,8 @@ export default function ClothCard({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    padding: 16,
+    paddingVertical: 16,
+    paddingHorizontal: 20,
 
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -80,36 +83,40 @@ const styles = StyleSheet.create({
 
     backgroundColor: COLORS.white,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
+    borderBottomColor: COLORS.bgGray,
   },
 
   info: {
     flex: 1,
-    gap: 4,
+    gap: 6,
+  },
+
+  heading: {
+    gap: 2,
   },
 
   title: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 16,
-    lineHeight: 22.4,
+    lineHeight: 23.2,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
   },
 
   meta: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 13,
-    lineHeight: 18.2,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 12,
+    lineHeight: 17.4,
     letterSpacing: 0,
     color: COLORS.textSub,
     includeFontPadding: false,
   },
 
   price: {
-    fontFamily: 'Pretendard-Bold',
+    fontFamily: 'Pretendard-SemiBold',
     fontSize: 16,
-    lineHeight: 22.4,
+    lineHeight: 23.2,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
@@ -118,7 +125,7 @@ const styles = StyleSheet.create({
   badges: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 4,
+    gap: 6,
   },
 });
 
