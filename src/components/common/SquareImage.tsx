@@ -51,8 +51,8 @@ const styles = StyleSheet.create({
 
     backgroundColor: COLORS.bgGray,
     borderWidth: 1,
-    borderColor: COLORS.line,
-    borderRadius: 8,
+    borderColor: COLORS.border,
+    borderRadius: 12,
 
     alignItems: 'center',
     justifyContent: 'center',
@@ -61,10 +61,10 @@ const styles = StyleSheet.create({
 
   placeholder: {
     fontFamily: 'Pretendard-Regular',
-    fontSize: 11,
-    lineHeight: 15.4,
+    fontSize: 12,
+    lineHeight: 17.4,
     letterSpacing: 0,
-    color: COLORS.textPlaceholder,
+    color: COLORS.textSub,
     includeFontPadding: false,
   },
 

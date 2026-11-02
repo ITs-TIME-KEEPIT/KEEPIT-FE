@@ -22,6 +22,8 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
 
 import Header from '../../components/common/Header';
+import CtaButton from '../../components/common/CtaButton';
+import SecondaryButton from '../../components/common/SecondaryButton';
 import CtaDisabledButton from '../../components/common/CtaDisabledButton';
 
 type Props = NativeStackScreenProps<
@@ -123,7 +125,7 @@ export default function ProfileSetupScreen({
   return (
     <SafeAreaView
       style={styles.container}
-      edges={['top', 'bottom']}
+      edges={['top']}
     >
       {/* Header - 390 x 56 */}
       <Header
@@ -143,7 +145,7 @@ export default function ProfileSetupScreen({
           showsVerticalScrollIndicator={false}
           keyboardShouldPersistTaps="handled"
         >
-          {/* 프로필 사진 영역 - 358 x 115 */}
+          {/* 프로필 사진 영역 */}
           <View style={styles.profileArea}>
 
             <Pressable
@@ -159,29 +161,25 @@ export default function ProfileSetupScreen({
               />
             </Pressable>
 
-            <Text style={styles.profileLabel}>
-              프로필사진
-            </Text>
-
           </View>
 
           {/* 입력 폼 */}
           <View style={styles.form}>
 
-            {/* 닉네임 입력 행 - 358 x 73 */}
+            {/* 닉네임 입력 행 */}
             <View style={styles.nicknameRow}>
 
-              {/* 입력창 - 264 x 73 */}
+              {/* 닉네임 입력창 */}
               <View style={styles.nicknameField}>
 
                 <Text style={styles.inputLabel}>
-                  닉네임 [필수]
+                  닉네임 <Text style={styles.required}>*</Text>
                 </Text>
 
                 <TextInput
                   style={styles.nicknameInput}
                   placeholder="2~10자로 입력해주세요"
-                  placeholderTextColor={COLORS.textPlaceholder}
+                  placeholderTextColor={COLORS.textSub}
                   value={nickname}
                   onChangeText={handleNicknameChange}
                   maxLength={20}
@@ -192,72 +190,57 @@ export default function ProfileSetupScreen({
 
               </View>
 
-              {/* 중복 확인 - 86 x 42 */}
-              <Pressable
+              {/* 중복 확인 */}
+              <SecondaryButton
+                title="중복 확인"
                 onPress={handleNicknameCheck}
-                accessibilityRole="button"
-                accessibilityLabel="닉네임 중복 확인"
                 style={styles.duplicateButton}
-              >
-                <Text style={styles.duplicateText}>
-                  중복 확인
-                </Text>
-              </Pressable>
-
-            </View>
-
-            {/* 휴대폰 번호 입력 - 358 x 73 */}
-            <View style={styles.phoneField}>
-
-              <Text style={styles.inputLabel}>
-                휴대폰 번호 [필수]
-              </Text>
-
-              <TextInput
-                style={styles.phoneInput}
-                placeholder="010-0000-0000"
-                placeholderTextColor={COLORS.textPlaceholder}
-                value={phone}
-                onChangeText={handlePhoneChange}
-                keyboardType="phone-pad"
-                maxLength={13}
-                accessibilityLabel="휴대폰 번호"
               />
 
             </View>
 
-            {/* 번호 공개 안내 - 358 x 58 */}
-            <View style={styles.note}>
+            <View style={styles.phoneGroup}>
+              {/* 휴대폰 번호 입력 */}
+              <View style={styles.phoneField}>
 
-              <View style={styles.infoIcon}>
-                <Text style={styles.infoIconText}>
-                  i
+                <Text style={styles.inputLabel}>
+                  휴대폰 번호 <Text style={styles.required}>*</Text>
                 </Text>
+
+                <TextInput
+                  style={styles.phoneInput}
+                  placeholder="010-0000-0000"
+                  placeholderTextColor={COLORS.textSub}
+                  value={phone}
+                  onChangeText={handlePhoneChange}
+                  keyboardType="phone-pad"
+                  maxLength={13}
+                  accessibilityLabel="휴대폰 번호"
+                />
+
               </View>
 
-              <Text style={styles.noteText}>
-                번호는 거래가 수락된 상대에게만 공개되고, 거래 완료 7일 뒤 다시 숨겨져요
-              </Text>
+              {/* 번호 공개 안내 */}
+              <View style={styles.note}>
+
+                <Image source={require('../../../assets/icons/info.png')} style={styles.infoIcon} resizeMode="contain" />
+
+                <Text style={styles.noteText}>
+                  번호는 거래가 수락된 상대에게만 공개되고, 거래 완료 7일 뒤 다시 숨겨져요
+                </Text>
+
+              </View>
 
             </View>
-
           </View>
 
         </ScrollView>
 
-        {/* Bottom CTA - 390 x 89 */}
+        {/* Bottom CTA */}
         <View style={styles.bottomCta}>
 
           {canStart ? (
-            <Pressable
-              style={styles.activeButton}
-              onPress={handleStart}
-              accessibilityRole="button"
-            >
-              <Text style={styles.activeButtonText}>
-                시작하기
-              </Text>
-            </Pressable>
+            <CtaButton title="시작하기" onPress={handleStart} />
           ) : (
             <CtaDisabledButton title="시작하기" />
           )}
@@ -296,8 +279,8 @@ const styles = StyleSheet.create({
     flexGrow: 1,
 
     paddingTop: 20,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
 
     // 프로필 영역과 입력 폼 사이
     gap: 24,
@@ -309,7 +292,7 @@ const styles = StyleSheet.create({
 
   profileArea: {
     width: '100%',
-    height: 115,
+    height: 88,
 
     flexDirection: 'column',
     alignItems: 'center',
@@ -328,17 +311,6 @@ const styles = StyleSheet.create({
     height: 88,
   },
 
-  profileLabel: {
-    fontFamily: 'Pretendard-Medium',
-    fontSize: 13,
-    lineHeight: 19,
-
-    color: COLORS.textSub,
-
-    letterSpacing: 0,
-    textAlign: 'center',
-    includeFontPadding: false,
-  },
 
   // ===================================
   // 입력 폼
@@ -359,29 +331,33 @@ const styles = StyleSheet.create({
 
   nicknameRow: {
     width: '100%',
-    height: 73,
+    height: 72,
 
     flexDirection: 'row',
     alignItems: 'flex-end',
 
-    gap: 8,
+    gap: 14,
   },
 
   nicknameField: {
     flex: 1,
     minWidth: 0,
-    height: 73,
+    height: 72,
 
     flexDirection: 'column',
     gap: 6,
   },
 
+  required: {
+    color: COLORS.alert,
+  },
+
   inputLabel: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 20,
+    lineHeight: 20.3,
 
-    color: '#1F2937',
+    color: COLORS.text,
 
     letterSpacing: 0,
     includeFontPadding: false,
@@ -389,20 +365,20 @@ const styles = StyleSheet.create({
 
   nicknameInput: {
     width: '100%',
-    height: 47,
+    height: 46,
 
     backgroundColor: COLORS.white,
 
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingVertical: 12,
     paddingHorizontal: 14,
 
     fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20.3,
 
     color: COLORS.text,
 
@@ -417,37 +393,22 @@ const styles = StyleSheet.create({
 
   duplicateButton: {
     width: 86,
-    height: 42,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    borderWidth: 1,
-    borderColor: COLORS.primary,
-    borderRadius: 6,
-
-    backgroundColor: COLORS.white,
+    height: 46,
   },
 
-  duplicateText: {
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 14,
-    lineHeight: 20,
-
-    color: COLORS.primary,
-
-    letterSpacing: 0,
-    includeFontPadding: false,
-  },
 
   // ===================================
   // 휴대폰 번호 입력
   // ===================================
 
+  phoneGroup: {
+    width: '100%',
+    gap: 12,
+  },
+
   phoneField: {
     width: '100%',
-    height: 73,
+    height: 72,
 
     flexDirection: 'column',
     gap: 6,
@@ -455,20 +416,20 @@ const styles = StyleSheet.create({
 
   phoneInput: {
     width: '100%',
-    height: 47,
+    height: 46,
 
     backgroundColor: COLORS.white,
 
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingVertical: 12,
     paddingHorizontal: 14,
 
     fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
-    lineHeight: 21,
+    fontSize: 14,
+    lineHeight: 20.3,
 
     color: COLORS.text,
 
@@ -484,7 +445,7 @@ const styles = StyleSheet.create({
 
   note: {
     width: '100%',
-    height: 58,
+    minHeight: 58,
 
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -496,34 +457,17 @@ const styles = StyleSheet.create({
 
     gap: 6,
 
-    backgroundColor: '#EAF4FC',
-    borderRadius: 8,
+    backgroundColor: COLORS.bgGray,
+    borderRadius: 12,
   },
 
   // 안내 아이콘
   infoIcon: {
     width: 16,
     height: 16,
-
-    borderWidth: 1.5,
-    borderColor: COLORS.primary,
-    borderRadius: 8,
-
-    alignItems: 'center',
-    justifyContent: 'center',
-
-    marginTop: 1,
+    tintColor: COLORS.textSub,
   },
 
-  infoIconText: {
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 11,
-    lineHeight: 13,
-
-    color: COLORS.primary,
-
-    includeFontPadding: false,
-  },
 
   // 안내 문구
   // 358 - 24(Padding) - 16(Icon) - 6(Gap) = 312
@@ -536,7 +480,7 @@ const styles = StyleSheet.create({
     lineHeight: 18.85,
 
     letterSpacing: 0,
-    color: '#1F2937',
+    color: COLORS.textSub,
 
     includeFontPadding: false,
   },
@@ -548,37 +492,11 @@ const styles = StyleSheet.create({
   bottomCta: {
     width: '100%',
 
-    borderTopWidth: 1,
-    borderTopColor: COLORS.line,
-
     paddingTop: 12,
-    paddingHorizontal: 16,
-    paddingBottom: 24,
+    paddingHorizontal: 20,
+    paddingBottom: 32,
 
     backgroundColor: COLORS.white,
   },
 
-  // 시작하기 활성화 상태
-  activeButton: {
-    width: '100%',
-    height: 52,
-
-    backgroundColor: COLORS.primary,
-    borderRadius: 8,
-
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-
-  activeButtonText: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 16,
-    lineHeight: 22.4,
-
-    letterSpacing: 0,
-    color: COLORS.white,
-
-    includeFontPadding: false,
-  },
 });

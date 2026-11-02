@@ -20,7 +20,7 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top']}>
 
       {/* 중앙 로고 영역 */}
       <View style={styles.body}>
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
   // 중앙 로고 영역 (Figma: Body)
   body: {
     flex: 1,
-    paddingTop: 20,
+    paddingTop: 64,
     paddingBottom: 24,
     paddingHorizontal: 16,
     justifyContent: 'center',
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
 
   // 로고 하단 설명
   description: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 16,
     lineHeight: 23.2,
     color: COLORS.textSub,
@@ -103,7 +103,7 @@ const styles = StyleSheet.create({
   footer: {
     width: '100%',
     paddingHorizontal: 16,
-    paddingBottom: 40,
+    paddingBottom: 32,
     gap: 12,
   },
 
@@ -111,18 +111,18 @@ const styles = StyleSheet.create({
   kakaoButton: {
     width: '100%',
     height: 53,
-    backgroundColor: '#FEE500',
-    borderRadius: 8,
+    backgroundColor: COLORS.kakao,
+    borderRadius: 12,
     justifyContent: 'center',
     alignItems: 'center',
   },
 
   // 카카오 버튼 텍스트
   kakaoButtonText: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 16,
-    lineHeight: 23.2,
-    color: '#191919',
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    lineHeight: 26.1,
+    color: COLORS.text,
     textAlign: 'center',
   },
 
@@ -130,9 +130,9 @@ const styles = StyleSheet.create({
   termsText: {
     width: '100%',
     fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 17,
-    color: COLORS.textPlaceholder,
+    fontSize: 13,
+    lineHeight: 18.85,
+    color: COLORS.textSub,
     textAlign: 'center',
   },
 

@@ -35,7 +35,7 @@ export default function SearchInputField({
       <TextInput
         style={styles.input}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textPlaceholder}
+        placeholderTextColor={COLORS.textSub}
         value={value}
         onChangeText={onChangeText}
         onSubmitEditing={onSubmitEditing}
@@ -59,7 +59,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
 
     backgroundColor: COLORS.bgGray,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingVertical: 10,
     paddingHorizontal: 12,

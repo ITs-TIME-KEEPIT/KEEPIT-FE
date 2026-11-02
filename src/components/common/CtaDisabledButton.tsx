@@ -32,23 +32,23 @@ export default function CtaDisabledButton({
 const styles = StyleSheet.create({
   button: {
     width: '100%',
-    height: 52,
+    height: 56,
 
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
 
-    backgroundColor: COLORS.line,
-    borderRadius: 8,
+    backgroundColor: COLORS.bgGray,
+    borderRadius: 12,
   },
 
   label: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 16,
-    lineHeight: 22.4,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    lineHeight: 26.1,
     letterSpacing: 0,
 
-    color: COLORS.textPlaceholder,
+    color: COLORS.textSub,
     includeFontPadding: false,
   },
 });

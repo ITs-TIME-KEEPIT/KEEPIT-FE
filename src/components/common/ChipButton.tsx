@@ -37,9 +37,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    minHeight: 34,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    height: 36,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     gap: 4,
 
     backgroundColor: COLORS.bgGray,
@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,

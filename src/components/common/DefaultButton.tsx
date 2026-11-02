@@ -38,9 +38,9 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 14,
-    lineHeight: 19.6,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 16,
+    lineHeight: 23.2,
     letterSpacing: 0,
     color: COLORS.textSub,
     includeFontPadding: false,

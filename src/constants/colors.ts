@@ -1,8 +1,8 @@
 
 export const COLORS = {
   // Main
-  primary: '#5AA9E6',
-  primaryLight: '#EAF4FC',
+  primary: '#1F79FF',
+  primaryLight: '#EFF5FF',
 
   // Text
   text: '#1F2937',
@@ -11,13 +11,19 @@ export const COLORS = {
 
   // Base
   white: '#FFFFFF',
+  black: '#000000',
+  bgLight: '#FBFBFB',
+  glassWhite: 'rgba(255,255,255,0.15)',
+  glassLine: 'rgba(255,255,255,0.3)',
+  glassActive: 'rgba(0,0,0,0.05)',
+  kakao: '#FEE500',
   line: '#E5E7EB',
   border: '#D1D5DB',
 
   // Danger
-  alert: '#EF4444',
-  dangerBg: '#FCA5A5',
-  dangerText: '#7F1D1D',
+  alert: '#FF1F1F',
+  dangerBg: '#FFEFEF',
+  dangerText: '#FF1F1F',
 
   // Chip
   bgGray: '#F3F4F6',

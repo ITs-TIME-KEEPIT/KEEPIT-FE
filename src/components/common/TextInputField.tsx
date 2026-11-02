@@ -40,7 +40,7 @@ export default function TextInputField({
       <TextInput
         style={styles.input}
         placeholder={placeholder}
-        placeholderTextColor={COLORS.textPlaceholder}
+        placeholderTextColor={COLORS.textSub}
         value={value}
         onChangeText={onChangeText}
         secureTextEntry={secureTextEntry}
@@ -63,7 +63,7 @@ const styles = StyleSheet.create({
   label: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
@@ -71,19 +71,19 @@ const styles = StyleSheet.create({
 
   input: {
     width: '100%',
-    height: 47,
+    height: 46,
 
     backgroundColor: COLORS.white,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 8,
+    borderRadius: 12,
 
     paddingVertical: 12,
     paddingHorizontal: 14,
 
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
 

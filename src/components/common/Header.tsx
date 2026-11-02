@@ -78,7 +78,7 @@ export default function Header({
   }
 
   return (
-    <View style={[styles.container, styles.bordered]}>
+    <View style={styles.container}>
       <Pressable
         onPress={onPressLeft}
         accessibilityRole="button"
@@ -110,7 +110,7 @@ const styles = StyleSheet.create({
   container: {
     width: '100%',
     height: 56,
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   locationText: {
     fontFamily: 'Pretendard-Bold',
     fontSize: 18,
-    lineHeight: 25.2,
+    lineHeight: 26.1,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
@@ -150,8 +150,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
 
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 17,
-    lineHeight: 23.8,
+    fontSize: 16,
+    lineHeight: 23.2,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,

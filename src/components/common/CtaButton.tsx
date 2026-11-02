@@ -33,7 +33,7 @@ export default function CtaButton({
 const styles = StyleSheet.create({
   button: {
     width: '100%',
-    height: 52,
+    height: 56,
 
     flexDirection: 'row',
     alignItems: 'center',
@@ -48,9 +48,9 @@ const styles = StyleSheet.create({
   },
 
   label: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 16,
-    lineHeight: 22.4,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 18,
+    lineHeight: 26.1,
     letterSpacing: 0,
     color: COLORS.white,
     includeFontPadding: false,

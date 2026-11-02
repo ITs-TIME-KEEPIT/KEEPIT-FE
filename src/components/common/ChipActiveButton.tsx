@@ -38,19 +38,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
 
-    minHeight: 32,
-    paddingVertical: 6,
-    paddingHorizontal: 12,
+    height: 36,
+    paddingVertical: 8,
+    paddingHorizontal: 14,
     gap: 4,
 
     backgroundColor: COLORS.primary,
+    borderWidth: 1,
+    borderColor: COLORS.primary,
     borderRadius: 999,
   },
 
   label: {
     fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.white,
     includeFontPadding: false,

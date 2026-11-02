@@ -9,7 +9,7 @@ import {
   StyleSheet,
   Alert,
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 
 import { COLORS } from '../../constants/colors';
 
@@ -34,6 +34,7 @@ const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
 const showPreparing = (message: string) => Alert.alert('준비 중', message);
 
 export default function HomeScreen() {
+  const { bottom } = useSafeAreaInsets();
   const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -96,7 +97,7 @@ export default function HomeScreen() {
         <FlatList
           data={clothes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={styles.listContent}
+          contentContainerStyle={[styles.listContent, { paddingBottom: 176 + bottom }]}
           renderItem={({ item }) => (
             <ClothCard
               imageUrl={item.imageUrl}
@@ -130,7 +131,7 @@ export default function HomeScreen() {
             showPreparing('옷 등록 화면은 준비 중이에요.\n카메라 연동과 함께 추가될 예정이에요.')
           }
           accessibilityRole="button"
-          style={styles.fab}
+          style={[styles.fab, { bottom: 90 + Math.max(bottom, 24) }]}
         >
           <Image source={require('../../../assets/icons/plus.png')} style={styles.fabIcon} resizeMode="contain" />
           <Text style={styles.fabText}>옷 올리기</Text>
@@ -186,8 +187,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 8,
     paddingHorizontal: 16,
-    paddingTop: 4,
-    paddingBottom: 12,
+    height: 54,
+    borderBottomWidth: 1,
+    borderBottomColor: COLORS.line,
   },
 
   chipScroll: {
@@ -244,7 +246,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontFamily: 'Pretendard-SemiBold',
     fontSize: 16,
-    lineHeight: 22.4,
+    lineHeight: 23.2,
     color: COLORS.text,
     includeFontPadding: false,
   },
@@ -252,7 +254,7 @@ const styles = StyleSheet.create({
   emptySub: {
     fontFamily: 'Pretendard-Regular',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     color: COLORS.textSub,
     includeFontPadding: false,
   },
@@ -261,13 +263,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     right: 16,
     bottom: 16,
-    height: 48,
+    height: 52,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    paddingLeft: 16,
-    paddingRight: 18,
-    paddingVertical: 12,
+    paddingLeft: 14,
+    paddingRight: 14,
+    paddingVertical: 14,
     backgroundColor: COLORS.primary,
     borderRadius: 999,
 
