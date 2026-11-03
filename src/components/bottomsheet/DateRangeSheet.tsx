@@ -6,16 +6,12 @@ import {
 
 import { COLORS } from '../../constants/colors';
 import type { DateRange } from '../../types/filter';
+import { formatDate } from '../../utils/formatDate';
 
 import BottomSheet from './BottomSheet';
 import DateRangeCalendar from '../common/DateRangeCalendar';
 import CtaButton from '../common/CtaButton';
 import CtaDisabledButton from '../common/CtaDisabledButton';
-
-const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
-const formatDate = (date: Date) =>
-  `${date.getMonth() + 1}.${date.getDate()} (${WEEKDAYS[date.getDay()]})`;
 
 interface DateRangeSheetProps {
   visible: boolean;
