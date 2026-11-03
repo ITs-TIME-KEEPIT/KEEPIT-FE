@@ -1,0 +1,56 @@
+warning: in the working copy of 'src/components/clothing/ClothCard.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/AreaInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/Badge.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/CheckInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/CheckOnInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/ChipActiveButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/ChipButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/CtaButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/CtaDisabledButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/CtaSecondaryButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/DangerButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/DefaultActiveButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/DefaultButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/Header.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/PrimaryButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/RadioInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/RadioOnInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/SearchInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/SecondaryButton.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/SelectInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/SquareImage.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/TabBar.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/components/common/TextInputField.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/constants/colors.ts', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/Auth/LoginScreen.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/Auth/ProfileSetupScreen.tsx', LF will be replaced by CRLF the next time Git touches it
+warning: in the working copy of 'src/screens/Home/HomeScreen.tsx', LF will be replaced by CRLF the next time Git touches it
+ App.tsx                                       |  12 [32m+[m[31m-[m
+ src/components/clothing/ClothCard.tsx         |  29 [32m++[m[31m--[m
+ src/components/common/AreaInputField.tsx      |  10 [32m+[m[31m-[m
+ src/components/common/Badge.tsx               |  12 [32m+[m[31m-[m
+ src/components/common/CheckInputField.tsx     |   2 [32m+[m[31m-[m
+ src/components/common/CheckOnInputField.tsx   |   2 [32m+[m[31m-[m
+ src/components/common/ChipActiveButton.tsx    |  10 [32m+[m[31m-[m
+ src/components/common/ChipButton.tsx          |   8 [32m+[m[31m-[m
+ src/components/common/CtaButton.tsx           |   8 [32m+[m[31m-[m
+ src/components/common/CtaDisabledButton.tsx   |  14 [32m+[m[31m-[m
+ src/components/common/CtaSecondaryButton.tsx  |  14 [32m+[m[31m-[m
+ src/components/common/DangerButton.tsx        |   6 [32m+[m[31m-[m
+ src/components/common/DefaultActiveButton.tsx |   4 [32m+[m[31m-[m
+ src/components/common/DefaultButton.tsx       |   6 [32m+[m[31m-[m
+ src/components/common/Header.tsx              |  10 [32m+[m[31m-[m
+ src/components/common/PrimaryButton.tsx       |   6 [32m+[m[31m-[m
+ src/components/common/RadioInputField.tsx     |   2 [32m+[m[31m-[m
+ src/components/common/RadioOnInputField.tsx   |   2 [32m+[m[31m-[m
+ src/components/common/SearchInputField.tsx    |   4 [32m+[m[31m-[m
+ src/components/common/SecondaryButton.tsx     |  12 [32m+[m[31m-[m
+ src/components/common/SelectInputField.tsx    |  18 [32m+[m[31m-[m
+ src/components/common/SquareImage.tsx         |  10 [32m+[m[31m-[m
+ src/components/common/TabBar.tsx              |  32 [32m+++[m[31m-[m
+ src/components/common/TextInputField.tsx      |  10 [32m+[m[31m-[m
+ src/constants/colors.ts                       |  16 [32m+[m[31m-[m
+ src/screens/Auth/LoginScreen.tsx              |  26 [32m+[m[31m--[m
+ src/screens/Auth/ProfileSetupScreen.tsx       | 230 [32m+++++++++[m[31m-----------------[m
+ src/screens/Home/HomeScreen.tsx               |  24 [32m+[m[31m--[m
+ 28 files changed, 240 insertions(+), 299 deletions(-)

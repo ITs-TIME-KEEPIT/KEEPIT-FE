@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
 import {
   View,
   Text,
@@ -33,7 +35,7 @@ const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
 
 const showPreparing = (message: string) => Alert.alert('준비 중', message);
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Home'>) {
   const { bottom } = useSafeAreaInsets();
   const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
@@ -110,7 +112,7 @@ export default function HomeScreen() {
                 ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
                 ...(item.shippingAvailable ? [{ label: '택배 가능', tone: 'gray' as const }] : []),
               ]}
-              onPress={() => showPreparing('옷 상세 화면은 준비 중이에요.')}
+              onPress={() => navigation.navigate('ClothDetail', { clothId: item.id })}
             />
           )}
           // TODO: 캐릭터 시안 확정 후 디자인 적용
