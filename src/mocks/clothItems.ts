@@ -1,4 +1,5 @@
 import type { ClothItem } from '../types/clothing';
+import { DEMO_CLOTH_ITEMS } from './demoScenario';
 
 /*
  * 백엔드 연동 전 임시 데이터
@@ -6,7 +7,7 @@ import type { ClothItem } from '../types/clothing';
  * API 연동 후에는 이 파일 대신 서버 응답을 사용합니다.
  */
 
-export const MOCK_CLOTH_ITEMS: ClothItem[] = [
+const BASE_CLOTH_ITEMS: ClothItem[] = [
   {
     id: '1',
     title: '하객룩 네이비 원피스',
@@ -95,4 +96,16 @@ export const MOCK_CLOTH_ITEMS: ClothItem[] = [
     laundryIncluded: false,
     shippingAvailable: true,
   },
+];
+
+export const MOCK_CLOTH_ITEMS: ClothItem[] = [
+  ...BASE_CLOTH_ITEMS,
+  ...DEMO_CLOTH_ITEMS.filter(
+    (demoItem) =>
+      !BASE_CLOTH_ITEMS.some(
+        (existing) =>
+          existing.id === demoItem.id ||
+          existing.title === demoItem.title
+      )
+  ),
 ];

@@ -1,5 +1,7 @@
 
 import React from 'react';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
 import {
   View,
   Text,
@@ -9,14 +11,20 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/colors';
+import { DEMO_LOGIN_MODE } from '../../mocks/demoScenario';
 
 // 로그인 화면
-export default function LoginScreen() {
+export default function LoginScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Login'>) {
 
   // 카카오 로그인 버튼 클릭
   const handleKakaoLogin = () => {
     // TODO: 백엔드 카카오 OAuth 연동 후 로그인 처리
-    Alert.alert('안내', '카카오 로그인 연동 전입니다.');
+    // 화요일 UI 시연 경로. 실제 OAuth 인증/가입 여부 판별은 후속 연동.
+    if (__DEV__) {
+      if (DEMO_LOGIN_MODE === 'new') navigation.navigate('ProfileSetup');
+      else navigation.reset({index:0,routes:[{name:'Home'}]});
+    }
+    else Alert.alert('안내', '카카오 로그인 연동 전입니다.');
   };
 
   return (

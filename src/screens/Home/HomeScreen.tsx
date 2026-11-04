@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import type { NativeStackScreenProps } from '@react-navigation/native-stack';
+import type { RootStackParamList } from '../../navigation/RootNavigator';
 import {
   View,
   Text,
@@ -26,15 +28,16 @@ import { CATEGORIES } from '../../constants/clothing';
 import type { Region } from '../../constants/regions';
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
-import { MOCK_CLOTH_ITEMS } from '../../mocks/clothItems';
+import { useClothingItems } from '../../state/clothingStore';
 import { filterClothItems } from '../../utils/filterClothItems';
 
 const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
 
 const showPreparing = (message: string) => Alert.alert('준비 중', message);
 
-export default function HomeScreen() {
+export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Home'>) {
   const { bottom } = useSafeAreaInsets();
+  const items = useClothingItems();
   const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -44,7 +47,7 @@ export default function HomeScreen() {
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
 
-  const clothes = filterClothItems(MOCK_CLOTH_ITEMS, category, appliedFilter, region);
+  const clothes = filterClothItems(items, category, appliedFilter, region);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -110,7 +113,7 @@ export default function HomeScreen() {
                 ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
                 ...(item.shippingAvailable ? [{ label: '택배 가능', tone: 'gray' as const }] : []),
               ]}
-              onPress={() => showPreparing('옷 상세 화면은 준비 중이에요.')}
+              onPress={() => navigation.navigate('ClothDetail', { clothId: item.id })}
             />
           )}
           // TODO: 캐릭터 시안 확정 후 디자인 적용
@@ -128,7 +131,7 @@ export default function HomeScreen() {
 
         <Pressable
           onPress={() =>
-            showPreparing('옷 등록 화면은 준비 중이에요.\n카메라 연동과 함께 추가될 예정이에요.')
+            navigation.navigate('ClothRegister')
           }
           accessibilityRole="button"
           style={[styles.fab, { bottom: 90 + Math.max(bottom, 24) }]}
@@ -141,7 +144,7 @@ export default function HomeScreen() {
       <FilterSheet
         visible={filterOpen}
         value={appliedFilter}
-        countFor={(filter) => filterClothItems(MOCK_CLOTH_ITEMS, category, filter, region).length}
+        countFor={(filter) => filterClothItems(items, category, filter, region).length}
         onApply={(filter) => {
           setAppliedFilter(filter);
           setFilterOpen(false);
