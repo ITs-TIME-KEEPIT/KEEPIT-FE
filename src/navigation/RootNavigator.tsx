@@ -8,6 +8,8 @@ import HomeScreen from '../screens/Home/HomeScreen';
 
 import ClothDetailScreen from '../screens/Clothing/ClothDetailScreen';
 import CameraPreviewScreen from '../screens/Clothing/CameraPreviewScreen';
+import ClothRegisterScreen from '../screens/Clothing/ClothRegisterScreen';
+import ClothRegisterCompleteScreen from '../screens/Clothing/ClothRegisterCompleteScreen';
 
 import RentalRequestScreen from '../screens/Rental/RentalRequestScreen';
 import RentalConfirmScreen from '../screens/Rental/RentalConfirmScreen';
@@ -24,6 +26,8 @@ export type RootStackParamList = {
 
   ClothDetail: { clothId: string };
   CameraPreview: undefined;
+  ClothRegister: undefined;
+  ClothRegisterComplete: {clothId: string};
 
   RentalRequest: { clothId: string };
   RentalConfirm: {
@@ -53,6 +57,9 @@ export default function RootNavigator() {
           options={{ headerShown: false }}
         />
       )}
+
+      <Stack.Screen name="ClothRegister" component={ClothRegisterScreen} options={{headerShown:false,gestureEnabled:false}} />
+      <Stack.Screen name="ClothRegisterComplete" component={ClothRegisterCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
 
       <Stack.Screen
         name="Login"

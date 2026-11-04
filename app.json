@@ -13,7 +13,15 @@
     "plugins": [
       "expo-status-bar",
       "expo-font",
-      ["expo-camera", {"cameraPermission": "옷 상태 사진 촬영을 위해 카메라 접근을 허용해주세요.", "recordAudioAndroid": false, "barcodeScannerEnabled": false}]
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "옷 상태 사진 촬영을 위해 카메라 접근을 허용해주세요.",
+          "recordAudioAndroid": false,
+          "barcodeScannerEnabled": false
+        }
+      ],
+      "expo-image"
     ]
   }
 }

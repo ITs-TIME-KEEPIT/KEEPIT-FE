@@ -3,7 +3,7 @@ import { View, Text, Image, ScrollView, Pressable, StyleSheet, useWindowDimensio
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import { MOCK_CLOTH_ITEMS } from '../../mocks/clothItems';
+import { useClothingItems } from '../../state/clothingStore';
 import { COLORS } from '../../constants/colors';
 import Badge from '../../components/common/Badge';
 import CtaButton from '../../components/common/CtaButton';
@@ -24,7 +24,8 @@ function Row({ label, value, primary = false }: {label: string; value: string; p
 }
 
 export default function ClothDetailScreen({ navigation, route }: Props) {
- const item = MOCK_CLOTH_ITEMS.find(cloth => cloth.id === route.params.clothId);
+ const items = useClothingItems();
+ const item = items.find(cloth => cloth.id === route.params.clothId);
  const {width} = useWindowDimensions();
  const {bottom} = useSafeAreaInsets();
  const [page, setPage] = useState(0);
@@ -55,14 +56,14 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
      {item.shippingAvailable && <Row label="택배비" value={detail?.shippingFee !== undefined ? `${detail.shippingFee.toLocaleString('ko-KR')}원 (편도 · 택배 선택 시)` : '-'} />}
      <Row label="세탁" value={detail?.laundry ?? '-'} />
      <Row label="거래 방식" value={`직거래 (${item.region})${item.shippingAvailable ? ' · 택배 가능' : ''}`} />
-     <Row label="대여 가능 기간" value={detail?.availablePeriod ?? '-'} />
+     {detail?.unavailablePeriod ? <Row label="대여 불가능 기간" value={`${new Date(detail.unavailablePeriod.start).toLocaleDateString('ko-KR')} ~ ${new Date(detail.unavailablePeriod.end).toLocaleDateString('ko-KR')}`} /> : <Row label="대여 가능 기간" value={detail?.region ? '대여 불가능 기간 없음' : detail?.availablePeriod ?? '-'} />}
     </View>
     {item.category !== '잡화' && <View style={styles.sizeCard}>
      <Text style={styles.sectionTitle}>사이즈</Text>
      <SizeDiagram category={item.category} />
      <Text style={styles.hint}>단면은 옷을 평평하게 놓고 잰 길이예요</Text>
      <Row label="표기 사이즈" value={item.sizeLabel ?? item.size} />
-     {measurementLabels[item.category].map(label => <Row key={label} label={label} value="- cm" />)}
+     {measurementLabels[item.category].map(label => <Row key={label} label={label} value={detail?.measurements?.[label] !== undefined ? `${detail.measurements[label]} cm` : '- cm'} />)}
     </View>}
     <View style={styles.defect}>
      <View style={styles.row}><Text style={styles.label}>하자 고지</Text><Text style={[styles.value, detail?.defect ? styles.alert : undefined]}>{detail?.defect ? `있음 · ${detail.defect.count}곳` : detail ? '없음' : '-'}</Text></View>

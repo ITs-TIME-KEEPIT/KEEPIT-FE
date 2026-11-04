@@ -25,6 +25,9 @@ export type ClothItem = {
     shippingFee?: number;
     laundry?: string;
     availablePeriod?: string;
+    measurements?: Record<string, number>;
+    region?: {sido: string; district: string};
+    unavailablePeriod?: {start: number; end: number};
     photoUris?: string[];
     photos?: { part: '전면' | '후면' | '라벨' | '디테일'; uri?: string }[];
     views?: number;
