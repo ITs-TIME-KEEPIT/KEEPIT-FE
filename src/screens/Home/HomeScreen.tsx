@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import type { RootStackParamList } from '../../navigation/RootNavigator';
+import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 import {
   View,
   Text,
@@ -16,7 +15,6 @@ import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context'
 import { COLORS } from '../../constants/colors';
 
 import Header from '../../components/common/Header';
-import TabBar from '../../components/common/TabBar';
 import ChipButton from '../../components/common/ChipButton';
 import ChipActiveButton from '../../components/common/ChipActiveButton';
 import ClothCard from '../../components/clothing/ClothCard';
@@ -35,7 +33,7 @@ const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
 
 const showPreparing = (message: string) => Alert.alert('준비 중', message);
 
-export default function HomeScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Home'>) {
+export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const { bottom } = useSafeAreaInsets();
   const items = useClothingItems();
   const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
@@ -54,6 +52,8 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
       <Header
         location={region?.district ?? '전체'}
         onPressLocation={() => setRegionOpen(true)}
+        // 알림은 서버(푸시·알림 API) 연동 후 제공
+        onPressBell={() => showPreparing('알림은 서버 연동 후 사용할 수 있어요.')}
       />
 
       {/* 필터 바 */}
@@ -174,7 +174,6 @@ export default function HomeScreen({ navigation }: NativeStackScreenProps<RootSt
       />
 
       {/* 다른 탭 화면이 아직 없어 홈만 활성 */}
-      <TabBar active="home" onPressTab={() => {}} />
     </SafeAreaView>
   );
 }

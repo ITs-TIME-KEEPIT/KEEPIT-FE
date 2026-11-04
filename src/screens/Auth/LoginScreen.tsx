@@ -1,4 +1,3 @@
-
 import React from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -22,7 +21,7 @@ export default function LoginScreen({ navigation }: NativeStackScreenProps<RootS
     // 화요일 UI 시연 경로. 실제 OAuth 인증/가입 여부 판별은 후속 연동.
     if (__DEV__) {
       if (DEMO_LOGIN_MODE === 'new') navigation.navigate('ProfileSetup');
-      else navigation.reset({index:0,routes:[{name:'Home'}]});
+      else navigation.reset({index:0,routes:[{name:'Main'}]});
     }
     else Alert.alert('안내', '카카오 로그인 연동 전입니다.');
   };
