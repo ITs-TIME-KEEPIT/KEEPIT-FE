@@ -10,6 +10,7 @@ import {
 import { COLORS } from '../../constants/colors';
 
 const WEEKDAYS = ['일', '월', '화', '수', '목', '금', '토'];
+const DAY_MS = 24 * 60 * 60 * 1000;
 
 const today = () => {
   const now = new Date();
@@ -34,6 +35,7 @@ interface DateRangeCalendarProps {
   onChange: (start: Date | null, end: Date | null) => void;
   // TODO: API 연동 후 옷별 예약 날짜(택배 버퍼·예약 간격 포함)를 넘겨 취소선으로 표시
   isReserved?: (date: Date) => boolean;
+  maxDays?: number; // 받는 날 포함 최대 대여 일수
 }
 
 export default function DateRangeCalendar({
@@ -41,6 +43,7 @@ export default function DateRangeCalendar({
   end,
   onChange,
   isReserved,
+  maxDays,
 }: DateRangeCalendarProps) {
   const min = today();
   const initial = start ?? min;
@@ -55,9 +58,18 @@ export default function DateRangeCalendar({
     setMonth(next.getMonth());
   };
 
-  // 첫 탭 = 받는 날, 두 번째 탭 = 돌려주는 날. 받는 날보다 앞을 누르면 받는 날을 다시 고름
+  // 최대 일수를 넘거나 사이에 예약된 날이 끼면 돌려주는 날로 고를 수 없음
+  const canBeEnd = (from: Date, to: Date) => {
+    if (maxDays && Math.round((to.getTime() - from.getTime()) / DAY_MS) >= maxDays) return false;
+    for (const d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
+      if (isReserved?.(d)) return false;
+    }
+    return true;
+  };
+
+  // 첫 탭 = 받는 날, 두 번째 탭 = 돌려주는 날. 돌려주는 날로 고를 수 없는 날을 누르면 받는 날을 다시 고름
   const onPressDay = (date: Date) => {
-    if (!start || end || date < start) onChange(date, null);
+    if (!start || end || date < start || !canBeEnd(start, date)) onChange(date, null);
     else onChange(start, date);
   };
 
@@ -188,7 +200,7 @@ const styles = StyleSheet.create({
   },
 
   month: {
-    fontFamily: 'Pretendard-Bold',
+    fontFamily: 'Pretendard-SemiBold',
     fontSize: 16,
     lineHeight: 23.2,
     letterSpacing: 0,
@@ -205,8 +217,8 @@ const styles = StyleSheet.create({
     height: 24,
     textAlign: 'center',
     fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 17.4,
+    fontSize: 14,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.textPlaceholder,
     includeFontPadding: false,
