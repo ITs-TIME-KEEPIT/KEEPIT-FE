@@ -20,6 +20,7 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
+import { DEMO_ACTIVE_ROLE, DEMO_USERS } from '../../mocks/demoScenario';
 
 import Header from '../../components/common/Header';
 import CtaButton from '../../components/common/CtaButton';
@@ -34,7 +35,7 @@ type Props = NativeStackScreenProps<
 export default function ProfileSetupScreen({
   navigation,
 }: Props) {
-  const [nickname, setNickname] = useState('');
+  const [nickname, setNickname] = useState<string>(__DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : '');
   const [phone, setPhone] = useState('');
   const [nicknameVerified, setNicknameVerified] = useState(false);
 
@@ -109,10 +110,12 @@ export default function ProfileSetupScreen({
     }
 
     // TODO: 백엔드 닉네임 중복 확인 API 연동
-    Alert.alert(
-      '중복 확인',
-      '닉네임 중복 확인 API 연동 전입니다.',
-    );
+    if (__DEV__) {
+      setNicknameVerified(true);
+      Alert.alert('시연용 확인', '서버 중복 확인 전입니다. UI 시연을 위해 진행할 수 있어요.');
+    } else {
+      Alert.alert('중복 확인', '닉네임 중복 확인 API 연동 전입니다.');
+    }
   };
 
   // 프로필 설정 완료
@@ -120,6 +123,7 @@ export default function ProfileSetupScreen({
     if (!canStart) return;
 
     // TODO: 서버에 프로필 저장 후 홈 화면으로 이동
+    if (__DEV__) navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
   };
 
   return (

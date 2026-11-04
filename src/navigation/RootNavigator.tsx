@@ -5,10 +5,15 @@ import LoginScreen from '../screens/Auth/LoginScreen';
 import SignupScreen from '../screens/Auth/SignupScreen';
 import ProfileSetupScreen from '../screens/Auth/ProfileSetupScreen';
 import HomeScreen from '../screens/Home/HomeScreen';
+
+import ClothDetailScreen from '../screens/Clothing/ClothDetailScreen';
+import CameraPreviewScreen from '../screens/Clothing/CameraPreviewScreen';
+
 import RentalRequestScreen from '../screens/Rental/RentalRequestScreen';
 import RentalConfirmScreen from '../screens/Rental/RentalConfirmScreen';
 import RentalCompleteScreen from '../screens/Rental/RentalCompleteScreen';
 
+import { DEMO_START_SCREEN } from '../mocks/demoScenario';
 import type { TradeMethod } from '../types/rental';
 
 export type RootStackParamList = {
@@ -16,9 +21,17 @@ export type RootStackParamList = {
   Signup: undefined;
   ProfileSetup: undefined;
   Home: undefined;
+
+  ClothDetail: { clothId: string };
+  CameraPreview: undefined;
+
   RentalRequest: { clothId: string };
-  // 날짜는 직렬화 가능한 timestamp(ms)로 전달
-  RentalConfirm: { clothId: string; start: number; end: number; method: TradeMethod };
+  RentalConfirm: {
+    clothId: string;
+    start: number;
+    end: number;
+    method: TradeMethod;
+  };
   RentalComplete: undefined;
 };
 
@@ -26,7 +39,21 @@ const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootNavigator() {
   return (
-    <Stack.Navigator initialRouteName="Login">
+    <Stack.Navigator
+      initialRouteName={
+        __DEV__ && DEMO_START_SCREEN === 'camera'
+          ? 'CameraPreview'
+          : 'Login'
+      }
+    >
+      {__DEV__ && (
+        <Stack.Screen
+          name="CameraPreview"
+          component={CameraPreviewScreen}
+          options={{ headerShown: false }}
+        />
+      )}
+
       <Stack.Screen
         name="Login"
         component={LoginScreen}
@@ -52,6 +79,12 @@ export default function RootNavigator() {
       />
 
       <Stack.Screen
+        name="ClothDetail"
+        component={ClothDetailScreen}
+        options={{ headerShown: false }}
+      />
+
+      <Stack.Screen
         name="RentalRequest"
         component={RentalRequestScreen}
         options={{ headerShown: false }}
@@ -66,7 +99,7 @@ export default function RootNavigator() {
       <Stack.Screen
         name="RentalComplete"
         component={RentalCompleteScreen}
-        options={{ headerShown: false, gestureEnabled: false }}
+        options={{ headerShown: false }}
       />
     </Stack.Navigator>
   );
