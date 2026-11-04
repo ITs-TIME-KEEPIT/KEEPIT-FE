@@ -49,6 +49,7 @@ export default function BottomSheet({
         />
 
         <View style={[styles.sheet, { paddingBottom: 24 + bottom }]}>
+          <View style={styles.handle} />
           <View style={styles.titleRow}>
             <Text style={styles.title}>
               {title}
@@ -78,18 +79,35 @@ export default function BottomSheet({
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'flex-end',
   },
 
+  // 시트 뒤까지 덮어야 둥근 모서리 바깥도 어둡게 보임
   dim: {
-    flex: 1,
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
     backgroundColor: 'rgba(0, 0, 0, 0.4)',
   },
 
   sheet: {
     paddingHorizontal: 16,
-    paddingTop: 20,
+    paddingTop: 8,
     gap: 16,
     backgroundColor: COLORS.white,
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+  },
+
+  handle: {
+    alignSelf: 'center',
+    width: 52,
+    height: 4,
+    marginBottom: -4, // 시트 gap(16)에서 손잡이~제목 간격을 시안의 12로 맞춤
+    borderRadius: 2,
+    backgroundColor: COLORS.textPlaceholder,
   },
 
   titleRow: {
