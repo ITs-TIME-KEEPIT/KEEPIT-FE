@@ -4,6 +4,7 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { useClothingItems } from '../../state/clothingStore';
+import { useRentalState } from '../../state/rentalStore';
 import { COLORS } from '../../constants/colors';
 import Badge from '../../components/common/Badge';
 import CtaButton from '../../components/common/CtaButton';
@@ -25,6 +26,7 @@ function Row({ label, value, primary = false }: {label: string; value: string; p
 
 export default function ClothDetailScreen({ navigation, route }: Props) {
  const items = useClothingItems();
+ const { currentUserId } = useRentalState();
  const item = items.find(cloth => cloth.id === route.params.clothId);
  const {width} = useWindowDimensions();
  const {bottom} = useSafeAreaInsets();
@@ -72,7 +74,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
     {detail?.views !== undefined && <Text style={styles.label}>조회 {detail.views}</Text>}
    </View>
   </ScrollView>
-  <View style={[styles.footer,{paddingBottom:Math.max(bottom, 16)}]}><CtaButton title="대여 신청" onPress={() => Alert.alert('준비 중', '대여 신청 화면은 B 담당 작업과 연결할 예정이에요.')} /></View>
+  <View style={[styles.footer,{paddingBottom:Math.max(bottom, 16)}]}><CtaButton title="대여 신청" onPress={() => item.ownerId === currentUserId ? Alert.alert('대여 신청', '내가 등록한 옷은 신청할 수 없어요.') : navigation.navigate('RentalRequest', { clothId: item.id })} /></View>
  </SafeAreaView>;
 }
 

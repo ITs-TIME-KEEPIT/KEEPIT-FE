@@ -13,7 +13,9 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
 import type { TradeMethod } from '../../types/rental';
-import { MOCK_HOLIDAY, MOCK_RENTAL_CLOTH } from '../../mocks/rental';
+import { MOCK_HOLIDAY } from '../../mocks/rental';
+import { useClothingItems } from '../../state/clothingStore';
+import { useRentalState } from '../../state/rentalStore';
 import { formatDate } from '../../utils/formatDate';
 
 import Header from '../../components/common/Header';
@@ -24,6 +26,7 @@ import CtaDisabledButton from '../../components/common/CtaDisabledButton';
 import ItemSummary from '../../components/rental/ItemSummary';
 import InfoRow from '../../components/rental/InfoRow';
 import HolidayShippingPopup from '../../components/rental/HolidayShippingPopup';
+import Popup from '../../components/common/Popup';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'RentalRequest'>;
 
@@ -42,23 +45,42 @@ const overlapsHoliday = (start: Date, end: Date) =>
   addDays(start, -SHIPPING_BUFFER_DAYS) <= MOCK_HOLIDAY.end &&
   addDays(end, SHIPPING_BUFFER_DAYS) >= addDays(MOCK_HOLIDAY.start, -HOLIDAY_NOTICE_DAYS);
 
-export default function RentalRequestScreen({ navigation }: Props) {
-  // shortcut: 옷 상세 연동 전이라 clothId와 무관하게 시연용 옷을 표시, 상세 연동 시 clothId로 조회
-  const cloth = MOCK_RENTAL_CLOTH;
+// 거래가 잡힌 기간은 다른 신청에서 고를 수 없음 (신청 대기·거절·완료는 제외)
+const BLOCKING_STAGES = ['accepted', 'handed-over', 'received', 'returned'];
+
+export default function RentalRequestScreen({ navigation, route }: Props) {
+  const cloth = useClothingItems().find((item) => item.id === route.params.clothId);
+  const { rentals } = useRentalState();
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const [method, setMethod] = useState<TradeMethod | null>(null);
   // 연휴 택배 안내는 같은 신청에서 한 번만 노출
   const [holidayNoticeShown, setHolidayNoticeShown] = useState(false);
   const [holidayPopupOpen, setHolidayPopupOpen] = useState(false);
+  // 세탁 주체가 빌린 사람이면 신청 전 드라이클리닝 안내 1회 (시나리오 ③)
+  const [laundryNoticeShown, setLaundryNoticeShown] = useState(false);
+  const [laundryPopupOpen, setLaundryPopupOpen] = useState(false);
+
+  if (!cloth) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <Header type="back" title="대여 신청" onPressLeft={() => navigation.goBack()} />
+        <Text style={styles.empty}>옷 정보를 찾을 수 없어요.</Text>
+      </SafeAreaView>
+    );
+  }
 
   const methods: TradeMethod[] = cloth.shippingAvailable ? ['직거래', '택배'] : ['직거래'];
+  const borrowerWashes = !cloth.laundryIncluded;
+  const unavailable = cloth.detail?.unavailablePeriod;
+  const booked = rentals.filter((rental) => rental.clothId === cloth.id && BLOCKING_STAGES.includes(rental.stage));
 
-  // 대여 가능 기간 밖이거나 이미 예약된 날은 선택 불가
-  const isReserved = (date: Date) =>
-    date < cloth.availableFrom ||
-    date > cloth.availableTo ||
-    cloth.reservedDates.some((d) => d.getTime() === date.getTime());
+  // 등록자가 정한 대여 불가 기간이나 이미 거래가 잡힌 날은 선택 불가
+  const isReserved = (date: Date) => {
+    const time = date.getTime();
+    if (unavailable && time >= unavailable.start && time <= unavailable.end) return true;
+    return booked.some((rental) => time >= rental.start && time <= rental.end);
+  };
 
   const canNext = !!start && !!end && !!method;
 
@@ -72,6 +94,15 @@ export default function RentalRequestScreen({ navigation }: Props) {
     });
   };
 
+  const afterHolidayNotice = (selected: TradeMethod) => {
+    if (borrowerWashes && !laundryNoticeShown) {
+      setLaundryNoticeShown(true);
+      setLaundryPopupOpen(true);
+      return;
+    }
+    goToConfirm(selected);
+  };
+
   const onPressNext = () => {
     if (!start || !end || !method) return;
     if (method === '택배' && !holidayNoticeShown && overlapsHoliday(start, end)) {
@@ -79,7 +110,7 @@ export default function RentalRequestScreen({ navigation }: Props) {
       setHolidayPopupOpen(true);
       return;
     }
-    goToConfirm(method);
+    afterHolidayNotice(method);
   };
 
   return (
@@ -94,7 +125,7 @@ export default function RentalRequestScreen({ navigation }: Props) {
         <ItemSummary
           title={cloth.title}
           price={cloth.price}
-          ownerNickname={cloth.ownerNickname}
+          ownerNickname={cloth.detail?.ownerName ?? '등록자'}
           region={cloth.region}
         />
 
@@ -166,7 +197,7 @@ export default function RentalRequestScreen({ navigation }: Props) {
           arrivalDate={start}
           onConfirm={() => {
             setHolidayPopupOpen(false);
-            goToConfirm('택배');
+            afterHolidayNotice('택배');
           }}
           onSwitchToDirect={() => {
             setHolidayPopupOpen(false);
@@ -174,6 +205,18 @@ export default function RentalRequestScreen({ navigation }: Props) {
           }}
         />
       )}
+
+      <Popup
+        visible={laundryPopupOpen}
+        title="드라이클리닝 후 돌려주세요"
+        description={'이 옷은 빌린 사람이 세탁해서 돌려줘요.\n기본 세탁은 드라이클리닝이고, 특별한 세탁 방법은 등록자에게 미리 물어봐 주세요.'}
+        primaryLabel="확인했어요"
+        onPressPrimary={() => {
+          setLaundryPopupOpen(false);
+          if (method) goToConfirm(method);
+        }}
+        onClose={() => setLaundryPopupOpen(false)}
+      />
     </SafeAreaView>
   );
 }
@@ -186,6 +229,15 @@ const styles = StyleSheet.create({
 
   scrollView: {
     flex: 1,
+  },
+
+  empty: {
+    padding: 20,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    lineHeight: 20.3,
+    color: COLORS.textSub,
+    includeFontPadding: false,
   },
 
   body: {
