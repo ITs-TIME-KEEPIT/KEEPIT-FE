@@ -1,4 +1,3 @@
-
 import React from 'react';
 import {
   View,
@@ -28,9 +27,12 @@ export default function AreaInputField({
 }: AreaInputFieldProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
-        {label}
-      </Text>
+      {/* label=""이면 라벨 줄 없이 입력창만 (거절 사유 기타 입력) */}
+      {!!label && (
+        <Text style={styles.label}>
+          {label}
+        </Text>
+      )}
 
       <TextInput
         style={styles.input}
@@ -43,7 +45,7 @@ export default function AreaInputField({
         multiline={true}
         textAlignVertical="top"
         underlineColorAndroid="transparent"
-        accessibilityLabel={label}
+        accessibilityLabel={label || placeholder}
       />
     </View>
   );

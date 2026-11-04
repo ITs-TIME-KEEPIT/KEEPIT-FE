@@ -14,6 +14,9 @@ interface ItemSummaryProps {
   price: number;
   ownerNickname: string;
   region: string;
+  imageUrl?: string;
+  meta?: string; // 기본 '대여료 · 등록자 · 지역' 대신 보여줄 부가 정보
+  divider?: boolean;
 }
 
 /* 대여 신청·신청 확인 상단의 옷 요약 */
@@ -22,17 +25,20 @@ export default function ItemSummary({
   price,
   ownerNickname,
   region,
+  imageUrl,
+  meta,
+  divider = true,
 }: ItemSummaryProps) {
   return (
-    <View style={styles.container}>
-      <SquareImage size={56} />
+    <View style={[styles.container, divider && styles.divider]}>
+      <SquareImage size={56} source={imageUrl ? { uri: imageUrl } : undefined} />
 
       <View style={styles.texts}>
         <Text style={styles.title} numberOfLines={1}>
           {title}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {price.toLocaleString('ko-KR')}원 · {ownerNickname} · {region}
+          {meta ?? `${price.toLocaleString('ko-KR')}원 · ${ownerNickname} · ${region}`}
         </Text>
       </View>
     </View>
@@ -45,6 +51,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
+  },
+
+  divider: {
     paddingBottom: 16,
     borderBottomWidth: 1,
     borderBottomColor: COLORS.bgGray,
