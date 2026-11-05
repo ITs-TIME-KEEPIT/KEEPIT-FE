@@ -17,6 +17,8 @@ export function useRentalState() {
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }
 
+export const getRentalState = () => state;
+
 export function createRental(input: {clothId: string; ownerId: string; start: number; end: number; method: TradeMethod}) {
   const rental: Rental = {
     ...input, id: `local-rental-${Date.now()}`, borrowerId: state.currentUserId, stage: 'requested', createdAt: Date.now(),

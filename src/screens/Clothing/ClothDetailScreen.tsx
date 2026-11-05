@@ -10,6 +10,8 @@ import Badge from '../../components/common/Badge';
 import CtaButton from '../../components/common/CtaButton';
 import SquareImage from '../../components/common/SquareImage';
 import SizeDiagram from '../../components/clothing/SizeDiagram';
+import { COLORS as CLOTH_COLORS } from '../../constants/clothing';
+import { formatDate } from '../../utils/formatDate';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ClothDetail'>;
 const measurementLabels = {
@@ -33,6 +35,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
  const [page, setPage] = useState(0);
  if (!item) return <SafeAreaView style={styles.container}><CtaButton title="홈으로 돌아가기" onPress={() => navigation.goBack()} /></SafeAreaView>;
  const detail = item.detail;
+ const isMine = item.ownerId === currentUserId;
  const photos = detail?.photos?.length ? detail.photos.map(photo => photo.uri) : detail?.photoUris?.length ? detail.photoUris : item.imageUrl ? [item.imageUrl] : [undefined];
  return <SafeAreaView style={styles.container} edges={['top']}>
   <ScrollView contentContainerStyle={{paddingBottom: 20}}>
@@ -50,7 +53,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
    </Pressable>
    <View style={styles.body}>
     <View style={styles.heading}><Text style={styles.title}>{item.title}</Text><View style={styles.badges}>{item.laundryIncluded && <Badge label="세탁 포함" />}{item.shippingAvailable && <Badge label="택배 가능" tone="gray" />}</View></View>
-    <Text style={styles.label}>{item.category}{item.category !== '잡화' ? ` · ${item.sizeLabel ?? item.size}` : ''}{detail?.postedLabel ? ` · ${detail.postedLabel}` : ''}</Text>
+    <Text style={styles.label}>{item.category}{item.category !== '잡화' ? ` · ${item.sizeLabel ?? item.size}` : ''} · {item.colorLabel ?? item.colors.map(color => CLOTH_COLORS.find(c => c.key === color)?.label ?? color).join(', ')}{detail?.postedLabel ? ` · ${detail.postedLabel}` : ''}</Text>
     {detail?.description && <Text style={styles.description}>{detail.description}</Text>}
     <View style={styles.rental}>
      <Text style={styles.sectionTitle}>대여 정보</Text>
@@ -58,11 +61,11 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
      {item.shippingAvailable && <Row label="택배비" value={detail?.shippingFee !== undefined ? `${detail.shippingFee.toLocaleString('ko-KR')}원 (편도 · 택배 선택 시)` : '-'} />}
      <Row label="세탁" value={detail?.laundry ?? '-'} />
      <Row label="거래 방식" value={`직거래 (${item.region})${item.shippingAvailable ? ' · 택배 가능' : ''}`} />
-     {detail?.unavailablePeriod ? <Row label="대여 불가능 기간" value={`${new Date(detail.unavailablePeriod.start).toLocaleDateString('ko-KR')} ~ ${new Date(detail.unavailablePeriod.end).toLocaleDateString('ko-KR')}`} /> : <Row label="대여 가능 기간" value={detail?.region ? '대여 불가능 기간 없음' : detail?.availablePeriod ?? '-'} />}
+     {detail?.unavailablePeriod ? <Row label="대여 불가능 기간" value={`${formatDate(new Date(detail.unavailablePeriod.start))} ~ ${formatDate(new Date(detail.unavailablePeriod.end))}`} /> : <Row label={detail?.region ? '대여 불가능 기간' : '대여 가능 기간'} value={detail?.region ? '없음' : detail?.availablePeriod ?? '-'} />}
     </View>
     {item.category !== '잡화' && <View style={styles.sizeCard}>
      <Text style={styles.sectionTitle}>사이즈</Text>
-     <SizeDiagram category={item.category} />
+     <SizeDiagram category={item.category} measurements={detail?.measurements} />
      <Text style={styles.hint}>단면은 옷을 평평하게 놓고 잰 길이예요</Text>
      <Row label="표기 사이즈" value={item.sizeLabel ?? item.size} />
      {measurementLabels[item.category].map(label => <Row key={label} label={label} value={detail?.measurements?.[label] !== undefined ? `${detail.measurements[label]} cm` : '- cm'} />)}
@@ -74,7 +77,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
     {detail?.views !== undefined && <Text style={styles.label}>조회 {detail.views}</Text>}
    </View>
   </ScrollView>
-  <View style={[styles.footer,{paddingBottom:Math.max(bottom, 16)}]}><CtaButton title="대여 신청" onPress={() => item.ownerId === currentUserId ? Alert.alert('대여 신청', '내가 등록한 옷은 신청할 수 없어요.') : navigation.navigate('RentalRequest', { clothId: item.id })} /></View>
+  <View style={[styles.footer,{paddingBottom:Math.max(bottom, 16)}]}><CtaButton title={isMine ? '받은 신청 보기' : '대여 신청'} onPress={() => isMine ? navigation.navigate('ReceivedRequests', { clothId: item.id }) : item.hidden || item.deleted ? Alert.alert('대여 신청', '현재 대여할 수 없는 옷이에요.') : navigation.navigate('RentalRequest', { clothId: item.id })} /></View>
  </SafeAreaView>;
 }
 

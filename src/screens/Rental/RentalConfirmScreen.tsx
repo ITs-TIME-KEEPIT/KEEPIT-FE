@@ -46,7 +46,7 @@ export default function RentalConfirmScreen({ navigation, route }: Props) {
   const toggle = (index: number) =>
     setAgreed((prev) => prev.map((v, i) => (i === index ? !v : v)));
 
-  if (!cloth) {
+  if (!cloth || cloth.hidden || cloth.deleted) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header type="back" title="신청 확인" onPressLeft={() => navigation.goBack()} />

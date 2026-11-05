@@ -1,6 +1,6 @@
 import { DEMO_CLOTH_ITEMS, DEMO_IDS, DEMO_USERS } from '../mocks/demoScenario';
 import { hasRequiredPhotos, PHOTO_PARTS } from '../components/camera/photoPolicy';
-import { REGIONS } from '../constants/regions';
+import { REGIONS, type Region } from '../constants/regions';
 import type { RegistrationDraft } from '../types/registration';
 import type { ClothItem } from '../types/clothing';
 
@@ -38,22 +38,39 @@ export function registrationErrors(d: RegistrationDraft): string[] {
   }
   if (d.hasDefect === null) errors.push('하자 여부를 선택해주세요.');
   if (d.hasDefect && !d.defectDescription.trim()) errors.push('하자 설명을 입력해주세요.');
-  if (!d.region || !REGIONS[d.region.sido].some(district => district === d.region?.district)) errors.push('거래 가능 지역을 선택해주세요.');
+  if (d.defectDescription.length > 500) errors.push('하자 설명은 500자 이내로 입력해주세요.');
+  if (d.description.length > 2000) errors.push('설명은 2,000자 이내로 입력해주세요.');
+  if (!d.region || !REGIONS[d.region.sido]?.some(district => district === d.region?.district)) errors.push('거래 가능 지역을 선택해주세요.');
   if (!d.unavailableConfirmed) errors.push('대여 불가능 기간을 정하거나 없음을 선택해주세요.');
   if (d.unavailable && (!Number.isFinite(d.unavailable.start) || !Number.isFinite(d.unavailable.end) || d.unavailable.start > d.unavailable.end)) errors.push('대여 불가능 기간을 확인해주세요.');
   if (!money(d.price)) errors.push('대여료를 1~10,000,000원으로 입력해주세요.');
   if (d.shippingAvailable && !money(d.shippingFee,true)) errors.push('택배비를 0~10,000,000원으로 입력해주세요.');
   return errors;
 }
-export function buildRegisteredCloth(d: RegistrationDraft): ClothItem {
+export function buildRegisteredCloth(d: RegistrationDraft, owner: { id: string; name: string } = DEMO_USERS.owner): ClothItem {
   const errors = registrationErrors(d);
   if (errors.length || !d.category || !d.region) throw new Error(errors[0] ?? '등록 정보를 확인해주세요.');
   const photos = PHOTO_PARTS.flatMap(part => d.photos[part] ? [{part,uri:d.photos[part]!}] : []);
-  return {id:d.id,title:d.title.trim(),ownerId:DEMO_IDS.owner,category:d.category,size:d.category === '잡화' ? 'FREE' : d.size!,colors:[...d.colors],region:d.region.district,
+  return {id:d.id,title:d.title.trim(),ownerId:owner.id,category:d.category,size:d.category === '잡화' ? 'FREE' : d.size!,colors:[...d.colors],region:d.region.district,
     price:Number(d.price),shippingAvailable:d.shippingAvailable,laundryIncluded:d.laundryBy === 'owner',imageUrl:d.photos.전면,
-    detail:{ownerName:DEMO_USERS.owner.name,postedLabel:'방금 전',description:d.description.trim(),photos,
+    detail:{ownerName:owner.name,postedLabel:'방금 전',description:d.description.trim(),photos,
       shippingFee:d.shippingAvailable ? Number(d.shippingFee) : undefined,laundry:d.laundryBy === 'owner' ? '등록자가 직접 세탁 · 대여료에 포함' : '빌린 사람이 세탁 후 반납',
       measurements:d.category === '잡화' ? undefined : Object.fromEntries(MEASUREMENT_LABELS[d.category].filter(label => d.measurements[label]?.trim()).map(label => [label,Number(d.measurements[label])])),
       region:{...d.region},unavailablePeriod:d.unavailable ?? undefined,
       defect:d.hasDefect ? {count:1,description:d.defectDescription.trim(),photoUris:d.photos.디테일 ? [d.photos.디테일] : []} : undefined}};
+}
+
+export function draftFromCloth(item: ClothItem): RegistrationDraft {
+  const detail = item.detail;
+  const sido = (Object.keys(REGIONS) as (keyof typeof REGIONS)[]).find(s => REGIONS[s].some(d => d === item.region));
+  const region: Region = detail?.region ? { sido: detail.region.sido as keyof typeof REGIONS, district: detail.region.district } : sido ? { sido, district: item.region } : null;
+  const photos = Object.fromEntries((detail?.photos ?? []).filter(p => p.uri).map(p => [p.part, p.uri]));
+  if (!photos.전면 && item.imageUrl) photos.전면 = item.imageUrl;
+  return { ...createRegistrationDraft(), id: item.id, photos, title: item.title, category: item.category, size: item.size,
+    colors: [...item.colors], measurements: Object.fromEntries(Object.entries(detail?.measurements ?? {}).map(([k,v]) => [k,String(v)])),
+    hasDefect: detail ? !!detail.defect : null, defectDescription: detail?.defect?.description ?? '', description: detail?.description ?? '', region,
+    unavailable: detail?.unavailablePeriod ? { ...detail.unavailablePeriod } : null,
+    unavailableConfirmed: !!detail?.region || !!detail?.unavailablePeriod,
+    price: String(item.price), shippingAvailable: item.shippingAvailable, shippingFee: detail?.shippingFee === undefined ? '' : String(detail.shippingFee),
+    laundryBy: item.laundryIncluded ? 'owner' : 'borrower' };
 }

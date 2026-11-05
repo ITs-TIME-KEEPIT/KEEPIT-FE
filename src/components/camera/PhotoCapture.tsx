@@ -10,6 +10,7 @@ import { PHOTO_PARTS, PHOTO_STEP, PHOTO_GUIDES, hasRequiredPhotos, type PhotoPar
 export { PHOTO_PARTS, type PhotoPart, type CapturedPhotos } from './photoPolicy';
 type Props = {
   title?: string;
+  showStep?: boolean;
   guide?: string;
   onClose: () => void;
   onPhotosChange?: (photos: CapturedPhotos) => void;
@@ -22,7 +23,7 @@ type Props = {
 /** 등록·전달·수령·반납 화면에서 재사용하는 앱 내 촬영 UI.
  * 사진 URI는 세션 임시 값입니다. 서버 업로드/서버 촬영 시각은 후속 연동합니다.
  */
-export default function PhotoCapture({title = '옷 사진', guide, onClose, onPhotosChange, canProceed = true, onNext, initialPhotos = {}}: Props) {
+export default function PhotoCapture({title = '옷 사진', showStep = true, guide, onClose, onPhotosChange, canProceed = true, onNext, initialPhotos = {}}: Props) {
   const camera = useRef<CameraView>(null);
   const busy = useRef(false);
   const alive = useRef(true);
@@ -35,8 +36,9 @@ export default function PhotoCapture({title = '옷 사진', guide, onClose, onPh
   const [capturing, setCapturing] = useState(false);
   const [cameraError, setCameraError] = useState(false);
   const [cameraKey, setCameraKey] = useState(0);
+  const [retaking, setRetaking] = useState<PhotoPart | null>(null);
   const [active, setActive] = useState(AppState.currentState === 'active');
-  const preview = photos[part];
+  const preview = retaking === part ? undefined : photos[part];
   useEffect(() => {
     if (permission?.status === 'undetermined' && focused && active && !asked.current) {
       asked.current = true;
@@ -71,6 +73,7 @@ export default function PhotoCapture({title = '옷 사진', guide, onClose, onPh
       if (!photo?.uri || !alive.current) return;
       const next = {...photos, [part]:photo.uri};
       setPhotos(next);
+      setRetaking(null);
       onPhotosChange?.(next);
     } catch {
       if (alive.current) Alert.alert('촬영 실패', '카메라를 확인한 뒤 다시 촬영해주세요.');
@@ -81,18 +84,16 @@ export default function PhotoCapture({title = '옷 사진', guide, onClose, onPh
   };
   const retake = () => {
     if (busy.current || !preview) return;
-    const next = {...photos};
-    delete next[part];
     setReady(false);
-    setPhotos(next);
-    onPhotosChange?.(next);
+    // 새 촬영에 성공하기 전까지 기존 URI를 보존합니다.
+    setRetaking(part);
   };
-  const nextEnabled = hasRequiredPhotos(photos) && canProceed && !!onNext && !capturing;
+  const nextEnabled = hasRequiredPhotos(photos) && canProceed && !!onNext && !capturing && retaking === null;
   return <SafeAreaView style={styles.container} edges={['top','bottom']}>
     <StatusBar style="light" />
     <View style={styles.header}>
       <Pressable onPress={onClose} disabled={capturing} accessibilityRole="button" accessibilityLabel="촬영 닫기" hitSlop={10}><Image source={require('../../../assets/icons/x.png')} style={styles.closeIcon} /></Pressable>
-      <Text style={styles.title}>{title} {PHOTO_STEP[part]}/3</Text><View style={styles.closeIcon} />
+      <Text style={styles.title}>{title}{showStep ? ` ${PHOTO_STEP[part]}/3` : ''}</Text><View style={styles.closeIcon} />
     </View>
     <View style={styles.previewArea}>
       {preview ? <Image source={{uri:preview}} style={StyleSheet.absoluteFill} resizeMode="cover" /> : permission?.granted && focused && active && !cameraError ? <CameraView key={cameraKey} ref={camera} facing="back" mode="picture" style={StyleSheet.absoluteFill} onCameraReady={() => setReady(true)} onMountError={() => {setReady(false); setCameraError(true);}} /> : null}
@@ -106,7 +107,7 @@ export default function PhotoCapture({title = '옷 사진', guide, onClose, onPh
       </View>}
     </View>
     <View style={styles.parts}>
-      {PHOTO_PARTS.map(value => <Pressable key={value} disabled={capturing} onPress={() => setPart(value)} accessibilityRole="button" accessibilityLabel={`${value}${photos[value] ? ', 촬영 완료' : ''}`} accessibilityState={{selected:part === value,disabled:capturing}} style={[styles.chip, part === value && styles.selectedChip]}><Text style={styles.chipText}>{photos[value] ? '✓ ' : ''}{value}</Text></Pressable>)}
+      {PHOTO_PARTS.map(value => <Pressable key={value} disabled={capturing} onPress={() => {setRetaking(null);setPart(value);}} accessibilityRole="button" accessibilityLabel={`${value}${photos[value] ? ', 촬영 완료' : ''}`} accessibilityState={{selected:part === value,disabled:capturing}} style={[styles.chip, part === value && styles.selectedChip]}><Text style={styles.chipText}>{photos[value] ? '✓ ' : ''}{value}</Text></Pressable>)}
     </View>
     <Text style={styles.notice}>대충 찍으면 분쟁이 생겼을 때 불리할 수 있어요</Text>
     <View style={styles.controls}>

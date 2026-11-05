@@ -61,7 +61,7 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
   const [laundryNoticeShown, setLaundryNoticeShown] = useState(false);
   const [laundryPopupOpen, setLaundryPopupOpen] = useState(false);
 
-  if (!cloth) {
+  if (!cloth || cloth.hidden || cloth.deleted) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header type="back" title="대여 신청" onPressLeft={() => navigation.goBack()} />
