@@ -39,7 +39,7 @@ export default function RentalCompleteScreen({ navigation }: Props) {
         {/* 신청 흐름을 스택에서 지우고 홈으로 */}
         <CtaButton
           title="홈으로"
-          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Home' }] })}
+          onPress={() => navigation.reset({ index: 0, routes: [{ name: 'Main' }] })}
         />
       </View>
     </SafeAreaView>

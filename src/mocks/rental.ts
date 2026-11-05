@@ -1,20 +1,4 @@
-/*
- * 중간발표 시연용 대여 신청 더미 데이터 (라벤더 쉬폰 롱원피스, 등록자 수빈)
- * API 연동 후에는 옷 상세 응답을 사용합니다.
- */
-
-export const MOCK_RENTAL_CLOTH = {
-  id: 'lavender-dress',
-  title: '라벤더 쉬폰 롱원피스',
-  price: 25000,
-  ownerNickname: '옷장정리중',
-  region: '마포구',
-  shippingAvailable: true,
-  laundryByRenter: true, // 빌린 사람이 드라이클리닝 후 반납
-  availableFrom: new Date(2026, 10, 1),
-  availableTo: new Date(2026, 11, 31),
-  reservedDates: [6, 7, 8, 21, 22].map((day) => new Date(2026, 10, day)),
-};
+import { DEMO_IDS } from './demoScenario';
 
 /*
  * 연휴 택배 안내 팝업용 연휴 일정 (Figma 시안 데이터)
@@ -25,4 +9,10 @@ export const MOCK_HOLIDAY = {
   start: new Date(2026, 11, 25),
   end: new Date(2026, 11, 27),
   shippingDeadline: new Date(2026, 11, 23),
+};
+
+// shortcut: 기획 문서에 연락처가 없어 전화·문자 버튼 시연용 가짜 번호를 사용, 프로필 API 연동 시 교체
+export const DEMO_PHONES: Record<string, string> = {
+  [DEMO_IDS.owner]: '010-0000-0001',
+  [DEMO_IDS.borrower]: '010-0000-0002',
 };

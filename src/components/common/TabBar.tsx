@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
+  Animated,
   View,
   Text,
   Image,
@@ -23,14 +24,37 @@ const TABS = [
   { key: 'my', label: '마이', icon: require('../../../assets/icons/user.png') },
 ] as const;
 
+const INSET = 4; // 컨테이너 안쪽 여백 (선택 배경 위치 계산에 사용)
+
 export default function TabBar({
   active,
   onPressTab,
 }: TabBarProps) {
   const { bottom } = useSafeAreaInsets();
+  const [tabWidth, setTabWidth] = useState(0);
+  const translateX = useRef(new Animated.Value(0)).current;
+  const placed = useRef(false);
+  const index = TABS.findIndex((tab) => tab.key === active);
+
+  // 선택 배경을 탭 사이로 미끄러지게 이동. 처음 그릴 때는 애니메이션 없이 제자리에
+  useEffect(() => {
+    if (!tabWidth) return;
+    if (!placed.current) {
+      placed.current = true;
+      translateX.setValue(index * tabWidth);
+      return;
+    }
+    Animated.spring(translateX, {
+      toValue: index * tabWidth,
+      useNativeDriver: true,
+      speed: 20,
+      bounciness: 4,
+    }).start();
+  }, [index, tabWidth, translateX]);
 
   return (
     <View
+      onLayout={(event) => setTabWidth((event.nativeEvent.layout.width - INSET * 2) / TABS.length)}
       style={[
         styles.container,
         {
@@ -38,6 +62,13 @@ export default function TabBar({
         },
       ]}
     >
+      {tabWidth > 0 && (
+        <Animated.View
+          pointerEvents="none"
+          style={[styles.indicator, { width: tabWidth, transform: [{ translateX }] }]}
+        />
+      )}
+
       {TABS.map(({ key, label, icon }) => {
         const isActive = key === active;
         const color = isActive ? COLORS.text : COLORS.textPlaceholder;
@@ -48,7 +79,7 @@ export default function TabBar({
             onPress={() => onPressTab(key)}
             accessibilityRole="tab"
             accessibilityState={{ selected: isActive }}
-            style={[styles.tab, isActive && styles.tabActive]}
+            style={styles.tab}
           >
             <Image
               source={icon}
@@ -71,7 +102,7 @@ const styles = StyleSheet.create({
     left: 25,
     right: 25,
     height: 68,
-    padding: 4,
+    padding: INSET,
     borderRadius: 40,
     flexDirection: 'row',
 
@@ -92,7 +123,11 @@ const styles = StyleSheet.create({
     gap: 2,
   },
 
-  tabActive: {
+  indicator: {
+    position: 'absolute',
+    top: INSET,
+    bottom: INSET,
+    left: INSET,
     borderRadius: 32,
     backgroundColor: COLORS.glassActive,
   },

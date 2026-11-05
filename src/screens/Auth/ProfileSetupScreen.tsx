@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 
 import {
@@ -123,7 +122,7 @@ export default function ProfileSetupScreen({
     if (!canStart) return;
 
     // TODO: 서버에 프로필 저장 후 홈 화면으로 이동
-    if (__DEV__) navigation.reset({ index: 0, routes: [{ name: 'Home' }] });
+    if (__DEV__) navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   return (
