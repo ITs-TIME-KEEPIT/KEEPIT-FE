@@ -175,9 +175,9 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  // 탭이 바뀌어도 시트 높이가 변하지 않도록 고정
+  // 시안의 내용~버튼 간격 92에서 시트 gap 16을 뺀 값
   content: {
-    height: 300,
+    marginBottom: 76,
     gap: 12,
   },
 
