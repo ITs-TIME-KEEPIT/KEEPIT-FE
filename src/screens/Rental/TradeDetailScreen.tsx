@@ -25,6 +25,7 @@ import Header from '../../components/common/Header';
 import TradeStepper from '../../components/common/TradeStepper';
 import CtaButton from '../../components/common/CtaButton';
 import DefaultButton from '../../components/common/DefaultButton';
+import { nextPhotoCheckpoint } from '../../state/tradePhotoStore';
 import ItemSummary from '../../components/rental/ItemSummary';
 import PersonRow from '../../components/rental/PersonRow';
 
@@ -32,7 +33,7 @@ type Props = NativeStackScreenProps<RootStackParamList, 'TradeDetail'>;
 
 const preparing = () => Alert.alert('준비 중', '다음 작업에서 연결할 예정이에요.');
 
-// TODO: 단계·역할별 '다음에 할 일'. 수락 이후 단계의 역할별 문구·버튼
+// 공통 촬영 진입과 같은 단계·역할을 사용합니다.
 function nextAction(rental: Rental, isOwner: boolean) {
   switch (rental.stage) {
     case 'requested':
@@ -40,7 +41,13 @@ function nextAction(rental: Rental, isOwner: boolean) {
         ? { title: '신청을 확인하고 응답해주세요', desc: `${hoursLeft(rental)}시간 안에 수락하거나 거절해주세요.` }
         : { title: '등록자의 수락을 기다리고 있어요', desc: '수락되면 서로의 연락처가 공개돼요.' };
     case 'accepted':
-      return { title: '상대방에게 연락해서 거래를 진행해주세요', desc: '직거래 장소와 시간은 연락해서 정해주세요. 번호는 거래 완료 7일 뒤에 숨겨져요.' };
+      return { title: isOwner ? '전달 전 옷 상태를 촬영해주세요' : '등록자가 옷을 전달하기를 기다려주세요', desc: '직거래 장소와 시간은 연락해서 정해주세요.' };
+    case 'handed-over':
+      return { title: isOwner ? '대여자의 수령 확인을 기다려주세요' : '받은 옷 상태를 촬영해주세요', desc: '등록 사진과 비교해서 옷 상태를 확인해주세요.' };
+    case 'received':
+      return { title: isOwner ? '대여자가 옷을 사용 중이에요' : '반납 전 옷 상태를 촬영해주세요', desc: '약속한 세탁 방법과 반납 기한을 확인해주세요.' };
+    case 'returned':
+      return { title: isOwner ? '돌려받은 옷 상태를 확인해주세요' : '등록자의 반납 확인을 기다려주세요', desc: '' };
     case 'rejected':
       return { title: '거절된 신청이에요', desc: rental.rejectReason ?? '' };
     default:
@@ -72,6 +79,7 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
   // 수락 후에만 서로 번호 공개
   const contactOpen = rental.stage !== 'requested' && rental.stage !== 'rejected';
   const action = nextAction(rental, isOwner);
+  const checkpoint = nextPhotoCheckpoint(rental, currentUserId);
 
   const openSms = (number: string) =>
     Linking.openURL(`sms:${number}`).catch(() => Alert.alert('연결할 수 없어요', '이 기기에서는 문자를 열 수 없어요.'));
@@ -119,13 +127,13 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
         )}
       </ScrollView>
 
-      {/* 등록자만 전달 전 촬영으로 진행, 대여자는 대기. TODO: 촬영 연결 */}
-      {rental.stage === 'accepted' && (
+      {/* 현재 계정과 단계에서 가능한 촬영만 연결합니다. */}
+      {(rental.stage === 'accepted' || checkpoint) && (
         <View style={styles.bottomCta}>
-          {isOwner && <CtaButton title="전달 전 사진 찍기" onPress={preparing} />}
-          <View style={styles.secondary}>
+          {checkpoint && <CtaButton title={checkpoint === 'handoff' ? '전달 전 사진 찍기' : checkpoint === 'receipt' ? '수령 사진 찍기' : '반납 전 사진 찍기'} onPress={() => navigation.navigate('TradePhoto', { rentalId: rental.id })} />}
+          {rental.stage === 'accepted' && <View style={styles.secondary}>
             <DefaultButton title="거래 취소" onPress={preparing} />
-          </View>
+          </View>}
         </View>
       )}
     </SafeAreaView>

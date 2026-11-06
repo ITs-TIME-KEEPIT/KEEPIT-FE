@@ -33,7 +33,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
 
   const mine = rentals.filter((rental) => rental.ownerId === currentUserId || rental.borrowerId === currentUserId);
   const stats = [
-    { label: '등록한 옷', value: clothes.filter((cloth) => cloth.ownerId === currentUserId).length },
+    { label: '등록한 옷', value: clothes.filter((cloth) => cloth.ownerId === currentUserId && !cloth.deleted).length },
     { label: '진행 중 거래', value: mine.filter((rental) => IN_PROGRESS.includes(rental.stage)).length },
     { label: '완료 거래', value: mine.filter((rental) => rental.stage === 'completed').length },
   ];
@@ -76,16 +76,20 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
 
         <View style={styles.stats}>
           {stats.map((stat) => (
-            <View key={stat.label} style={styles.stat}>
+            <Pressable key={stat.label} style={styles.stat} accessibilityRole="button" onPress={() => stat.label === '등록한 옷' ? navigation.navigate('MyClothes') : navigation.navigate('MyTrades')}>
               <Text style={styles.statValue}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
-            </View>
+            </Pressable>
           ))}
         </View>
 
         <View style={styles.menus}>
           {menus.map((menu) => (
-            <MenuRow key={menu.label} label={menu.label} muted={menu.muted} onPress={() => preparing(menu.message)} />
+            <MenuRow key={menu.label} label={menu.label} muted={menu.muted} onPress={() => {
+              if (menu.label === '내 등록 옷 관리') navigation.navigate('MyClothes');
+              else if (menu.label === '받은 신청') navigation.navigate('ReceivedRequests');
+              else preparing(menu.message);
+            }} />
           ))}
         </View>
 

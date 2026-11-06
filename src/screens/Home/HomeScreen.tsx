@@ -45,7 +45,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
 
-  const clothes = filterClothItems(items, category, appliedFilter, region);
+  const clothes = filterClothItems(items.filter(item => !item.hidden && !item.deleted), category, appliedFilter, region);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

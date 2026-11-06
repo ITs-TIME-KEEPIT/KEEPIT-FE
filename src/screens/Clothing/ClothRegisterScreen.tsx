@@ -21,13 +21,15 @@ import BottomSheet from '../../components/bottomsheet/BottomSheet';
 import DateRangeCalendar from '../../components/common/DateRangeCalendar';
 import { COLORS } from '../../constants/colors';
 import { CATEGORIES, SIZES } from '../../constants/clothing';
-import { createRegistrationDraft, fillScenario, MEASUREMENT_LABELS, registrationErrors, buildRegisteredCloth } from '../../utils/registration';
+import { createRegistrationDraft, draftFromCloth, fillScenario, MEASUREMENT_LABELS, registrationErrors, buildRegisteredCloth } from '../../utils/registration';
 import type { RegistrationDraft } from '../../types/registration';
-import { saveClothing } from '../../state/clothingStore';
+import { saveClothing, updateClothing, useClothingItems } from '../../state/clothingStore';
+import { findDemoUser, getRentalState, useRentalState } from '../../state/rentalStore';
+import { hasActiveTrade } from '../../utils/myClothes';
 import { formatDate } from '../../utils/formatDate';
 
 // 백엔드 없이 임시저장·재진입을 시연합니다. 앱 재시작 시 초기화됩니다.
-let savedDraft: RegistrationDraft | null = null;
+const savedDrafts = new Map<string, RegistrationDraft>();
 type Props = NativeStackScreenProps<RootStackParamList,'ClothRegister'>;
 function Section({label,children}: {label:string;children:React.ReactNode}) {
   return <View style={styles.section}><Text style={styles.label}>{label}</Text>{children}</View>;
@@ -38,9 +40,16 @@ function Note({children}: {children:string}) {
 function SelectRow({label,value,onPress}: {label:string;value:string;onPress:()=>void}) {
   return <Section label={label}><Pressable onPress={onPress} accessibilityRole="button" accessibilityLabel={label} style={styles.select}><Text style={styles.selectText}>{value}</Text><Image source={require('../../../assets/icons/chevron-right.png')} style={styles.icon} /></Pressable></Section>;
 }
-export default function ClothRegisterScreen({navigation}: Props) {
-  const [draft,setDraft] = useState<RegistrationDraft>(() => savedDraft ?? createRegistrationDraft());
-  const [phase,setPhase] = useState<'camera'|'form'>(() => savedDraft && hasRequiredPhotos(savedDraft.photos) ? 'form' : 'camera');
+export default function ClothRegisterScreen({navigation,route}: Props) {
+  const { currentUserId, rentals } = useRentalState();
+  const clothes = useClothingItems();
+  const editingId = route.params?.clothId;
+  const original = clothes.find(c => c.id === editingId && c.ownerId === currentUserId && !c.deleted);
+  const draftOwnerId = useRef(currentUserId).current;
+  const draftKey = `${draftOwnerId}:${editingId ?? 'new'}`;
+  const initialDraft = () => savedDrafts.get(draftKey) ?? (original ? draftFromCloth(original) : createRegistrationDraft());
+  const [draft,setDraft] = useState<RegistrationDraft>(initialDraft);
+  const [phase,setPhase] = useState<'camera'|'form'>(() => editingId || hasRequiredPhotos(initialDraft().photos) ? 'form' : 'camera');
   const [regionOpen,setRegionOpen] = useState(false);
   const [calendarOpen,setCalendarOpen] = useState(false);
   const [start,setStart] = useState<Date|null>(null);
@@ -49,8 +58,8 @@ export default function ClothRegisterScreen({navigation}: Props) {
   const update = <K extends keyof RegistrationDraft>(key:K,value:RegistrationDraft[K]) => setDraft(current => ({...current,[key]:value}));
   const close = () => Alert.alert('등록을 나갈까요?', '작성 중인 내용을 임시저장할 수 있어요.', [
     {text:'계속 작성',style:'cancel'},
-    {text:'저장하지 않고 나가기',style:'destructive',onPress:()=>{savedDraft=null;navigation.goBack();}},
-    {text:'임시저장 후 나가기',onPress:()=>{savedDraft=draft;navigation.goBack();}},
+    {text:'저장하지 않고 나가기',style:'destructive',onPress:()=>{savedDrafts.delete(draftKey);navigation.goBack();}},
+    {text:'임시저장 후 나가기',onPress:()=>{savedDrafts.set(draftKey,draft);navigation.goBack();}},
   ]);
   const openCalendar = () => {setStart(draft.unavailable ? new Date(draft.unavailable.start) : null);setEnd(draft.unavailable ? new Date(draft.unavailable.end) : null);setCalendarOpen(true);};
   const errors = registrationErrors(draft);
@@ -59,19 +68,34 @@ export default function ClothRegisterScreen({navigation}: Props) {
     if (errors.length) {Alert.alert('등록 정보 확인',errors[0]);return;}
     submitting.current = true;
     try {
-      const item = buildRegisteredCloth(draft);
-      saveClothing(item);
-      savedDraft = null;
-      navigation.replace('ClothRegisterComplete',{clothId:item.id});
+      if (getRentalState().currentUserId !== draftOwnerId) throw new Error('계정이 변경됐어요. 다시 등록해주세요.');
+      const owner = findDemoUser(draftOwnerId);
+      if (!owner) throw new Error('등록자 정보를 확인해주세요.');
+      const built = buildRegisteredCloth(draft, owner);
+      if (editingId) {
+        if (!original) throw new Error('수정할 옷을 찾을 수 없어요.');
+        const item = { ...original, ...built, detail: { ...original.detail, ...built.detail!, postedLabel: original.detail?.postedLabel } };
+        // 색상·사이즈를 바꾼 경우 예전 표시 문자열을 남기지 않습니다.
+        if (original.size !== item.size) item.sizeLabel = undefined;
+        if (original.colors.join() !== item.colors.join()) item.colorLabel = undefined;
+        updateClothing(item, draftOwnerId);
+        savedDrafts.delete(draftKey);
+        navigation.replace('ClothDetail',{clothId:item.id});
+      } else {
+        saveClothing(built);
+        savedDrafts.delete(draftKey);
+        navigation.replace('ClothRegisterComplete',{clothId:built.id});
+      }
     } catch (error) {submitting.current=false;Alert.alert('등록 정보 확인',error instanceof Error ? error.message : '입력 내용을 확인해주세요.');}
   };
+  if (editingId && (!original || hasActiveTrade(rentals, editingId))) return <SafeAreaView style={styles.container}><Text style={styles.label}>진행 중인 거래가 있거나 수정할 수 없는 옷이에요.</Text><CtaButton title="돌아가기" onPress={() => navigation.goBack()} /></SafeAreaView>;
   if (phase === 'camera') return <PhotoCapture initialPhotos={draft.photos} onPhotosChange={photos=>update('photos',photos)} onClose={()=>hasRequiredPhotos(draft.photos) ? setPhase('form') : close()} onNext={photos=>{update('photos',photos);setPhase('form');}} />;
   return <SafeAreaView style={styles.container} edges={['top','bottom']}>
     <StatusBar style="dark" />
     <View style={styles.header}>
       <Pressable onPress={close} accessibilityRole="button" accessibilityLabel="등록 닫기" hitSlop={10}><Image source={require('../../../assets/icons/x.png')} style={styles.icon} /></Pressable>
-      <Text style={styles.heading}>옷 올리기</Text>
-      <Pressable onPress={()=>{savedDraft=draft;Alert.alert('임시저장','앱을 종료하기 전까지 작성한 내용을 보관해요.');}} accessibilityRole="button"><Text style={styles.muted}>임시저장</Text></Pressable>
+      <Text style={styles.heading}>{editingId ? '옷 수정' : '옷 올리기'}</Text>
+      <Pressable onPress={()=>{savedDrafts.set(draftKey,draft);Alert.alert('임시저장','앱을 종료하기 전까지 작성한 내용을 보관해요.');}} accessibilityRole="button"><Text style={styles.muted}>임시저장</Text></Pressable>
     </View>
     <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.body}>
@@ -85,7 +109,7 @@ export default function ClothRegisterScreen({navigation}: Props) {
         {draft.category !== '잡화' && <Section label="표기 사이즈 *"><View style={styles.chips}>{SIZES.map(size=>size===draft.size ? <ChipActiveButton key={size} title={size} onPress={()=>{}} /> : <ChipButton key={size} title={size} onPress={()=>update('size',size)} />)}</View></Section>}
         <Section label="컬러 *  (최대 2개 선택할 수 있어요)"><ColorChipGroup selected={draft.colors} onChange={colors=>{if(colors.length<=2) update('colors',colors);else Alert.alert('컬러 선택','컬러는 최대 2개까지 선택할 수 있어요.');}} /></Section>
         {draft.category && draft.category !== '잡화' && <Section label="실측 사이즈 (cm)">
-          <SizeDiagram category={draft.category} />
+          <SizeDiagram category={draft.category} measurements={Object.fromEntries(Object.entries(draft.measurements).map(([key,value]) => [key,Number(value)]))} />
           <View style={styles.measurements}>{MEASUREMENT_LABELS[draft.category].map(label=><View key={label} style={styles.measurement}><TextInputField label={`${label}${label==='총장'?' *':''}`} keyboardType="decimal-pad" placeholder="0" value={draft.measurements[label] ?? ''} onChangeText={value=>update('measurements',{...draft.measurements,[label]:value})} /></View>)}</View>
           <Note>그림처럼 옷을 평평하게 놓고 재주세요. 필수가 아닌 항목은 비워둬도 돼요</Note>
         </Section>}
@@ -112,7 +136,7 @@ export default function ClothRegisterScreen({navigation}: Props) {
         </Section>
         {errors.length>0 && <Text style={styles.error}>{errors[0]}</Text>}
       </ScrollView>
-      <View style={styles.footer}>{errors.length ? <CtaDisabledButton title="등록하기" /> : <CtaButton title="등록하기" onPress={submit} />}</View>
+      <View style={styles.footer}>{errors.length ? <CtaDisabledButton title={editingId ? '수정 완료' : '등록하기'} /> : <CtaButton title={editingId ? '수정 완료' : '등록하기'} onPress={submit} />}</View>
     </KeyboardAvoidingView>
     <RegionSheet visible={regionOpen} value={draft.region} onSelect={region=>{update('region',region);setRegionOpen(false);}} onClose={()=>setRegionOpen(false)} />
     <BottomSheet visible={calendarOpen} title="대여 불가능 기간을 정해주세요" onClose={()=>setCalendarOpen(false)} footer={start&&end ? <CtaButton title="이 날짜로 보기" onPress={()=>{setDraft(current=>({...current,unavailable:{start:start.getTime(),end:end.getTime()},unavailableConfirmed:true}));setCalendarOpen(false);}} /> : <CtaDisabledButton title="이 날짜로 보기" />}>

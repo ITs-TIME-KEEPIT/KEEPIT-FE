@@ -17,6 +17,8 @@ export type ClothItem = {
   laundryIncluded: boolean; // '세탁 포함' 뱃지
   shippingAvailable: boolean; // '택배 가능' 뱃지
   imageUrl?: string;
+  hidden?: boolean;
+  deleted?: boolean;
   // UI 시연용 상세 데이터. API 연동 때 서버 응답으로 교체합니다.
   detail?: {
     ownerName: string;
