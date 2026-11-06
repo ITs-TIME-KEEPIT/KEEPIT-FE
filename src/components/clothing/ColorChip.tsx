@@ -44,16 +44,9 @@ export default function ColorChip({
             ]}
           />
         )}
-        {selected && (
-          <Image
-            source={require('../../../assets/icons/check.png')}
-            style={styles.check}
-            resizeMode="contain"
-          />
-        )}
       </View>
 
-      <Text style={selected ? styles.labelActive : styles.label}>
+      <Text style={styles.label}>
         {color.label}
       </Text>
     </Pressable>
@@ -92,28 +85,12 @@ const styles = StyleSheet.create({
     borderColor: COLORS.line,
   },
 
-  check: {
-    position: 'absolute',
-    width: 18,
-    height: 18,
-    tintColor: COLORS.white,
-  },
-
   label: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 16.8,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 14,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.textSub,
-    includeFontPadding: false,
-  },
-
-  labelActive: {
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 12,
-    lineHeight: 16.8,
-    letterSpacing: 0,
-    color: COLORS.text,
     includeFontPadding: false,
   },
 });
@@ -121,7 +98,7 @@ const styles = StyleSheet.create({
 /*
 ColorChip 사용법 - 최종 배포 시 주석은 삭제 예정
 
-컬러 하나 (40 영역 / 32 원 / 이름). 선택 시 primary 링 + 흰색 체크.
+컬러 하나 (40 영역 / 32 원 / 이름). 선택 시 primary 링.
 
 import ColorChip from '../../components/clothing/ColorChip';
 import { COLORS as CLOTH_COLORS } from '../../constants/clothing';

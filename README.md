@@ -66,8 +66,7 @@ KEEPIT-FE/
 │   │       └── filter/
 │   │           ├── PriceTab.tsx
 │   │           ├── SizeTab.tsx
-│   │           ├── ColorTab.tsx
-│   │           └── RangeSlider.tsx
+│   │           └── ColorTab.tsx
 │   │
 │   ├── constants/
 │   │   ├── colors.ts

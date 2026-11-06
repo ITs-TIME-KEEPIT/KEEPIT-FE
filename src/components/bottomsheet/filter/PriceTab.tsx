@@ -8,15 +8,11 @@ import {
 import { COLORS } from '../../../constants/colors';
 import type { DetailFilter } from '../../../types/filter';
 
-import RangeSlider from './RangeSlider';
 import TextInputField from '../../common/TextInputField';
 import ChipButton from '../../common/ChipButton';
 import ChipActiveButton from '../../common/ChipActiveButton';
 
 type Price = DetailFilter['price'];
-
-const PRICE_MAX = 50000;
-const PRICE_STEP = 1000;
 
 const QUICK_PRICES = [
   { label: '~1만원', min: 0, max: 10000 },
@@ -39,13 +35,6 @@ export default function PriceTab({
 }: PriceTabProps) {
   const { min, max } = price;
 
-  const rangeText =
-    max !== null
-      ? `${formatNumber(min)}원 ~ ${formatNumber(max)}원`
-      : min >= PRICE_MAX
-        ? `${formatNumber(PRICE_MAX)}원 이상`
-        : `${formatNumber(min)}원 ~ ${formatNumber(PRICE_MAX)}원 이상`;
-
   // 입력이 끝났을 때 최소가 최대보다 크면 두 값을 바꿈
   const swapIfReversed = () => {
     if (max !== null && min > max) onChange({ min: max, max: min });
@@ -53,55 +42,30 @@ export default function PriceTab({
 
   return (
     <View style={styles.container}>
-      <View style={styles.group}>
-        <View style={styles.titleRow}>
-          <Text style={styles.groupTitle}>대여료</Text>
-          <Text style={styles.hint}>직거래 기준, 택배비 제외</Text>
+      <View style={styles.inputs}>
+        <View style={styles.input}>
+          <TextInputField
+            label="최소"
+            placeholder="0"
+            value={min === 0 ? '' : formatNumber(min)}
+            onChangeText={(text) => onChange({ min: Number(onlyDigits(text)), max })}
+            onBlur={swapIfReversed}
+            keyboardType="number-pad"
+          />
         </View>
-
-        <Text style={styles.range}>
-          {rangeText}
-        </Text>
-
-        <RangeSlider
-          maxValue={PRICE_MAX}
-          step={PRICE_STEP}
-          low={min}
-          high={max}
-          onChange={(low, high) => onChange({ min: low, max: high })}
-        />
-
-        <View style={styles.ticks}>
-          <Text style={styles.hint}>0원</Text>
-          <Text style={styles.hint}>2.5만원</Text>
-          <Text style={styles.hint}>5만원+</Text>
-        </View>
-
-        <View style={styles.inputs}>
-          <View style={styles.input}>
-            <TextInputField
-              label="최소"
-              placeholder="0"
-              value={min === 0 ? '' : formatNumber(min)}
-              onChangeText={(text) => onChange({ min: Number(onlyDigits(text)), max })}
-              onBlur={swapIfReversed}
-              keyboardType="number-pad"
-            />
-          </View>
-          <Text style={styles.tilde}>~</Text>
-          <View style={styles.input}>
-            <TextInputField
-              label="최대"
-              placeholder="상한 없음"
-              value={max === null ? '' : formatNumber(max)}
-              onChangeText={(text) => {
-                const digits = onlyDigits(text);
-                onChange({ min, max: digits ? Number(digits) : null });
-              }}
-              onBlur={swapIfReversed}
-              keyboardType="number-pad"
-            />
-          </View>
+        <Text style={styles.tilde}>~</Text>
+        <View style={styles.input}>
+          <TextInputField
+            label="최대"
+            placeholder="상한 없음"
+            value={max === null ? '' : formatNumber(max)}
+            onChangeText={(text) => {
+              const digits = onlyDigits(text);
+              onChange({ min, max: digits ? Number(digits) : null });
+            }}
+            onBlur={swapIfReversed}
+            keyboardType="number-pad"
+          />
         </View>
       </View>
 
@@ -124,55 +88,26 @@ export default function PriceTab({
 
 const styles = StyleSheet.create({
   container: {
-    gap: 24,
+    gap: 20,
   },
 
   group: {
     gap: 10,
   },
 
-  titleRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-
   groupTitle: {
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
   },
 
-  hint: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 16.8,
-    letterSpacing: 0,
-    color: COLORS.textPlaceholder,
-    includeFontPadding: false,
-  },
-
-  range: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 16,
-    lineHeight: 22.4,
-    letterSpacing: 0,
-    color: COLORS.primary,
-    includeFontPadding: false,
-  },
-
-  ticks: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-
   inputs: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    gap: 8,
+    gap: 14,
   },
 
   input: {
