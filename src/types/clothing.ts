@@ -23,6 +23,7 @@ export type ClothItem = {
   detail?: {
     ownerName: string;
     postedLabel?: string;
+    registeredAt?: number; // 사진 비교의 1단계 촬영 시각
     description?: string;
     shippingFee?: number;
     laundry?: string;
