@@ -51,7 +51,7 @@ export default function PhotoViewer({ uris, startIndex, onClose }: PhotoViewerPr
           {uris.map((uri, index) => (
             <View key={index} style={[styles.page, { width }]}>
               {uri ? (
-                <Image source={{ uri }} style={{ width, height: photoHeight }} resizeMode="contain" />
+                <Image source={{ uri }} style={{ width, height: photoHeight }} resizeMode="cover" />
               ) : (
                 <View style={[styles.empty, { width, height: photoHeight }]}>
                   <Text style={styles.emptyText}>Image</Text>
