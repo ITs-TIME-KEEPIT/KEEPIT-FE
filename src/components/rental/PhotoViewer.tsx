@@ -20,16 +20,21 @@ interface PhotoViewerProps {
   onClose: () => void;
 }
 
+const PHOTO_RATIO = 553 / 390;
+const CHROME_HEIGHT = 126; // 헤더 56 + 페이지 점 영역 41 + 하단 여백 29
+
 /* TRD-550 사진 비교 크게 보기. 좌우로 넘겨 1~4단계를 봅니다 */
 export default function PhotoViewer({ uris, startIndex, onClose }: PhotoViewerProps) {
-  const { width } = useWindowDimensions();
+  const { width, height } = useWindowDimensions();
   const { top, bottom } = useSafeAreaInsets();
   const [page, setPage] = useState(startIndex);
+  // 작은 화면에서는 페이지 점을 가리지 않게 높이를 줄입니다.
+  const photoHeight = Math.min(width * PHOTO_RATIO, height - top - bottom - CHROME_HEIGHT);
 
   return (
     <Modal visible animationType="fade" onRequestClose={onClose}>
       <StatusBar style="light" />
-      <View style={[styles.container, { paddingTop: top, paddingBottom: bottom + 24 }]}>
+      <View style={[styles.container, { paddingTop: top, paddingBottom: bottom + 29 }]}>
         <View style={styles.header}>
           <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="크게 보기 닫기" hitSlop={10}>
             <Image source={require('../../../assets/icons/x.png')} style={styles.close} />
@@ -46,9 +51,9 @@ export default function PhotoViewer({ uris, startIndex, onClose }: PhotoViewerPr
           {uris.map((uri, index) => (
             <View key={index} style={[styles.page, { width }]}>
               {uri ? (
-                <Image source={{ uri }} style={{ width, height: width }} resizeMode="contain" />
+                <Image source={{ uri }} style={{ width, height: photoHeight }} resizeMode="contain" />
               ) : (
-                <View style={[styles.empty, { width, height: width }]}>
+                <View style={[styles.empty, { width, height: photoHeight }]}>
                   <Text style={styles.emptyText}>Image</Text>
                 </View>
               )}
@@ -96,7 +101,8 @@ const styles = StyleSheet.create({
 
   emptyText: {
     fontFamily: 'Pretendard-Regular',
-    fontSize: 20,
+    fontSize: 16,
+    lineHeight: 23.2,
     color: COLORS.textSub,
     includeFontPadding: false,
   },
@@ -105,7 +111,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
     gap: 10,
-    paddingTop: 16,
+    paddingTop: 33,
   },
 
   dot: {
