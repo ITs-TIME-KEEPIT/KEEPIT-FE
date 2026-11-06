@@ -62,7 +62,7 @@ export function completeRental(id: string) {
   patchRental(id, {stage: 'completed', completedAt: Date.now()});
 }
 
-// RENT-450 수락 전: 대여자만 사유 없이. 수락 후 ~ 전달 전: 양쪽 모두 사유 필수. 전달 이후엔 취소 불가
+// 수락 전: 대여자만 사유 없이. 수락 후 ~ 전달 전: 양쪽 모두 사유 필수. 전달 이후엔 취소 불가
 export function cancelRental(id: string, reason?: string) {
   const target = state.rentals.find(rental => rental.id === id);
   if (target?.stage === 'requested' && target.borrowerId === state.currentUserId) return patchRental(id, {stage: 'cancelled'});
@@ -71,7 +71,7 @@ export function cancelRental(id: string, reason?: string) {
   patchRental(id, {stage: 'cancelled', cancelReason: reason.trim()});
 }
 
-// TRD-580 옷이 전달된 뒤 ~ 거래 완료 전까지 신고할 수 있습니다.
+// 옷이 전달된 뒤 ~ 거래 완료 전까지 신고할 수 있습니다.
 export function reportRental(id: string, reason: string) {
   const target = state.rentals.find(rental => rental.id === id);
   if (!target || !['handed-over', 'received', 'returned'].includes(target.stage)) throw new Error('지금은 신고할 수 없어요.');
