@@ -93,7 +93,7 @@ const styles = StyleSheet.create({
   },
 
   sheet: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 20,
     paddingTop: 8,
     gap: 16,
     backgroundColor: COLORS.white,
@@ -117,9 +117,9 @@ const styles = StyleSheet.create({
   },
 
   title: {
-    fontFamily: 'Pretendard-Bold',
+    fontFamily: 'Pretendard-SemiBold',
     fontSize: 18,
-    lineHeight: 25.2,
+    lineHeight: 26.1,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
