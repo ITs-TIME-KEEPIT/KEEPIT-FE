@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import {
+  View,
   Text,
   StyleSheet,
 } from 'react-native';
@@ -37,10 +38,6 @@ export default function DateRangeSheet({
     }
   }, [visible]);
 
-  const summary = !start
-    ? '받는 날을 선택해주세요'
-    : `받는 날 ${formatDate(start)} ~ ${end ? `돌려주는 날 ${formatDate(end)}` : '돌려주는 날을 선택해주세요'}`;
-
   return (
     <BottomSheet
       visible={visible}
@@ -66,20 +63,26 @@ export default function DateRangeSheet({
         />
       )}
 
-      <Text style={styles.summary}>
-        {summary}
-      </Text>
+      <View style={styles.summary}>
+        <Text style={styles.summaryText}>받는 날 {start ? formatDate(start) : '-'}</Text>
+        <Text style={styles.summaryText}>돌려주는 날 {end ? formatDate(end) : '-'}</Text>
+      </View>
     </BottomSheet>
   );
 }
 
 const styles = StyleSheet.create({
   summary: {
-    fontFamily: 'Pretendard-SemiBold',
+    flexDirection: 'row',
+    gap: 16,
+  },
+
+  summaryText: {
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
     lineHeight: 20.3,
     letterSpacing: 0,
-    color: COLORS.primary,
+    color: COLORS.text,
     includeFontPadding: false,
   },
 });

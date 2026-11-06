@@ -31,8 +31,6 @@ export default function SizeTab({
 
   return (
     <View style={styles.container}>
-      <Text style={styles.hint}>여러 개 선택할 수 있어요</Text>
-
       {SIZE_GROUPS.map((group) => (
         <View key={group.title} style={styles.group}>
           <Text style={styles.groupTitle}>{group.title}</Text>
@@ -61,20 +59,11 @@ const styles = StyleSheet.create({
   },
 
   groupTitle: {
-    fontFamily: 'Pretendard-SemiBold',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
-    lineHeight: 19.6,
+    lineHeight: 20.3,
     letterSpacing: 0,
     color: COLORS.text,
-    includeFontPadding: false,
-  },
-
-  hint: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 16.8,
-    letterSpacing: 0,
-    color: COLORS.textPlaceholder,
     includeFontPadding: false,
   },
 

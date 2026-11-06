@@ -100,12 +100,13 @@ const styles = StyleSheet.create({
   list: {
     height: 432,
     flexDirection: 'row',
+    gap: 8,
   },
 
   sidoColumn: {
     width: 112,
-    backgroundColor: COLORS.line,
-    borderRadius: 8,
+    backgroundColor: COLORS.bgGray,
+    borderRadius: 12,
     overflow: 'hidden',
   },
 
@@ -125,12 +126,12 @@ const styles = StyleSheet.create({
 
   districtRowActive: {
     backgroundColor: COLORS.primaryLight,
-    borderRadius: 8,
+    borderRadius: 12,
   },
 
   sido: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 15,
+    fontFamily: 'Pretendard-Medium',
+    fontSize: 16,
     letterSpacing: 0,
     color: COLORS.textPlaceholder,
     includeFontPadding: false,
@@ -138,14 +139,14 @@ const styles = StyleSheet.create({
 
   sidoActive: {
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 15,
+    fontSize: 16,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
   },
 
   district: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 15,
     letterSpacing: 0,
     color: COLORS.text,

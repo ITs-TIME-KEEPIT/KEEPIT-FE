@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
 
-import { COLORS } from '../../../constants/colors';
 import type { ColorKey } from '../../../constants/clothing';
 
 import ColorChipGroup from '../../clothing/ColorChipGroup';
@@ -19,25 +13,5 @@ export default function ColorTab({
   colors,
   onChange,
 }: ColorTabProps) {
-  return (
-    <View style={styles.container}>
-      <Text style={styles.hint}>여러 개 선택할 수 있어요</Text>
-      <ColorChipGroup selected={colors} onChange={onChange} />
-    </View>
-  );
+  return <ColorChipGroup selected={colors} onChange={onChange} />;
 }
-
-const styles = StyleSheet.create({
-  container: {
-    gap: 16,
-  },
-
-  hint: {
-    fontFamily: 'Pretendard-Regular',
-    fontSize: 12,
-    lineHeight: 16.8,
-    letterSpacing: 0,
-    color: COLORS.textPlaceholder,
-    includeFontPadding: false,
-  },
-});

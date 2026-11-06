@@ -43,7 +43,7 @@ const styles = StyleSheet.create({
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    rowGap: 16,
+    rowGap: 20,
   },
 
   // 한 줄에 5개

@@ -148,7 +148,6 @@ export default function DateRangeCalendar({
                   <Text
                     style={[
                       styles.day,
-                      inRange && styles.dayInRange,
                       isSunday && styles.daySunday,
                       disabled && styles.dayDisabled,
                     ]}
@@ -179,7 +178,7 @@ export default function DateRangeCalendar({
 const styles = StyleSheet.create({
   container: {
     width: '100%',
-    gap: 4,
+    gap: 12,
   },
 
   monthRow: {
@@ -192,7 +191,7 @@ const styles = StyleSheet.create({
   arrow: {
     width: 24,
     height: 24,
-    tintColor: COLORS.textSub,
+    tintColor: COLORS.text,
   },
 
   arrowDisabled: {
@@ -264,10 +263,6 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  dayInRange: {
-    fontFamily: 'Pretendard-SemiBold',
-  },
-
   daySunday: {
     color: COLORS.alert,
   },
@@ -278,7 +273,7 @@ const styles = StyleSheet.create({
   },
 
   dayOnCircle: {
-    fontFamily: 'Pretendard-Bold',
+    fontFamily: 'Pretendard-Regular',
     fontSize: 15,
     lineHeight: 21.75,
     letterSpacing: 0,
@@ -305,7 +300,7 @@ const styles = StyleSheet.create({
   },
 
   legendText: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 12,
     lineHeight: 17.4,
     letterSpacing: 0,
