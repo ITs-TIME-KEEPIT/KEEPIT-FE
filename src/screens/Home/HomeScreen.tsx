@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 import {
+  Animated,
   View,
   Text,
   Image,
@@ -44,8 +45,22 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   // shortcut: 더미 데이터에 예약 날짜가 없어 기간은 목록에 반영하지 않음, API 연동 시 filterClothItems에 추가
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const fabCollapse = useRef(new Animated.Value(0)).current;
 
-  const clothes = filterClothItems(items.filter(item => !item.hidden && !item.deleted), category, appliedFilter, region);
+  useEffect(() => {
+    // width는 네이티브 드라이버로 애니메이션할 수 없음
+    Animated.timing(fabCollapse, {
+      toValue: scrolled ? 1 : 0,
+      duration: 200,
+      useNativeDriver: false,
+    }).start();
+  }, [scrolled, fabCollapse]);
+
+  const visibleItems = items.filter(item => !item.hidden && !item.deleted);
+  const clothes = filterClothItems(visibleItems, category, appliedFilter, region);
+  const { price, sizes, colors } = appliedFilter;
+  const filterActive = price.min > 0 || price.max !== null || sizes.length > 0 || colors.length > 0;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -80,17 +95,17 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
             onPress={() => setDateOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="날짜 선택"
-            style={styles.toolButton}
+            style={[styles.toolButton, dateRange && styles.toolButtonActive]}
           >
-            <Image source={require('../../../assets/icons/calendar.png')} style={styles.toolIcon} resizeMode="contain" />
+            <Image source={require('../../../assets/icons/calendar.png')} style={[styles.toolIcon, dateRange && styles.toolIconActive]} resizeMode="contain" />
           </Pressable>
           <Pressable
             onPress={() => setFilterOpen(true)}
             accessibilityRole="button"
             accessibilityLabel="상세 필터"
-            style={styles.toolButton}
+            style={[styles.toolButton, filterActive && styles.toolButtonActive]}
           >
-            <Image source={require('../../../assets/icons/filter.png')} style={styles.toolIcon} resizeMode="contain" />
+            <Image source={require('../../../assets/icons/filter.png')} style={[styles.toolIcon, filterActive && styles.toolIconActive]} resizeMode="contain" />
           </Pressable>
         </View>
       </View>
@@ -100,7 +115,9 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         <FlatList
           data={clothes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={[styles.listContent, { paddingBottom: 176 + bottom }]}
+          contentContainerStyle={clothes.length ? { paddingBottom: 176 + bottom } : styles.emptyContent}
+          onScroll={(event) => setScrolled(event.nativeEvent.contentOffset.y > 0)}
+          scrollEventThrottle={16}
           renderItem={({ item }) => (
             <ClothCard
               imageUrl={item.imageUrl}
@@ -108,6 +125,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
               region={item.region}
               category={item.category}
               size={item.size}
+              date={item.detail?.postedLabel}
               price={item.price}
               badges={[
                 ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
@@ -116,7 +134,6 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
               onPress={() => navigation.navigate('ClothDetail', { clothId: item.id })}
             />
           )}
-          // TODO: 캐릭터 시안 확정 후 디자인 적용
           ListEmptyComponent={
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>
@@ -129,22 +146,42 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           }
         />
 
-        <Pressable
-          onPress={() =>
-            navigation.navigate('ClothRegister')
-          }
-          accessibilityRole="button"
-          style={[styles.fab, { bottom: 90 + Math.max(bottom, 24) }]}
-        >
-          <Image source={require('../../../assets/icons/plus.png')} style={styles.fabIcon} resizeMode="contain" />
-          <Text style={styles.fabText}>옷 올리기</Text>
-        </Pressable>
+        {clothes.length > 0 && (
+          <Animated.View
+            style={[
+              styles.fab,
+              {
+                bottom: 90 + Math.max(bottom, 24),
+                width: fabCollapse.interpolate({ inputRange: [0, 1], outputRange: [112, 52] }),
+              },
+            ]}
+          >
+            <Pressable
+              onPress={() =>
+                navigation.navigate('ClothRegister')
+              }
+              accessibilityRole="button"
+              accessibilityLabel="옷 올리기"
+              style={styles.fabButton}
+            >
+              <Image source={require('../../../assets/icons/plus.png')} style={styles.fabIcon} resizeMode="contain" />
+              <Animated.Text
+                style={[
+                  styles.fabText,
+                  { opacity: fabCollapse.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: 'clamp' }) },
+                ]}
+              >
+                옷 올리기
+              </Animated.Text>
+            </Pressable>
+          </Animated.View>
+        )}
       </View>
 
       <FilterSheet
         visible={filterOpen}
         value={appliedFilter}
-        countFor={(filter) => filterClothItems(items, category, filter, region).length}
+        countFor={(filter) => filterClothItems(visibleItems, category, filter, region).length}
         onApply={(filter) => {
           setAppliedFilter(filter);
           setFilterOpen(false);
@@ -173,7 +210,6 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         onClose={() => setDateOpen(false)}
       />
 
-      {/* 다른 탭 화면이 아직 없어 홈만 활성 */}
     </SafeAreaView>
   );
 }
@@ -196,11 +232,12 @@ const styles = StyleSheet.create({
 
   chipScroll: {
     flex: 1,
+    marginRight: 5,
   },
 
   chips: {
     alignItems: 'center',
-    gap: 6,
+    gap: 12,
   },
 
   divider: {
@@ -225,36 +262,46 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
 
+  toolButtonActive: {
+    backgroundColor: COLORS.primary,
+    borderColor: COLORS.primary,
+  },
+
   toolIcon: {
     width: 20,
     height: 20,
     tintColor: COLORS.text,
   },
 
+  toolIconActive: {
+    tintColor: COLORS.white,
+  },
+
   listArea: {
     flex: 1,
   },
 
-  listContent: {
-    paddingBottom: 80, // FAB에 마지막 카드가 가려지지 않도록
+  emptyContent: {
+    flexGrow: 1,
   },
 
   empty: {
+    flex: 1,
     alignItems: 'center',
-    paddingTop: 80,
-    gap: 4,
+    justifyContent: 'center',
+    gap: 10,
   },
 
   emptyTitle: {
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 16,
-    lineHeight: 23.2,
+    fontSize: 20,
+    lineHeight: 29,
     color: COLORS.text,
     includeFontPadding: false,
   },
 
   emptySub: {
-    fontFamily: 'Pretendard-Regular',
+    fontFamily: 'Pretendard-Medium',
     fontSize: 14,
     lineHeight: 20.3,
     color: COLORS.textSub,
@@ -263,15 +310,8 @@ const styles = StyleSheet.create({
 
   fab: {
     position: 'absolute',
-    right: 16,
-    bottom: 16,
+    right: 25,
     height: 52,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    paddingLeft: 14,
-    paddingRight: 14,
-    paddingVertical: 14,
     backgroundColor: COLORS.primary,
     borderRadius: 999,
 
@@ -280,6 +320,17 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.18,
     shadowRadius: 12,
     elevation: 6,
+  },
+
+  // 줄어드는 동안 글자를 잘라내되 그림자는 살리려고 바깥 뷰와 분리
+  fabButton: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    padding: 14,
+    borderRadius: 999,
+    overflow: 'hidden',
   },
 
   fabIcon: {

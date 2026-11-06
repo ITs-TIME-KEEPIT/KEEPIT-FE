@@ -16,6 +16,7 @@ interface ClothCardProps {
   region: string;
   category: string;
   size: string;
+  date?: string;
   price: number;
   badges?: { label: string; tone?: BadgeTone }[];
   onPress?: () => void;
@@ -27,6 +28,7 @@ export default function ClothCard({
   region,
   category,
   size,
+  date,
   price,
   badges = [],
   onPress,
@@ -48,7 +50,7 @@ export default function ClothCard({
           {title}
         </Text>
         <Text style={styles.meta} numberOfLines={1}>
-          {[region, category, size].join(' · ')}
+          {[region, category, size, date].filter(Boolean).join(' · ')}
         </Text>
         </View>
         <Text style={styles.price}>

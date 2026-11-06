@@ -127,13 +127,13 @@ const styles = StyleSheet.create({
   location: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 6,
   },
 
   locationText: {
-    fontFamily: 'Pretendard-Bold',
-    fontSize: 18,
-    lineHeight: 26.1,
+    fontFamily: 'Pretendard-SemiBold',
+    fontSize: 20,
+    lineHeight: 29,
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
