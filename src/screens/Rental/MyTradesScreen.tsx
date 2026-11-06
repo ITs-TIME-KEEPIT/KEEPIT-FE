@@ -23,11 +23,11 @@ import SquareImage from '../../components/common/SquareImage';
 const TABS = ['빌린 옷', '빌려준 옷'] as const;
 
 /* MYP-601 내 거래: 빌린 옷 / 빌려준 옷 */
-export default function MyTradesScreen({ navigation }: MainTabScreenProps<'MyTrades'>) {
+export default function MyTradesScreen({ navigation, route }: MainTabScreenProps<'MyTrades'>) {
   const { bottom } = useSafeAreaInsets();
   const { currentUserId, rentals } = useRentalState();
   const clothes = useClothingItems();
-  const [tab, setTab] = useState<(typeof TABS)[number]>('빌린 옷');
+  const [tab, setTab] = useState<(typeof TABS)[number]>(route.params?.tab ?? '빌린 옷');
 
   const lending = tab === '빌려준 옷';
   const list = rentals.filter((rental) => (lending ? rental.ownerId : rental.borrowerId) === currentUserId);
@@ -60,11 +60,11 @@ export default function MyTradesScreen({ navigation }: MainTabScreenProps<'MyTra
         renderItem={({ item: rental }) => {
           const cloth = clothes.find((item) => item.id === rental.clothId);
           const badge = stageBadge(rental, lending);
-          // 등록자가 아직 응답하지 않은 신청은 신청 상세(수락·거절)로, 나머지는 거래 상세로
+          // 등록자가 아직 응답하지 않은 신청은 신청 상세(수락·거절)로, 끝난 거래는 완료 화면으로, 나머지는 거래 상세로
           const goDetail = () =>
             lending && rental.stage === 'requested'
               ? navigation.navigate('ReceivedRequestDetail', { rentalId: rental.id })
-              : navigation.navigate('TradeDetail', { rentalId: rental.id });
+              : navigation.navigate(rental.stage === 'completed' ? 'TradeComplete' : 'TradeDetail', { rentalId: rental.id });
 
           return (
             <Pressable onPress={goDetail} accessibilityRole="button" style={styles.card}>
