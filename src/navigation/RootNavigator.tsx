@@ -24,6 +24,7 @@ import MyTradesScreen from '../screens/Rental/MyTradesScreen';
 import MyPageScreen from '../screens/My/MyPageScreen';
 import MyClothesScreen from '../screens/My/MyClothesScreen';
 import TradePhotoScreen from '../screens/Rental/TradePhotoScreen';
+import TradePhotoCompareScreen from '../screens/Rental/TradePhotoCompareScreen';
 import TradeReportScreen from '../screens/Rental/TradeReportScreen';
 
 import TabBar, { type TabKey } from '../components/common/TabBar';
@@ -61,6 +62,7 @@ export type RootStackParamList = {
   TradeDetail: { rentalId: string };
   MyClothes: undefined;
   TradePhoto: { rentalId: string };
+  TradePhotoCompare: { rentalId: string };
   TradeReport: { rentalId: string };
 };
 
@@ -113,6 +115,7 @@ export default function RootNavigator() {
 
       <Stack.Screen name="MyClothes" component={MyClothesScreen} options={{headerShown:false}} />
       <Stack.Screen name="TradePhoto" component={TradePhotoScreen} options={{headerShown:false,gestureEnabled:false}} />
+      <Stack.Screen name="TradePhotoCompare" component={TradePhotoCompareScreen} options={{headerShown:false}} />
       <Stack.Screen name="TradeReport" component={TradeReportScreen} options={{headerShown:false}} />
       <Stack.Screen name="ClothRegister" component={ClothRegisterScreen} options={{headerShown:false,gestureEnabled:false}} />
       <Stack.Screen name="ClothRegisterComplete" component={ClothRegisterCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
