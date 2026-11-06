@@ -24,6 +24,9 @@ import MyTradesScreen from '../screens/Rental/MyTradesScreen';
 import MyPageScreen from '../screens/My/MyPageScreen';
 import MyClothesScreen from '../screens/My/MyClothesScreen';
 import TradePhotoScreen from '../screens/Rental/TradePhotoScreen';
+import TradePhotoCompareScreen from '../screens/Rental/TradePhotoCompareScreen';
+import TradeCompleteScreen from '../screens/Rental/TradeCompleteScreen';
+import TradeReportScreen from '../screens/Rental/TradeReportScreen';
 
 import TabBar, { type TabKey } from '../components/common/TabBar';
 
@@ -32,7 +35,7 @@ import type { TradeMethod } from '../types/rental';
 
 export type MainTabParamList = {
   Home: undefined;
-  MyTrades: undefined;
+  MyTrades: { tab?: '빌린 옷' | '빌려준 옷' } | undefined;
   MyPage: undefined;
 };
 
@@ -60,6 +63,9 @@ export type RootStackParamList = {
   TradeDetail: { rentalId: string };
   MyClothes: undefined;
   TradePhoto: { rentalId: string };
+  TradePhotoCompare: { rentalId: string };
+  TradeComplete: { rentalId: string };
+  TradeReport: { rentalId: string };
 };
 
 // 탭 화면에서 스택 화면(상세 등)으로도 이동할 수 있도록 두 내비게이터 타입을 합칩니다
@@ -111,6 +117,9 @@ export default function RootNavigator() {
 
       <Stack.Screen name="MyClothes" component={MyClothesScreen} options={{headerShown:false}} />
       <Stack.Screen name="TradePhoto" component={TradePhotoScreen} options={{headerShown:false,gestureEnabled:false}} />
+      <Stack.Screen name="TradePhotoCompare" component={TradePhotoCompareScreen} options={{headerShown:false}} />
+      <Stack.Screen name="TradeComplete" component={TradeCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
+      <Stack.Screen name="TradeReport" component={TradeReportScreen} options={{headerShown:false}} />
       <Stack.Screen name="ClothRegister" component={ClothRegisterScreen} options={{headerShown:false,gestureEnabled:false}} />
       <Stack.Screen name="ClothRegisterComplete" component={ClothRegisterCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
 

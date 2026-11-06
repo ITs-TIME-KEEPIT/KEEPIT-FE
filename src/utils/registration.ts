@@ -53,7 +53,7 @@ export function buildRegisteredCloth(d: RegistrationDraft, owner: { id: string; 
   const photos = PHOTO_PARTS.flatMap(part => d.photos[part] ? [{part,uri:d.photos[part]!}] : []);
   return {id:d.id,title:d.title.trim(),ownerId:owner.id,category:d.category,size:d.category === '잡화' ? 'FREE' : d.size!,colors:[...d.colors],region:d.region.district,
     price:Number(d.price),shippingAvailable:d.shippingAvailable,laundryIncluded:d.laundryBy === 'owner',imageUrl:d.photos.전면,
-    detail:{ownerName:owner.name,postedLabel:'방금 전',description:d.description.trim(),photos,
+    detail:{ownerName:owner.name,postedLabel:'방금 전',registeredAt:Date.now(),description:d.description.trim(),photos,
       shippingFee:d.shippingAvailable ? Number(d.shippingFee) : undefined,laundry:d.laundryBy === 'owner' ? '등록자가 직접 세탁 · 대여료에 포함' : '빌린 사람이 세탁 후 반납',
       measurements:d.category === '잡화' ? undefined : Object.fromEntries(MEASUREMENT_LABELS[d.category].filter(label => d.measurements[label]?.trim()).map(label => [label,Number(d.measurements[label])])),
       region:{...d.region},unavailablePeriod:d.unavailable ?? undefined,

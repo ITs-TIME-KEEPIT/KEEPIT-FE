@@ -12,6 +12,7 @@ type Props = {
   title?: string;
   showStep?: boolean;
   guide?: string;
+  guideCaption?: string;
   onClose: () => void;
   onPhotosChange?: (photos: CapturedPhotos) => void;
   // 호출 화면에서 추가 조건이 필요할 때만 사용합니다. 필수 3장은 항상 검증합니다.
@@ -23,7 +24,7 @@ type Props = {
 /** 등록·전달·수령·반납 화면에서 재사용하는 앱 내 촬영 UI.
  * 사진 URI는 세션 임시 값입니다. 서버 업로드/서버 촬영 시각은 후속 연동합니다.
  */
-export default function PhotoCapture({title = '옷 사진', showStep = true, guide, onClose, onPhotosChange, canProceed = true, onNext, initialPhotos = {}}: Props) {
+export default function PhotoCapture({title = '옷 사진', showStep = true, guide, guideCaption, onClose, onPhotosChange, canProceed = true, onNext, initialPhotos = {}}: Props) {
   const camera = useRef<CameraView>(null);
   const busy = useRef(false);
   const alive = useRef(true);
@@ -97,7 +98,7 @@ export default function PhotoCapture({title = '옷 사진', showStep = true, gui
     </View>
     <View style={styles.previewArea}>
       {preview ? <Image source={{uri:preview}} style={StyleSheet.absoluteFill} resizeMode="cover" /> : permission?.granted && focused && active && !cameraError ? <CameraView key={cameraKey} ref={camera} facing="back" mode="picture" style={StyleSheet.absoluteFill} onCameraReady={() => setReady(true)} onMountError={() => {setReady(false); setCameraError(true);}} /> : null}
-      <View pointerEvents="none" style={styles.guideBorder}>{!preview && <Text style={styles.guide}>{guide ?? PHOTO_GUIDES[part]}</Text>}</View>
+      <View pointerEvents="none" style={styles.guideBorder}>{!preview && <Text style={styles.guide}>{guide ?? PHOTO_GUIDES[part]}</Text>}{!preview && !!guideCaption && <Text style={styles.guideCaption}>{guideCaption}</Text>}</View>
       {!preview && (!permission?.granted || cameraError) && <View style={styles.permissionPanel}>
         <Text style={styles.guide}>{cameraError ? '카메라를 사용할 수 없어요' : '옷 사진을 찍으려면 카메라 권한이 필요해요'}</Text>
         <Pressable accessibilityRole="button" onPress={() => {
@@ -120,7 +121,7 @@ export default function PhotoCapture({title = '옷 사진', showStep = true, gui
 
 const styles = StyleSheet.create({
   container:{flex:1,backgroundColor:COLORS.black},header:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:20,paddingTop:16,paddingBottom:12},closeIcon:{width:24,height:24,tintColor:COLORS.white},title:{fontFamily:'Pretendard-SemiBold',fontSize:16,lineHeight:23.2,color:COLORS.white},
-  previewArea:{flex:1,marginHorizontal:40,marginTop:16,marginBottom:16,overflow:'hidden',borderRadius:16},guideBorder:{position:'absolute',top:0,right:0,bottom:0,left:0,borderWidth:2,borderStyle:'dashed',borderColor:'rgba(255,255,255,0.9)',borderRadius:16,justifyContent:'center',alignItems:'center',paddingHorizontal:24},guide:{fontFamily:'Pretendard-SemiBold',fontSize:15,lineHeight:21.75,color:COLORS.white,textAlign:'center',textShadowColor:COLORS.black,textShadowRadius:3},
+  previewArea:{flex:1,marginHorizontal:40,marginTop:16,marginBottom:16,overflow:'hidden',borderRadius:16},guideBorder:{position:'absolute',top:0,right:0,bottom:0,left:0,borderWidth:2,borderStyle:'dashed',borderColor:'rgba(255,255,255,0.9)',borderRadius:16,justifyContent:'center',alignItems:'center',paddingHorizontal:24},guideCaption:{marginTop:8,fontFamily:'Pretendard-Regular',fontSize:12,lineHeight:17.4,color:COLORS.white,opacity:0.8,textAlign:'center'},guide:{fontFamily:'Pretendard-SemiBold',fontSize:15,lineHeight:21.75,color:COLORS.white,textAlign:'center',textShadowColor:COLORS.black,textShadowRadius:3},
   permissionPanel:{position:'absolute',top:0,right:0,bottom:0,left:0,justifyContent:'center',alignItems:'center',padding:20,gap:16,backgroundColor:COLORS.black},permissionAction:{fontFamily:'Pretendard-Medium',fontSize:14,color:COLORS.white,paddingHorizontal:16,paddingVertical:10},
   parts:{paddingTop:10,flexDirection:'row',justifyContent:'center',gap:6,paddingHorizontal:16},chip:{backgroundColor:COLORS.glassWhite,borderRadius:999,paddingHorizontal:12,paddingVertical:6},selectedChip:{backgroundColor:COLORS.primary},chipText:{fontFamily:'Pretendard-Medium',fontSize:13,lineHeight:18.85,color:COLORS.white},notice:{fontFamily:'Pretendard-Regular',fontSize:12,lineHeight:17.4,color:COLORS.white,opacity:0.7,textAlign:'center',paddingTop:10,paddingBottom:4},
   controls:{flexDirection:'row',alignItems:'center',justifyContent:'space-between',paddingHorizontal:24,paddingTop:16,paddingBottom:16},slot:{width:80,height:44,justifyContent:'center',alignItems:'center'},action:{fontFamily:'Pretendard-Bold',fontSize:15,lineHeight:21.75,color:COLORS.primary},disabled:{color:COLORS.textSub},shutter:{width:72,height:72,borderRadius:999,borderWidth:4,borderColor:COLORS.primary,backgroundColor:COLORS.white},

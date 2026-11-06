@@ -2,7 +2,7 @@ import type { TradeStep } from '../components/common/TradeStepper';
 import type { Rental } from '../types/rental';
 import { hoursLeft } from '../state/rentalStore';
 
-// demoScenario 공통 키 -> 화면 스테퍼 단계. 거절은 신청 단계에서 멈춘 것으로 표시
+// demoScenario 공통 키 -> 화면 스테퍼 단계. 거절·취소는 신청 단계에서 멈춘 것으로 표시
 export const STAGE_STEP: Record<Rental['stage'], TradeStep> = {
   requested: '신청',
   accepted: '수락',
@@ -11,6 +11,7 @@ export const STAGE_STEP: Record<Rental['stage'], TradeStep> = {
   returned: '반납',
   completed: '완료',
   rejected: '신청',
+  cancelled: '신청',
 };
 
 // 내 거래 카드 상태 뱃지 문구
@@ -30,5 +31,7 @@ export function stageBadge(rental: Rental, isOwner: boolean): { label: string; t
       return { label: '거래 완료', tone: 'gray' };
     case 'rejected':
       return { label: '거절됨', tone: 'gray' };
+    case 'cancelled':
+      return { label: '거래 취소', tone: 'gray' };
   }
 }
