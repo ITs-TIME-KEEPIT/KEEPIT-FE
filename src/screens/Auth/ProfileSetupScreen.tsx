@@ -20,6 +20,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
 import { DEMO_ACTIVE_ROLE, DEMO_USERS } from '../../mocks/demoScenario';
+import { findDemoUser, updateProfile, useRentalState } from '../../state/rentalStore';
 
 import Header from '../../components/common/Header';
 import CtaButton from '../../components/common/CtaButton';
@@ -28,12 +29,17 @@ import CtaDisabledButton from '../../components/common/CtaDisabledButton';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ProfileSetup'>;
 
-export default function ProfileSetupScreen({ navigation }: Props) {
+/* 가입 후 프로필 설정, 마이 > 프로필 수정 (route.params.edit) 공용 */
+export default function ProfileSetupScreen({ navigation, route }: Props) {
+  const isEdit = !!route.params?.edit;
+  const { currentUserId } = useRentalState();
+  const me = isEdit ? findDemoUser(currentUserId) : undefined;
   const [nickname, setNickname] = useState<string>(
-    __DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : '',
+    me?.name ?? (__DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : ''),
   );
-  const [phone, setPhone] = useState('');
-  const [nicknameVerified, setNicknameVerified] = useState(false);
+  const [phone, setPhone] = useState(me?.phone ?? '');
+  // 수정 화면에서 기존 닉네임은 이미 확인된 상태
+  const [nicknameVerified, setNicknameVerified] = useState(isEdit);
 
   // 닉네임 유효성 검사
   const nicknameLength = Array.from(nickname).length;
@@ -44,7 +50,8 @@ export default function ProfileSetupScreen({ navigation }: Props) {
   const isPhoneValid = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 시작하기 활성화 조건
-  const canStart = isNicknameValid && isPhoneValid && nicknameVerified;
+  const changed = !isEdit || nickname !== me?.name || phone !== me?.phone;
+  const canStart = isNicknameValid && isPhoneValid && nicknameVerified && changed;
 
   // 닉네임 입력
   const handleNicknameChange = (text: string) => {
@@ -52,8 +59,8 @@ export default function ProfileSetupScreen({ navigation }: Props) {
 
     setNickname(limited);
 
-    // 닉네임 수정 시 기존 중복 확인 결과 초기화
-    setNicknameVerified(false);
+    // 닉네임 수정 시 기존 중복 확인 결과 초기화 (수정 화면에서 원래 닉네임으로 되돌리면 확인 불필요)
+    setNicknameVerified(isEdit && limited === me?.name);
   };
 
   // 휴대폰 번호 하이픈 자동 입력
@@ -96,6 +103,13 @@ export default function ProfileSetupScreen({ navigation }: Props) {
   const handleStart = () => {
     if (!canStart) return;
 
+    // TODO: 서버에 프로필 수정 저장
+    if (isEdit) {
+      updateProfile(currentUserId, { name: nickname, phone });
+      navigation.goBack();
+      return;
+    }
+
     // TODO: 서버에 프로필 저장 후 홈 화면으로 이동
     if (__DEV__) navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
@@ -103,7 +117,11 @@ export default function ProfileSetupScreen({ navigation }: Props) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header - 390 x 56 */}
-      <Header type="back" title="프로필 설정" onPressLeft={() => navigation.goBack()} />
+      <Header
+        type="back"
+        title={isEdit ? '프로필 수정' : '프로필 설정'}
+        onPressLeft={() => navigation.goBack()}
+      />
 
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
@@ -201,9 +219,9 @@ export default function ProfileSetupScreen({ navigation }: Props) {
         {/* Bottom CTA */}
         <View style={styles.bottomCta}>
           {canStart ? (
-            <CtaButton title="시작하기" onPress={handleStart} />
+            <CtaButton title={isEdit ? '저장하기' : '시작하기'} onPress={handleStart} />
           ) : (
-            <CtaDisabledButton title="시작하기" />
+            <CtaDisabledButton title={isEdit ? '저장하기' : '시작하기'} />
           )}
         </View>
       </KeyboardAvoidingView>
