@@ -1,10 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -43,8 +38,7 @@ export default function RentalConfirmScreen({ navigation, route }: Props) {
 
   // 전체 동의는 하위 항목에서 계산 -> 하위 3개가 모두 체크되면 자동 체크, 하나라도 풀리면 자동 해제
   const toggleAll = () => setAgreed(rules.map(() => !allAgreed));
-  const toggle = (index: number) =>
-    setAgreed((prev) => prev.map((v, i) => (i === index ? !v : v)));
+  const toggle = (index: number) => setAgreed((prev) => prev.map((v, i) => (i === index ? !v : v)));
 
   if (!cloth || cloth.hidden || cloth.deleted) {
     return (
@@ -61,7 +55,13 @@ export default function RentalConfirmScreen({ navigation, route }: Props) {
 
   const submit = () => {
     // shortcut: 등록자 정보가 없는 기존 더미 옷은 시연 등록자(수빈) 옷으로 처리, API 연동 시 옷 응답의 등록자 사용
-    createRental({ clothId: cloth.id, ownerId: cloth.ownerId ?? DEMO_IDS.owner, start, end, method });
+    createRental({
+      clothId: cloth.id,
+      ownerId: cloth.ownerId ?? DEMO_IDS.owner,
+      start,
+      end,
+      method,
+    });
     navigation.navigate('RentalComplete');
   };
 
@@ -93,10 +93,7 @@ export default function RentalConfirmScreen({ navigation, route }: Props) {
               label="세탁"
               value={laundryByRenter ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'}
             />
-            <InfoRow
-              label="대여 가능 기간"
-              value={cloth.detail?.availablePeriod ?? '-'}
-            />
+            <InfoRow label="대여 가능 기간" value={cloth.detail?.availablePeriod ?? '-'} />
           </View>
         </View>
 
@@ -107,14 +104,16 @@ export default function RentalConfirmScreen({ navigation, route }: Props) {
             <InfoRow label="대여료" value={`${cloth.price.toLocaleString('ko-KR')}원`} />
             <InfoRow
               label="택배비"
-              value={isDirect ? '0원 (직거래)' : shippingFee !== undefined ? `${shippingFee.toLocaleString('ko-KR')}원 (편도)` : '-'}
+              value={
+                isDirect
+                  ? '0원 (직거래)'
+                  : shippingFee !== undefined
+                    ? `${shippingFee.toLocaleString('ko-KR')}원 (편도)`
+                    : '-'
+              }
             />
             <InfoRow label="세탁" value={laundryByRenter ? '직접 세탁' : '등록자 세탁'} />
-            <InfoRow
-              label="총 예상 비용"
-              value={`${total.toLocaleString('ko-KR')}원`}
-              highlight
-            />
+            <InfoRow label="총 예상 비용" value={`${total.toLocaleString('ko-KR')}원`} highlight />
           </View>
         </View>
 

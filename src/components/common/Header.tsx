@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -37,9 +31,7 @@ export default function Header({
           accessibilityLabel="지역 선택"
           style={styles.location}
         >
-          <Text style={styles.locationText}>
-            {location}
-          </Text>
+          <Text style={styles.locationText}>{location}</Text>
           <Image
             source={require('../../../assets/icons/chevron-down.png')}
             style={styles.icon}

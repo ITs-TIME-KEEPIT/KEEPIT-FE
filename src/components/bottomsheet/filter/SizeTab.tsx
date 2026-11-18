@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../../constants/colors';
 import { SIZES } from '../../../constants/clothing';
@@ -22,10 +18,7 @@ interface SizeTabProps {
   onChange: (sizes: Size[]) => void;
 }
 
-export default function SizeTab({
-  sizes,
-  onChange,
-}: SizeTabProps) {
+export default function SizeTab({ sizes, onChange }: SizeTabProps) {
   const toggle = (size: Size) =>
     onChange(sizes.includes(size) ? sizes.filter((s) => s !== size) : [...sizes, size]);
 

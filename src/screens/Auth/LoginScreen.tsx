@@ -1,50 +1,36 @@
 import React from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { COLORS } from '../../constants/colors';
 import { DEMO_LOGIN_MODE } from '../../mocks/demoScenario';
 
 // 로그인 화면
-export default function LoginScreen({ navigation }: NativeStackScreenProps<RootStackParamList, 'Login'>) {
-
+export default function LoginScreen({
+  navigation,
+}: NativeStackScreenProps<RootStackParamList, 'Login'>) {
   // 카카오 로그인 버튼 클릭
   const handleKakaoLogin = () => {
     // TODO: 백엔드 카카오 OAuth 연동 후 로그인 처리
     // 화요일 UI 시연 경로. 실제 OAuth 인증/가입 여부 판별은 후속 연동.
     if (__DEV__) {
       if (DEMO_LOGIN_MODE === 'new') navigation.navigate('ProfileSetup');
-      else navigation.reset({index:0,routes:[{name:'Main'}]});
-    }
-    else Alert.alert('안내', '카카오 로그인 연동 전입니다.');
+      else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    } else Alert.alert('안내', '카카오 로그인 연동 전입니다.');
   };
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
-
       {/* 중앙 로고 영역 */}
       <View style={styles.body}>
+        <Text style={styles.logo}>KEEPIT</Text>
 
-        <Text style={styles.logo}>
-          KEEPIT
-        </Text>
-
-        <Text style={styles.description}>
-          한 번 입을 옷, 사지 말고 빌려요
-        </Text>
-
+        <Text style={styles.description}>한 번 입을 옷, 사지 말고 빌려요</Text>
       </View>
 
       {/* 하단 로그인 영역 */}
       <View style={styles.footer}>
-
         {/* 카카오 로그인 버튼 */}
         <TouchableOpacity
           style={styles.kakaoButton}
@@ -53,24 +39,17 @@ export default function LoginScreen({ navigation }: NativeStackScreenProps<RootS
           accessibilityRole="button"
           accessibilityLabel="카카오로 시작하기"
         >
-          <Text style={styles.kakaoButtonText}>
-            카카오로 시작하기
-          </Text>
+          <Text style={styles.kakaoButtonText}>카카오로 시작하기</Text>
         </TouchableOpacity>
 
         {/* 약관 안내 문구 */}
-        <Text style={styles.termsText}>
-          가입하면 이용약관과 개인정보 처리방침에 동의하게 돼요
-        </Text>
-
+        <Text style={styles.termsText}>가입하면 이용약관과 개인정보 처리방침에 동의하게 돼요</Text>
       </View>
-
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-
   // 전체 화면
   container: {
     flex: 1,
@@ -142,5 +121,4 @@ const styles = StyleSheet.create({
     color: COLORS.textSub,
     textAlign: 'center',
   },
-
 });

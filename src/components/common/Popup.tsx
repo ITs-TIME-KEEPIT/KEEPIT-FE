@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  Modal,
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { Modal, View, Text, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -34,23 +28,12 @@ export default function Popup({
   onClose,
 }: PopupProps) {
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="fade"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="fade" onRequestClose={onClose}>
       <View style={styles.dim}>
         <View style={styles.popup}>
-          <Text style={styles.title}>
-            {title}
-          </Text>
+          <Text style={styles.title}>{title}</Text>
 
-          {description && (
-            <Text style={styles.description}>
-              {description}
-            </Text>
-          )}
+          {description && <Text style={styles.description}>{description}</Text>}
 
           {children}
 
@@ -60,9 +43,7 @@ export default function Popup({
               accessibilityRole="button"
               style={styles.primaryButton}
             >
-              <Text style={styles.primaryLabel}>
-                {primaryLabel}
-              </Text>
+              <Text style={styles.primaryLabel}>{primaryLabel}</Text>
             </Pressable>
 
             {secondaryLabel && onPressSecondary && (
@@ -72,9 +53,7 @@ export default function Popup({
                 hitSlop={8}
                 style={styles.secondaryButton}
               >
-                <Text style={styles.secondaryLabel}>
-                  {secondaryLabel}
-                </Text>
+                <Text style={styles.secondaryLabel}>{secondaryLabel}</Text>
               </Pressable>
             )}
           </View>

@@ -103,9 +103,7 @@ export const MOCK_CLOTH_ITEMS: ClothItem[] = [
   ...DEMO_CLOTH_ITEMS.filter(
     (demoItem) =>
       !BASE_CLOTH_ITEMS.some(
-        (existing) =>
-          existing.id === demoItem.id ||
-          existing.title === demoItem.title
-      )
+        (existing) => existing.id === demoItem.id || existing.title === demoItem.title,
+      ),
   ),
 ];

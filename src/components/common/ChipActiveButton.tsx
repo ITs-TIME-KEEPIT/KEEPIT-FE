@@ -1,10 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -13,10 +8,7 @@ interface ChipActiveButtonProps {
   onPress: () => void;
 }
 
-export default function ChipActiveButton({
-  title = 'Button',
-  onPress,
-}: ChipActiveButtonProps) {
+export default function ChipActiveButton({ title = 'Button', onPress }: ChipActiveButtonProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -24,9 +16,7 @@ export default function ChipActiveButton({
       accessibilityState={{ selected: true }}
       style={styles.button}
     >
-      <Text style={styles.label}>
-        {title}
-      </Text>
+      <Text style={styles.label}>{title}</Text>
     </Pressable>
   );
 }

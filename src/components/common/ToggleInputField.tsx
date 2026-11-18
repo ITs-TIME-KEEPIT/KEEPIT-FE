@@ -1,10 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  View,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, View, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -31,17 +26,9 @@ export default function ToggleInputField({
         checked: value,
         disabled,
       }}
-      style={[
-        styles.toggle,
-        value && styles.toggleOn,
-      ]}
+      style={[styles.toggle, value && styles.toggleOn]}
     >
-      <View
-        style={[
-          styles.thumb,
-          value && styles.thumbOn,
-        ]}
-      />
+      <View style={[styles.thumb, value && styles.thumbOn]} />
     </Pressable>
   );
 }

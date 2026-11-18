@@ -1,12 +1,5 @@
-
 import React from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  KeyboardTypeOptions,
-} from 'react-native';
+import { View, Text, TextInput, StyleSheet, KeyboardTypeOptions } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -33,9 +26,7 @@ export default function TextInputField({
 }: TextInputFieldProps) {
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>
-        {label}
-      </Text>
+      <Text style={styles.label}>{label}</Text>
 
       <TextInput
         style={styles.input}

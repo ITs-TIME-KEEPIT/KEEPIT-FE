@@ -31,12 +31,7 @@ export default function BottomSheet({
   const { bottom } = useSafeAreaInsets();
 
   return (
-    <Modal
-      visible={visible}
-      transparent
-      animationType="slide"
-      onRequestClose={onClose}
-    >
+    <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
       <KeyboardAvoidingView
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -51,9 +46,7 @@ export default function BottomSheet({
         <View style={[styles.sheet, { paddingBottom: 24 + bottom }]}>
           <View style={styles.handle} />
           <View style={styles.titleRow}>
-            <Text style={styles.title}>
-              {title}
-            </Text>
+            <Text style={styles.title}>{title}</Text>
             <Pressable
               onPress={onClose}
               accessibilityRole="button"

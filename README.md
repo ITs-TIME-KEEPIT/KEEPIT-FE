@@ -132,20 +132,20 @@ KEEPIT-FE/
 
 Figma에서 확인된 주요 컬러:
 
-| Figma Token | HEX |
-|---|---|
-| primary | #5AA9E6 |
-| primary-light | #EAF4FC |
-| white | #FFFFFF |
-| text | #1F2937 |
-| text-sub | #6B7280 |
+| Figma Token      | HEX     |
+| ---------------- | ------- |
+| primary          | #5AA9E6 |
+| primary-light    | #EAF4FC |
+| white            | #FFFFFF |
+| text             | #1F2937 |
+| text-sub         | #6B7280 |
 | text-placeholder | #9CA3AF |
-| bg-gray | #F3F4F6 |
-| border | #D1D5DB |
-| line | #E5E7EB |
-| alert | #EF4444 |
-| danger-bg | #FCA5A5 |
-| danger-text | #7F1D1D |
+| bg-gray          | #F3F4F6 |
+| border           | #D1D5DB |
+| line             | #E5E7EB |
+| alert            | #EF4444 |
+| danger-bg        | #FCA5A5 |
+| danger-text      | #7F1D1D |
 
 컴포넌트 작성 시 HEX 값을 직접 반복해서 작성하지 않고 `colors.ts`의 컬러 토큰을 import하여 사용합니다.
 
@@ -177,13 +177,13 @@ Figma에서 확인된 주요 컬러:
 
 각 컴포넌트에서는 Figma의 Weight 값에 맞는 `fontFamily`를 지정합니다.
 
-| Weight | Font |
-|---|---|
-| 400 | Pretendard-Regular |
-| 500 | Pretendard-Medium |
-| 600 | Pretendard-SemiBold |
-| 700 | Pretendard-Bold |
-| 800 | Pretendard-ExtraBold |
+| Weight | Font                 |
+| ------ | -------------------- |
+| 400    | Pretendard-Regular   |
+| 500    | Pretendard-Medium    |
+| 600    | Pretendard-SemiBold  |
+| 700    | Pretendard-Bold      |
+| 800    | Pretendard-ExtraBold |
 
 그 외 굵기도 필요한 경우 App.tsx에 등록된 fontFamily 이름을 사용합니다.
 
@@ -251,11 +251,11 @@ Figma 디자인 시스템의 Icon을 기준으로 사용합니다.
 
 ### 화면별 작업
 
-| 화면 | 작업 내용 |
-|---|---|
-| 로그인 | Figma 기반 UI 및 프로필 설정 화면 이동 |
+| 화면        | 작업 내용                                  |
+| ----------- | ------------------------------------------ |
+| 로그인      | Figma 기반 UI 및 프로필 설정 화면 이동     |
 | 프로필 설정 | 닉네임, 휴대폰 번호 등 프로필 정보 입력 UI |
-| 홈 | Figma 기반 홈 화면 UI |
+| 홈          | Figma 기반 홈 화면 UI                      |
 
 로그인/프로필 설정 화면은 공통 컴포넌트 작업 완료 후 이어서 진행합니다.
 

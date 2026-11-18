@@ -9,9 +9,6 @@ interface ColorTabProps {
   onChange: (colors: ColorKey[]) => void;
 }
 
-export default function ColorTab({
-  colors,
-  onChange,
-}: ColorTabProps) {
+export default function ColorTab({ colors, onChange }: ColorTabProps) {
   return <ColorChipGroup selected={colors} onChange={onChange} />;
 }

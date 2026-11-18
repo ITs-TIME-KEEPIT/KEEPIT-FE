@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import { INITIAL_FILTER } from '../../types/filter';
@@ -99,9 +93,7 @@ export default function FilterSheet({
             accessibilityState={{ selected: t === tab }}
             style={[styles.tab, t === tab && styles.tabActive]}
           >
-            <Text style={t === tab ? styles.tabTextActive : styles.tabText}>
-              {tabLabel(t)}
-            </Text>
+            <Text style={t === tab ? styles.tabTextActive : styles.tabText}>{tabLabel(t)}</Text>
           </Pressable>
         ))}
       </View>
@@ -118,7 +110,11 @@ export default function FilterSheet({
             accessibilityLabel={`${tab} 초기화`}
             style={styles.reset}
           >
-            <Image source={require('../../../assets/icons/refresh.png')} style={styles.resetIcon} resizeMode="contain" />
+            <Image
+              source={require('../../../assets/icons/refresh.png')}
+              style={styles.resetIcon}
+              resizeMode="contain"
+            />
           </Pressable>
         </View>
 
@@ -129,7 +125,10 @@ export default function FilterSheet({
           <SizeTab sizes={draft.sizes} onChange={(sizes) => setDraft((d) => ({ ...d, sizes }))} />
         )}
         {tab === '컬러' && (
-          <ColorTab colors={draft.colors} onChange={(colors) => setDraft((d) => ({ ...d, colors }))} />
+          <ColorTab
+            colors={draft.colors}
+            onChange={(colors) => setDraft((d) => ({ ...d, colors }))}
+          />
         )}
       </View>
     </BottomSheet>

@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  View,
-  StyleSheet,
-} from 'react-native';
+import { View, StyleSheet } from 'react-native';
 
 import { COLORS as CLOTH_COLORS } from '../../constants/clothing';
 import type { ColorKey } from '../../constants/clothing';
@@ -14,10 +11,7 @@ interface ColorChipGroupProps {
   onChange: (next: ColorKey[]) => void;
 }
 
-export default function ColorChipGroup({
-  selected,
-  onChange,
-}: ColorChipGroupProps) {
+export default function ColorChipGroup({ selected, onChange }: ColorChipGroupProps) {
   return (
     <View style={styles.grid}>
       {CLOTH_COLORS.map((color) => (

@@ -1,12 +1,5 @@
-
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ImageSourcePropType,
-} from 'react-native';
+import { View, Text, Image, StyleSheet, ImageSourcePropType } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -15,10 +8,7 @@ interface SquareImageProps {
   size?: number;
 }
 
-export default function SquareImage({
-  source,
-  size = 64,
-}: SquareImageProps) {
+export default function SquareImage({ source, size = 64 }: SquareImageProps) {
   return (
     <View
       style={[
@@ -30,15 +20,9 @@ export default function SquareImage({
       ]}
     >
       {source ? (
-        <Image
-          source={source}
-          style={styles.image}
-          resizeMode="cover"
-        />
+        <Image source={source} style={styles.image} resizeMode="cover" />
       ) : (
-        <Text style={styles.placeholder}>
-          Image
-        </Text>
+        <Text style={styles.placeholder}>Image</Text>
       )}
     </View>
   );

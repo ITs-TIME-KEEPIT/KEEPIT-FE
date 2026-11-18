@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -14,7 +10,12 @@ import CtaButton from '../common/CtaButton';
 import CtaDisabledButton from '../common/CtaDisabledButton';
 
 // 거절 사유 (선택지 4개 - 피그마 기준)
-const REASONS = ['그 날짜엔 제가 입어야 해요', '옷 상태가 지금 빌려주기 어려워요', '거래 지역이 너무 멀어요', '기타 (직접 입력)'] as const;
+const REASONS = [
+  '그 날짜엔 제가 입어야 해요',
+  '옷 상태가 지금 빌려주기 어려워요',
+  '거래 지역이 너무 멀어요',
+  '기타 (직접 입력)',
+] as const;
 const ETC = REASONS[3];
 
 interface RejectReasonSheetProps {
@@ -23,11 +24,7 @@ interface RejectReasonSheetProps {
   onClose: () => void;
 }
 
-export default function RejectReasonSheet({
-  visible,
-  onReject,
-  onClose,
-}: RejectReasonSheetProps) {
+export default function RejectReasonSheet({ visible, onReject, onClose }: RejectReasonSheetProps) {
   const [reason, setReason] = useState<(typeof REASONS)[number] | null>(null);
   const [etcText, setEtcText] = useState('');
 

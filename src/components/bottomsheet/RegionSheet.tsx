@@ -1,11 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import { REGIONS, SIDOS } from '../../constants/regions';
@@ -48,9 +42,7 @@ export default function RegionSheet({
               accessibilityState={{ selected: value === null }}
               style={styles.row}
             >
-              <Text style={styles.sido}>
-                전체
-              </Text>
+              <Text style={styles.sido}>전체</Text>
             </Pressable>
           )}
 
@@ -62,9 +54,7 @@ export default function RegionSheet({
               accessibilityState={{ selected: item === sido }}
               style={[styles.row, item === sido && styles.sidoRowActive]}
             >
-              <Text style={item === sido ? styles.sidoActive : styles.sido}>
-                {item}
-              </Text>
+              <Text style={item === sido ? styles.sidoActive : styles.sido}>{item}</Text>
             </Pressable>
           ))}
         </View>
@@ -80,18 +70,14 @@ export default function RegionSheet({
                 accessibilityState={{ selected }}
                 style={[styles.row, selected && styles.districtRowActive]}
               >
-                <Text style={selected ? styles.districtActive : styles.district}>
-                  {district}
-                </Text>
+                <Text style={selected ? styles.districtActive : styles.district}>{district}</Text>
               </Pressable>
             );
           })}
         </ScrollView>
       </View>
 
-      <Text style={styles.hint}>
-        서울·경기·인천만 선택할 수 있어요
-      </Text>
+      <Text style={styles.hint}>서울·경기·인천만 선택할 수 있어요</Text>
     </BottomSheet>
   );
 }

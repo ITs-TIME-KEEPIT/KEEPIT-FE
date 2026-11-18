@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  Image,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { Image, StyleSheet, Text, View } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -12,7 +7,11 @@ import { COLORS } from '../../constants/colors';
 export default function InfoNote({ text }: { text: string }) {
   return (
     <View style={styles.note}>
-      <Image source={require('../../../assets/icons/info.png')} style={styles.icon} resizeMode="contain" />
+      <Image
+        source={require('../../../assets/icons/info.png')}
+        style={styles.icon}
+        resizeMode="contain"
+      />
       <Text style={styles.text}>{text}</Text>
     </View>
   );

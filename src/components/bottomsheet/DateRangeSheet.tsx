@@ -1,9 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import type { DateRange } from '../../types/filter';
@@ -21,12 +17,7 @@ interface DateRangeSheetProps {
   onClose: () => void;
 }
 
-export default function DateRangeSheet({
-  visible,
-  value,
-  onApply,
-  onClose,
-}: DateRangeSheetProps) {
+export default function DateRangeSheet({ visible, value, onApply, onClose }: DateRangeSheetProps) {
   const [start, setStart] = useState<Date | null>(value?.start ?? null);
   const [end, setEnd] = useState<Date | null>(value?.end ?? null);
 

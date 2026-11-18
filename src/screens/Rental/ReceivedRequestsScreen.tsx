@@ -1,12 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -24,7 +17,8 @@ import PersonRow from '../../components/rental/PersonRow';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'ReceivedRequests'>;
 
-const countDays = (start: number, end: number) => Math.round((end - start) / (24 * 60 * 60 * 1000)) + 1;
+const countDays = (start: number, end: number) =>
+  Math.round((end - start) / (24 * 60 * 60 * 1000)) + 1;
 
 /* 받은 신청 목록. clothId가 있으면 그 옷의 신청만, 없으면(마이에서 진입) 내 옷 전체 */
 export default function ReceivedRequestsScreen({ navigation, route }: Props) {
@@ -33,7 +27,10 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
   const { currentUserId, rentals } = useRentalState();
 
   const requests = rentals.filter(
-    (rental) => rental.ownerId === currentUserId && rental.stage === 'requested' && (!clothId || rental.clothId === clothId),
+    (rental) =>
+      rental.ownerId === currentUserId &&
+      rental.stage === 'requested' &&
+      (!clothId || rental.clothId === clothId),
   );
   const cloth = clothId ? clothes.find((item) => item.id === clothId) : undefined;
 
@@ -63,13 +60,16 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
           const borrower = findDemoUser(rental.borrowerId);
           const title = clothes.find((item) => item.id === rental.clothId)?.title ?? '-';
           const hasOverlap = requests.some(
-            (other) => other.id !== rental.id && other.clothId === rental.clothId && overlaps(other, rental),
+            (other) =>
+              other.id !== rental.id && other.clothId === rental.clothId && overlaps(other, rental),
           );
 
           return (
             <View key={rental.id} style={styles.group}>
               <Pressable
-                onPress={() => navigation.navigate('ReceivedRequestDetail', { rentalId: rental.id })}
+                onPress={() =>
+                  navigation.navigate('ReceivedRequestDetail', { rentalId: rental.id })
+                }
                 accessibilityRole="button"
                 accessibilityLabel={`${borrower?.name ?? '신청자'}의 신청 자세히 보기`}
                 style={styles.card}
@@ -119,7 +119,9 @@ function Row({ label, value }: { label: string; value: string }) {
   return (
     <View style={styles.row}>
       <Text style={styles.rowLabel}>{label}</Text>
-      <Text style={styles.rowValue} numberOfLines={1}>{value}</Text>
+      <Text style={styles.rowValue} numberOfLines={1}>
+        {value}
+      </Text>
     </View>
   );
 }

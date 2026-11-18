@@ -1,11 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import { COLORS as CLOTH_COLORS } from '../../constants/clothing';
@@ -16,11 +10,7 @@ interface ColorChipProps {
   onPress: () => void;
 }
 
-export default function ColorChip({
-  color,
-  selected,
-  onPress,
-}: ColorChipProps) {
+export default function ColorChip({ color, selected, onPress }: ColorChipProps) {
   return (
     <Pressable
       onPress={onPress}
@@ -31,10 +21,7 @@ export default function ColorChip({
     >
       <View style={[styles.ring, selected && styles.ringActive]}>
         {color.hex === null ? (
-          <Image
-            source={require('../../../assets/icons/color-etc.png')}
-            style={styles.swatch}
-          />
+          <Image source={require('../../../assets/icons/color-etc.png')} style={styles.swatch} />
         ) : (
           <View
             style={[
@@ -46,9 +33,7 @@ export default function ColorChip({
         )}
       </View>
 
-      <Text style={styles.label}>
-        {color.label}
-      </Text>
+      <Text style={styles.label}>{color.label}</Text>
     </Pressable>
   );
 }

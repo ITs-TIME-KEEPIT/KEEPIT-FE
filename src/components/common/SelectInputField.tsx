@@ -1,13 +1,5 @@
-
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  Image,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, Image, ScrollView, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -35,9 +27,7 @@ export default function SelectInputField({
 }: SelectInputFieldProps) {
   const [isOpen, setIsOpen] = useState(false);
 
-  const selectedOption = options.find(
-    (option) => option.value === value
-  );
+  const selectedOption = options.find((option) => option.value === value);
 
   const handleSelect = (selectedValue: string) => {
     onValueChange(selectedValue);
@@ -45,15 +35,8 @@ export default function SelectInputField({
   };
 
   return (
-    <View
-      style={[
-        styles.container,
-        isOpen && styles.containerOpen,
-      ]}
-    >
-      <Text style={styles.label}>
-        {label}
-      </Text>
+    <View style={[styles.container, isOpen && styles.containerOpen]}>
+      <Text style={styles.label}>{label}</Text>
 
       <View style={styles.selectContainer}>
         <Pressable
@@ -67,16 +50,8 @@ export default function SelectInputField({
           }}
           style={styles.inputBox}
         >
-          <Text
-            style={[
-              styles.inputText,
-              !selectedOption && styles.placeholder,
-            ]}
-            numberOfLines={1}
-          >
-            {selectedOption
-              ? selectedOption.label
-              : placeholder}
+          <Text style={[styles.inputText, !selectedOption && styles.placeholder]} numberOfLines={1}>
+            {selectedOption ? selectedOption.label : placeholder}
           </Text>
 
           <Image
@@ -103,13 +78,7 @@ export default function SelectInputField({
                   }}
                   style={styles.option}
                 >
-                  <Text
-                    style={[
-                      styles.optionText,
-                      option.value === value &&
-                        styles.selectedText,
-                    ]}
-                  >
+                  <Text style={[styles.optionText, option.value === value && styles.selectedText]}>
                     {option.label}
                   </Text>
                 </Pressable>

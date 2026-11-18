@@ -48,7 +48,7 @@ export type RootStackParamList = {
   ClothDetail: { clothId: string };
   CameraPreview: undefined;
   ClothRegister: { clothId: string } | undefined;
-  ClothRegisterComplete: {clothId: string};
+  ClothRegisterComplete: { clothId: string };
 
   RentalRequest: { clothId: string };
   RentalConfirm: {
@@ -77,8 +77,16 @@ export type MainTabScreenProps<T extends keyof MainTabParamList> = CompositeScre
 const Stack = createNativeStackNavigator<RootStackParamList>();
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-const TAB_ROUTES: Record<TabKey, keyof MainTabParamList> = { home: 'Home', trade: 'MyTrades', my: 'MyPage' };
-const ROUTE_TABS: Record<keyof MainTabParamList, TabKey> = { Home: 'home', MyTrades: 'trade', MyPage: 'my' };
+const TAB_ROUTES: Record<TabKey, keyof MainTabParamList> = {
+  home: 'Home',
+  trade: 'MyTrades',
+  my: 'MyPage',
+};
+const ROUTE_TABS: Record<keyof MainTabParamList, TabKey> = {
+  Home: 'home',
+  MyTrades: 'trade',
+  MyPage: 'my',
+};
 
 function MainTabs() {
   return (
@@ -101,11 +109,7 @@ function MainTabs() {
 export default function RootNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName={
-        __DEV__ && DEMO_START_SCREEN === 'camera'
-          ? 'CameraPreview'
-          : 'Login'
-      }
+      initialRouteName={__DEV__ && DEMO_START_SCREEN === 'camera' ? 'CameraPreview' : 'Login'}
     >
       {__DEV__ && (
         <Stack.Screen
@@ -115,25 +119,41 @@ export default function RootNavigator() {
         />
       )}
 
-      <Stack.Screen name="MyClothes" component={MyClothesScreen} options={{headerShown:false}} />
-      <Stack.Screen name="TradePhoto" component={TradePhotoScreen} options={{headerShown:false,gestureEnabled:false}} />
-      <Stack.Screen name="TradePhotoCompare" component={TradePhotoCompareScreen} options={{headerShown:false}} />
-      <Stack.Screen name="TradeComplete" component={TradeCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
-      <Stack.Screen name="TradeReport" component={TradeReportScreen} options={{headerShown:false}} />
-      <Stack.Screen name="ClothRegister" component={ClothRegisterScreen} options={{headerShown:false,gestureEnabled:false}} />
-      <Stack.Screen name="ClothRegisterComplete" component={ClothRegisterCompleteScreen} options={{headerShown:false,gestureEnabled:false}} />
-
+      <Stack.Screen name="MyClothes" component={MyClothesScreen} options={{ headerShown: false }} />
       <Stack.Screen
-        name="Login"
-        component={LoginScreen}
+        name="TradePhoto"
+        component={TradePhotoScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="TradePhotoCompare"
+        component={TradePhotoCompareScreen}
         options={{ headerShown: false }}
       />
-
       <Stack.Screen
-        name="Signup"
-        component={SignupScreen}
+        name="TradeComplete"
+        component={TradeCompleteScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="TradeReport"
+        component={TradeReportScreen}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="ClothRegister"
+        component={ClothRegisterScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+      <Stack.Screen
+        name="ClothRegisterComplete"
+        component={ClothRegisterCompleteScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
+
+      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+
+      <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
 
       <Stack.Screen
         name="ProfileSetup"
@@ -141,11 +161,7 @@ export default function RootNavigator() {
         options={{ headerShown: false }}
       />
 
-      <Stack.Screen
-        name="Main"
-        component={MainTabs}
-        options={{ headerShown: false }}
-      />
+      <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
 
       <Stack.Screen
         name="ClothDetail"

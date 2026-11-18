@@ -26,38 +26,29 @@ import CtaButton from '../../components/common/CtaButton';
 import SecondaryButton from '../../components/common/SecondaryButton';
 import CtaDisabledButton from '../../components/common/CtaDisabledButton';
 
-type Props = NativeStackScreenProps<
-  RootStackParamList,
-  'ProfileSetup'
->;
+type Props = NativeStackScreenProps<RootStackParamList, 'ProfileSetup'>;
 
-export default function ProfileSetupScreen({
-  navigation,
-}: Props) {
-  const [nickname, setNickname] = useState<string>(__DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : '');
+export default function ProfileSetupScreen({ navigation }: Props) {
+  const [nickname, setNickname] = useState<string>(
+    __DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : '',
+  );
   const [phone, setPhone] = useState('');
   const [nicknameVerified, setNicknameVerified] = useState(false);
 
   // 닉네임 유효성 검사
   const nicknameLength = Array.from(nickname).length;
 
-  const isNicknameValid =
-    nicknameLength >= 2 && nicknameLength <= 10;
+  const isNicknameValid = nicknameLength >= 2 && nicknameLength <= 10;
 
   // 휴대폰 번호 유효성 검사
   const isPhoneValid = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 시작하기 활성화 조건
-  const canStart =
-    isNicknameValid &&
-    isPhoneValid &&
-    nicknameVerified;
+  const canStart = isNicknameValid && isPhoneValid && nicknameVerified;
 
   // 닉네임 입력
   const handleNicknameChange = (text: string) => {
-    const limited = Array.from(text)
-      .slice(0, 10)
-      .join('');
+    const limited = Array.from(text).slice(0, 10).join('');
 
     setNickname(limited);
 
@@ -67,24 +58,14 @@ export default function ProfileSetupScreen({
 
   // 휴대폰 번호 하이픈 자동 입력
   const handlePhoneChange = (text: string) => {
-    const numbers = text
-      .replace(/\D/g, '')
-      .slice(0, 11);
+    const numbers = text.replace(/\D/g, '').slice(0, 11);
 
     let formatted = numbers;
 
     if (numbers.length > 7) {
-      formatted =
-        numbers.slice(0, 3) +
-        '-' +
-        numbers.slice(3, 7) +
-        '-' +
-        numbers.slice(7);
+      formatted = numbers.slice(0, 3) + '-' + numbers.slice(3, 7) + '-' + numbers.slice(7);
     } else if (numbers.length > 3) {
-      formatted =
-        numbers.slice(0, 3) +
-        '-' +
-        numbers.slice(3);
+      formatted = numbers.slice(0, 3) + '-' + numbers.slice(3);
     }
 
     setPhone(formatted);
@@ -92,19 +73,13 @@ export default function ProfileSetupScreen({
 
   // 프로필 이미지 선택
   const handleProfileImage = () => {
-    Alert.alert(
-      '프로필 사진',
-      '사진 선택 기능은 추후 연동 예정입니다.',
-    );
+    Alert.alert('프로필 사진', '사진 선택 기능은 추후 연동 예정입니다.');
   };
 
   // 닉네임 중복 확인
   const handleNicknameCheck = () => {
     if (!isNicknameValid) {
-      Alert.alert(
-        '닉네임 확인',
-        '닉네임은 2~10자로 입력해주세요.',
-      );
+      Alert.alert('닉네임 확인', '닉네임은 2~10자로 입력해주세요.');
       return;
     }
 
@@ -126,16 +101,9 @@ export default function ProfileSetupScreen({
   };
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={['top']}
-    >
+    <SafeAreaView style={styles.container} edges={['top']}>
       {/* Header - 390 x 56 */}
-      <Header
-        type="back"
-        title="프로필 설정"
-        onPressLeft={() => navigation.goBack()}
-      />
+      <Header type="back" title="프로필 설정" onPressLeft={() => navigation.goBack()} />
 
       <KeyboardAvoidingView
         style={styles.keyboardContainer}
@@ -150,7 +118,6 @@ export default function ProfileSetupScreen({
         >
           {/* 프로필 사진 영역 */}
           <View style={styles.profileArea}>
-
             <Pressable
               onPress={handleProfileImage}
               accessibilityRole="button"
@@ -163,18 +130,14 @@ export default function ProfileSetupScreen({
                 resizeMode="contain"
               />
             </Pressable>
-
           </View>
 
           {/* 입력 폼 */}
           <View style={styles.form}>
-
             {/* 닉네임 입력 행 */}
             <View style={styles.nicknameRow}>
-
               {/* 닉네임 입력창 */}
               <View style={styles.nicknameField}>
-
                 <Text style={styles.inputLabel}>
                   닉네임 <Text style={styles.required}>*</Text>
                 </Text>
@@ -190,7 +153,6 @@ export default function ProfileSetupScreen({
                   autoCorrect={false}
                   accessibilityLabel="닉네임"
                 />
-
               </View>
 
               {/* 중복 확인 */}
@@ -199,13 +161,11 @@ export default function ProfileSetupScreen({
                 onPress={handleNicknameCheck}
                 style={styles.duplicateButton}
               />
-
             </View>
 
             <View style={styles.phoneGroup}>
               {/* 휴대폰 번호 입력 */}
               <View style={styles.phoneField}>
-
                 <Text style={styles.inputLabel}>
                   휴대폰 번호 <Text style={styles.required}>*</Text>
                 </Text>
@@ -220,43 +180,38 @@ export default function ProfileSetupScreen({
                   maxLength={13}
                   accessibilityLabel="휴대폰 번호"
                 />
-
               </View>
 
               {/* 번호 공개 안내 */}
               <View style={styles.note}>
-
-                <Image source={require('../../../assets/icons/info.png')} style={styles.infoIcon} resizeMode="contain" />
+                <Image
+                  source={require('../../../assets/icons/info.png')}
+                  style={styles.infoIcon}
+                  resizeMode="contain"
+                />
 
                 <Text style={styles.noteText}>
                   번호는 거래가 수락된 상대에게만 공개되고, 거래 완료 7일 뒤 다시 숨겨져요
                 </Text>
-
               </View>
-
             </View>
           </View>
-
         </ScrollView>
 
         {/* Bottom CTA */}
         <View style={styles.bottomCta}>
-
           {canStart ? (
             <CtaButton title="시작하기" onPress={handleStart} />
           ) : (
             <CtaDisabledButton title="시작하기" />
           )}
-
         </View>
-
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-
   // ===================================
   // 전체 화면
   // ===================================
@@ -313,7 +268,6 @@ const styles = StyleSheet.create({
     width: 88,
     height: 88,
   },
-
 
   // ===================================
   // 입력 폼
@@ -399,7 +353,6 @@ const styles = StyleSheet.create({
     height: 46,
   },
 
-
   // ===================================
   // 휴대폰 번호 입력
   // ===================================
@@ -471,7 +424,6 @@ const styles = StyleSheet.create({
     tintColor: COLORS.textSub,
   },
 
-
   // 안내 문구
   // 358 - 24(Padding) - 16(Icon) - 6(Gap) = 312
   noteText: {
@@ -501,5 +453,4 @@ const styles = StyleSheet.create({
 
     backgroundColor: COLORS.white,
   },
-
 });

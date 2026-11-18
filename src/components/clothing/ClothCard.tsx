@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import Badge, { BadgeTone } from '../common/Badge';
@@ -34,37 +29,24 @@ export default function ClothCard({
   onPress,
 }: ClothCardProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={styles.container}
-    >
-      <SquareImage
-        source={imageUrl ? { uri: imageUrl } : undefined}
-        size={108}
-      />
+    <Pressable onPress={onPress} accessibilityRole="button" style={styles.container}>
+      <SquareImage source={imageUrl ? { uri: imageUrl } : undefined} size={108} />
 
       <View style={styles.info}>
         <View style={styles.heading}>
-        <Text style={styles.title} numberOfLines={1}>
-          {title}
-        </Text>
-        <Text style={styles.meta} numberOfLines={1}>
-          {[region, category, size, date].filter(Boolean).join(' · ')}
-        </Text>
+          <Text style={styles.title} numberOfLines={1}>
+            {title}
+          </Text>
+          <Text style={styles.meta} numberOfLines={1}>
+            {[region, category, size, date].filter(Boolean).join(' · ')}
+          </Text>
         </View>
-        <Text style={styles.price}>
-          {price.toLocaleString('ko-KR')}원
-        </Text>
+        <Text style={styles.price}>{price.toLocaleString('ko-KR')}원</Text>
 
         {badges.length > 0 && (
           <View style={styles.badges}>
             {badges.map((badge) => (
-              <Badge
-                key={badge.label}
-                label={badge.label}
-                tone={badge.tone}
-              />
+              <Badge key={badge.label} label={badge.label} tone={badge.tone} />
             ))}
           </View>
         )}

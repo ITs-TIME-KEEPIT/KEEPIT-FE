@@ -14,7 +14,7 @@ export type RegistrationDraft = {
   defectDescription: string;
   description: string;
   region: Region;
-  unavailable: {start: number; end: number} | null;
+  unavailable: { start: number; end: number } | null;
   unavailableConfirmed: boolean;
   price: string;
   shippingAvailable: boolean;
