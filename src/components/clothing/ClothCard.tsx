@@ -14,6 +14,8 @@ interface ClothCardProps {
   date?: string;
   price: number;
   badges?: { label: string; tone?: BadgeTone }[];
+  status?: { label: string; tone?: BadgeTone }; // 제목 위 상태 뱃지 (프로필의 거래 중·대여 중지)
+  muted?: boolean; // 대여 중지처럼 빌릴 수 없는 옷은 글자를 흐리게
   onPress?: () => void;
 }
 
@@ -26,6 +28,8 @@ export default function ClothCard({
   date,
   price,
   badges = [],
+  status,
+  muted = false,
   onPress,
 }: ClothCardProps) {
   return (
@@ -33,15 +37,16 @@ export default function ClothCard({
       <SquareImage source={imageUrl ? { uri: imageUrl } : undefined} size={108} />
 
       <View style={styles.info}>
+        {status && <Badge label={status.label} tone={status.tone} />}
         <View style={styles.heading}>
-          <Text style={styles.title} numberOfLines={1}>
+          <Text style={[styles.title, muted && styles.muted]} numberOfLines={1}>
             {title}
           </Text>
           <Text style={styles.meta} numberOfLines={1}>
             {[region, category, size, date].filter(Boolean).join(' · ')}
           </Text>
         </View>
-        <Text style={styles.price}>{price.toLocaleString('ko-KR')}원</Text>
+        <Text style={[styles.price, muted && styles.muted]}>{price.toLocaleString('ko-KR')}원</Text>
 
         {badges.length > 0 && (
           <View style={styles.badges}>
@@ -104,6 +109,10 @@ const styles = StyleSheet.create({
     letterSpacing: 0,
     color: COLORS.text,
     includeFontPadding: false,
+  },
+
+  muted: {
+    color: COLORS.textSub,
   },
 
   badges: {

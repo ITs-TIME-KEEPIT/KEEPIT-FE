@@ -21,3 +21,18 @@ export function filterClothItems(
     return true;
   });
 }
+
+export const isFilterActive = ({ price, sizes, colors }: DetailFilter) =>
+  price.min > 0 || price.max !== null || sizes.length > 0 || colors.length > 0;
+
+// shortcut: 옷 이름·카테고리에 검색어가 들어있는지만 봄 (띄어쓰기·오타 무시 안 함), 검색 API 연동 시 교체
+export const matchesQuery = (item: ClothItem, query: string) => {
+  const keyword = query.trim().toLowerCase();
+  return [item.title, item.category].some((text) => text.toLowerCase().includes(keyword));
+};
+
+// 옷 카드 공통 뱃지 (세탁 포함 · 택배 가능)
+export const clothBadges = (item: ClothItem) => [
+  ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
+  ...(item.shippingAvailable ? [{ label: '택배 가능', tone: 'gray' as const }] : []),
+];

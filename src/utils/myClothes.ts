@@ -2,12 +2,11 @@ import type { ClothItem } from '../types/clothing';
 import type { Rental } from '../types/rental';
 import { hoursLeft } from '../state/rentalStore';
 
+// 수락 후 ~ 거래 완료 전 (진행 중 거래)
+export const ACTIVE_STAGES: Rental['stage'][] = ['accepted', 'handed-over', 'received', 'returned'];
+
 export const hasActiveTrade = (rentals: Rental[], clothId: string) =>
-  rentals.some(
-    (r) =>
-      r.clothId === clothId &&
-      ['accepted', 'handed-over', 'received', 'returned'].includes(r.stage),
-  );
+  rentals.some((r) => r.clothId === clothId && ACTIVE_STAGES.includes(r.stage));
 
 export function clothingStatus(cloth: ClothItem, rentals: Rental[]) {
   const related = rentals.filter((r) => r.clothId === cloth.id);
