@@ -1,13 +1,20 @@
 import { useSyncExternalStore } from 'react';
 import { DEMO_ACTIVE_ROLE, DEMO_IDS, DEMO_USERS } from '../mocks/demoScenario';
+import { DEMO_PHONES } from '../mocks/rental';
 import type { LaundryNotice, Rental, TradeMethod, TradeStage } from '../types/rental';
 
 // 백엔드 연동 전 앱 실행 중의 신청·거래와 현재 계정을 여러 화면에서 함께 사용합니다.
-type RentalState = { currentUserId: string; rentals: Rental[] };
+type Profile = { name: string; phone: string };
+type RentalState = {
+  currentUserId: string;
+  rentals: Rental[];
+  profiles: Record<string, Profile>; // 프로필 수정 결과 (계정 id별)
+};
 
 const initialState = (): RentalState => ({
   currentUserId: DEMO_USERS[DEMO_ACTIVE_ROLE].id,
   rentals: [],
+  profiles: {},
 });
 
 let state = initialState();
@@ -130,11 +137,24 @@ export function switchDemoUser() {
 }
 
 export function resetRentals() {
-  setState({ ...initialState(), currentUserId: state.currentUserId });
+  setState({ ...initialState(), currentUserId: state.currentUserId, profiles: state.profiles });
 }
 
-export const findDemoUser = (id: string) =>
-  Object.values(DEMO_USERS).find((user) => user.id === id);
+export function updateProfile(id: string, profile: Profile) {
+  setState({ ...state, profiles: { ...state.profiles, [id]: profile } });
+}
+
+// 프로필 수정 내용이 있으면 시연 계정 기본값 위에 덮어씁니다
+export function findDemoUser(id: string) {
+  const user = Object.values(DEMO_USERS).find((demo) => demo.id === id);
+  if (!user) return undefined;
+  const profile = state.profiles[id];
+  return {
+    ...user,
+    name: profile?.name ?? (user.name as string),
+    phone: profile?.phone ?? (DEMO_PHONES[id] as string | undefined),
+  };
+}
 
 // 48시간 안에 응답해야 하는 신청의 남은 시간 (시간 단위, 최소 0)
 export const hoursLeft = (rental: Rental, now = Date.now()) =>

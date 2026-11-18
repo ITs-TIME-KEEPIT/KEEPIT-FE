@@ -7,7 +7,6 @@ import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
-import { DEMO_PHONES } from '../../mocks/rental';
 import { useClothingItems } from '../../state/clothingStore';
 import {
   cancelRental,
@@ -157,7 +156,7 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
   const isOwner = rental.ownerId === currentUserId;
   const partnerId = isOwner ? rental.borrowerId : rental.ownerId;
   const partner = findDemoUser(partnerId);
-  const phone = DEMO_PHONES[partnerId];
+  const phone = partner?.phone;
   // 수락 후에만 서로 번호 공개
   const contactOpen = !['requested', 'rejected', 'cancelled'].includes(rental.stage);
   const borrowerWashes = !cloth.laundryIncluded;
