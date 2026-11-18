@@ -59,7 +59,7 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
 
       <View style={styles.body}>
         <Image
-          source={require('../../../assets/icons/trade-complete-hero.svg')}
+          source={require('../../../assets/icons/char-happy.png')}
           style={styles.hero}
           contentFit="contain"
         />
@@ -130,9 +130,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
 
+  // Figma: 220 x 160 영역 가운데 105 x 110 캐릭터
   hero: {
-    width: 220,
-    height: 160,
+    width: 105,
+    height: 110,
+    marginVertical: 25,
   },
 
   title: {
