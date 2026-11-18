@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
@@ -27,9 +27,13 @@ export default function RegionSheet({
   const [sido, setSido] = useState<Sido>(value?.sido ?? '서울');
 
   // 열릴 때 현재 선택된 시/도를 보여줌
-  useEffect(() => {
-    if (visible) setSido(value?.sido ?? '서울');
-  }, [visible]);
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
+    if (visible) {
+      setSido(value?.sido ?? '서울');
+    }
+  }
 
   return (
     <BottomSheet visible={visible} title={title} onClose={onClose}>

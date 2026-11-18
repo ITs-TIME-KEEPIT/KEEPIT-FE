@@ -22,7 +22,7 @@ const INSET = 4; // 컨테이너 안쪽 여백 (선택 배경 위치 계산에 �
 export default function TabBar({ active, onPressTab }: TabBarProps) {
   const { bottom } = useSafeAreaInsets();
   const [tabWidth, setTabWidth] = useState(0);
-  const translateX = useRef(new Animated.Value(0)).current;
+  const translateX = useState(() => new Animated.Value(0))[0];
   const placed = useRef(false);
   const index = TABS.findIndex((tab) => tab.key === active);
 

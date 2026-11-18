@@ -94,7 +94,7 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
   const original = clothes.find(
     (c) => c.id === editingId && c.ownerId === currentUserId && !c.deleted,
   );
-  const draftOwnerId = useRef(currentUserId).current;
+  const [draftOwnerId] = useState(currentUserId);
   const draftKey = `${draftOwnerId}:${editingId ?? 'new'}`;
   const initialDraft = () =>
     savedDrafts.get(draftKey) ?? (original ? draftFromCloth(original) : createRegistrationDraft());

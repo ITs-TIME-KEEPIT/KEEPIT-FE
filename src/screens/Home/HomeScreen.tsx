@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 import {
   Animated,
@@ -46,7 +46,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const fabCollapse = useRef(new Animated.Value(0)).current;
+  const fabCollapse = useState(() => new Animated.Value(0))[0];
 
   useEffect(() => {
     // width는 네이티브 드라이버로 애니메이션할 수 없음

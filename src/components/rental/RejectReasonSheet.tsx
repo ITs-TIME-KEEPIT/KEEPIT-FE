@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
@@ -29,12 +29,14 @@ export default function RejectReasonSheet({ visible, onReject, onClose }: Reject
   const [etcText, setEtcText] = useState('');
 
   // 다시 열면 처음부터 고르도록 초기화
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setReason(null);
       setEtcText('');
     }
-  }, [visible]);
+  }
 
   const finalReason = reason === ETC ? etcText.trim() : reason;
 

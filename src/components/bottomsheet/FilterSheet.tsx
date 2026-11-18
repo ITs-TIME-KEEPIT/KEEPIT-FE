@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
@@ -40,12 +40,14 @@ export default function FilterSheet({
   const [draft, setDraft] = useState(value);
 
   // 열릴 때마다 적용된 필터를 복사해서 편집 (닫으면 draft는 버려짐)
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setDraft(value);
       setTab('가격');
     }
-  }, [visible]);
+  }
 
   const count = countFor(draft);
 

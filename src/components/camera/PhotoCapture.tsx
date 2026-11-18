@@ -76,9 +76,13 @@ export default function PhotoCapture({
       subscription.remove();
     };
   }, [getPermission]);
-  useEffect(() => {
+  // 카메라 화면 조건이 바뀌면 준비 상태를 다시 기다림
+  const readyKey = `${focused}|${active}|${preview}|${permission?.granted}`;
+  const [prevReadyKey, setPrevReadyKey] = useState(readyKey);
+  if (readyKey !== prevReadyKey) {
+    setPrevReadyKey(readyKey);
     setReady(false);
-  }, [focused, active, preview, permission?.granted]);
+  }
 
   const capture = async () => {
     if (busy.current) return;
