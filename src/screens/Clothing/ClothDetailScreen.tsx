@@ -110,9 +110,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
           style={styles.profile}
           accessibilityRole="button"
           accessibilityLabel="등록자 프로필"
-          onPress={() =>
-            Alert.alert('준비 중', '등록자 프로필은 이번 작업 범위 이후 연결할 예정이에요.')
-          }
+          onPress={() => navigation.navigate('UserProfile', { userId: item.ownerId ?? '' })}
         >
           <View style={styles.avatar}>
             <Text style={styles.avatarText}>Aa</Text>
