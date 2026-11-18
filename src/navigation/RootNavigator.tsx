@@ -4,10 +4,13 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import type { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigation/native';
 
+import SplashScreen from '../screens/Auth/SplashScreen';
+import OnboardingScreen from '../screens/Auth/OnboardingScreen';
 import LoginScreen from '../screens/Auth/LoginScreen';
 import SignupScreen from '../screens/Auth/SignupScreen';
 import ProfileSetupScreen from '../screens/Auth/ProfileSetupScreen';
 import HomeScreen from '../screens/Home/HomeScreen';
+import SearchScreen from '../screens/Home/SearchScreen';
 
 import ClothDetailScreen from '../screens/Clothing/ClothDetailScreen';
 import CameraPreviewScreen from '../screens/Clothing/CameraPreviewScreen';
@@ -23,6 +26,9 @@ import TradeDetailScreen from '../screens/Rental/TradeDetailScreen';
 import MyTradesScreen from '../screens/Rental/MyTradesScreen';
 import MyPageScreen from '../screens/My/MyPageScreen';
 import MyClothesScreen from '../screens/My/MyClothesScreen';
+import UserProfileScreen from '../screens/My/UserProfileScreen';
+import NotificationsScreen from '../screens/My/NotificationsScreen';
+import WithdrawScreen from '../screens/My/WithdrawScreen';
 import TradePhotoScreen from '../screens/Rental/TradePhotoScreen';
 import TradePhotoCompareScreen from '../screens/Rental/TradePhotoCompareScreen';
 import TradeCompleteScreen from '../screens/Rental/TradeCompleteScreen';
@@ -40,9 +46,15 @@ export type MainTabParamList = {
 };
 
 export type RootStackParamList = {
+  Splash: undefined;
+  Onboarding: undefined;
   Login: undefined;
   Signup: undefined;
-  ProfileSetup: undefined;
+  ProfileSetup: { edit?: boolean } | undefined; // edit: 마이 > 프로필 수정
+  Search: undefined;
+  UserProfile: { userId: string };
+  Notifications: undefined;
+  Withdraw: undefined;
   Main: NavigatorScreenParams<MainTabParamList> | undefined;
 
   ClothDetail: { clothId: string };
@@ -109,7 +121,7 @@ function MainTabs() {
 export default function RootNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName={__DEV__ && DEMO_START_SCREEN === 'camera' ? 'CameraPreview' : 'Login'}
+      initialRouteName={__DEV__ && DEMO_START_SCREEN === 'camera' ? 'CameraPreview' : 'Splash'}
     >
       {__DEV__ && (
         <Stack.Screen
@@ -151,6 +163,12 @@ export default function RootNavigator() {
         options={{ headerShown: false, gestureEnabled: false }}
       />
 
+      <Stack.Screen name="Splash" component={SplashScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="Onboarding"
+        component={OnboardingScreen}
+        options={{ headerShown: false, gestureEnabled: false }}
+      />
       <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
 
       <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
@@ -162,6 +180,19 @@ export default function RootNavigator() {
       />
 
       <Stack.Screen name="Main" component={MainTabs} options={{ headerShown: false }} />
+
+      <Stack.Screen name="Search" component={SearchScreen} options={{ headerShown: false }} />
+      <Stack.Screen
+        name="UserProfile"
+        component={UserProfileScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{ headerShown: false }}
+      />
+      <Stack.Screen name="Withdraw" component={WithdrawScreen} options={{ headerShown: false }} />
 
       <Stack.Screen
         name="ClothDetail"
