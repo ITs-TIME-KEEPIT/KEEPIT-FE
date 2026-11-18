@@ -1,8 +1,5 @@
 import React from 'react';
-import {
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -13,15 +10,8 @@ interface BadgeProps {
   tone?: BadgeTone;
 }
 
-export default function Badge({
-  label,
-  tone = 'primary',
-}: BadgeProps) {
-  return (
-    <Text style={[styles.badge, styles[tone]]}>
-      {label}
-    </Text>
-  );
+export default function Badge({ label, tone = 'primary' }: BadgeProps) {
+  return <Text style={[styles.badge, styles[tone]]}>{label}</Text>;
 }
 
 const styles = StyleSheet.create({

@@ -36,7 +36,12 @@ export default function PhotoViewer({ uris, startIndex, onClose }: PhotoViewerPr
       <StatusBar style="light" />
       <View style={[styles.container, { paddingTop: top, paddingBottom: bottom + 29 }]}>
         <View style={styles.header}>
-          <Pressable onPress={onClose} accessibilityRole="button" accessibilityLabel="크게 보기 닫기" hitSlop={10}>
+          <Pressable
+            onPress={onClose}
+            accessibilityRole="button"
+            accessibilityLabel="크게 보기 닫기"
+            hitSlop={10}
+          >
             <Image source={require('../../../assets/icons/x.png')} style={styles.close} />
           </Pressable>
         </View>
@@ -46,7 +51,9 @@ export default function PhotoViewer({ uris, startIndex, onClose }: PhotoViewerPr
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           contentOffset={{ x: startIndex * width, y: 0 }}
-          onMomentumScrollEnd={(event) => setPage(Math.round(event.nativeEvent.contentOffset.x / width))}
+          onMomentumScrollEnd={(event) =>
+            setPage(Math.round(event.nativeEvent.contentOffset.x / width))
+          }
         >
           {uris.map((uri, index) => (
             <View key={index} style={[styles.page, { width }]}>

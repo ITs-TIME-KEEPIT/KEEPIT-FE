@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -24,21 +20,19 @@ interface CancelReasonSheetProps {
 }
 
 /* RENT-450 수락 후 ~ 전달 전 거래 취소. 사유 필수 */
-export default function CancelReasonSheet({
-  visible,
-  onCancel,
-  onClose,
-}: CancelReasonSheetProps) {
+export default function CancelReasonSheet({ visible, onCancel, onClose }: CancelReasonSheetProps) {
   const [reason, setReason] = useState<(typeof REASONS)[number] | null>(null);
   const [etcText, setEtcText] = useState('');
 
   // 다시 열면 처음부터 고르도록 초기화
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setReason(null);
       setEtcText('');
     }
-  }, [visible]);
+  }
 
   const finalReason = reason === ETC ? etcText.trim() : reason;
 
@@ -55,7 +49,9 @@ export default function CancelReasonSheet({
         )
       }
     >
-      <Text style={styles.description}>상대방에게 취소 사유가 전달되고, 해당 기간 예약이 풀려요</Text>
+      <Text style={styles.description}>
+        상대방에게 취소 사유가 전달되고, 해당 기간 예약이 풀려요
+      </Text>
 
       <View style={styles.options}>
         {REASONS.map((item) => (

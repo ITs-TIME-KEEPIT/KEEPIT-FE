@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -15,7 +7,13 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
-import { acceptRental, findDemoUser, hoursLeft, setRentalStage, useRentalState } from '../../state/rentalStore';
+import {
+  acceptRental,
+  findDemoUser,
+  hoursLeft,
+  setRentalStage,
+  useRentalState,
+} from '../../state/rentalStore';
 import { formatDate } from '../../utils/formatDate';
 
 import Header from '../../components/common/Header';
@@ -64,7 +62,9 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
   const reject = (reason: string) => {
     setRejectOpen(false);
     setRentalStage(rental.id, 'rejected', reason);
-    Alert.alert('신청 거절', '거절 사유를 대여자에게 전달했어요.', [{ text: '확인', onPress: () => navigation.goBack() }]);
+    Alert.alert('신청 거절', '거절 사유를 대여자에게 전달했어요.', [
+      { text: '확인', onPress: () => navigation.goBack() },
+    ]);
   };
 
   return (
@@ -101,10 +101,18 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
             <InfoRow label="옷" value={cloth.title} />
             <InfoRow label="받는 날" value={formatDate(new Date(rental.start))} />
             <InfoRow label="돌려주는 날" value={formatDate(new Date(rental.end))} />
-            <InfoRow label="거래 방식" value={rental.method === '직거래' ? `직거래 · ${cloth.region}` : '택배'} />
-            <InfoRow label="세탁" value={borrowerWashes ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'} />
+            <InfoRow
+              label="거래 방식"
+              value={rental.method === '직거래' ? `직거래 · ${cloth.region}` : '택배'}
+            />
+            <InfoRow
+              label="세탁"
+              value={borrowerWashes ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'}
+            />
             <InfoRow label="대여료" value={`${cloth.price.toLocaleString('ko-KR')}원`} />
-            {rental.stage === 'rejected' && <InfoRow label="거절 사유" value={rental.rejectReason ?? '-'} />}
+            {rental.stage === 'rejected' && (
+              <InfoRow label="거절 사유" value={rental.rejectReason ?? '-'} />
+            )}
           </View>
         </View>
       </ScrollView>
@@ -121,7 +129,10 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
             </View>
           </>
         ) : rental.stage !== 'rejected' ? (
-          <CtaButton title="거래 상세 보기" onPress={() => navigation.replace('TradeDetail', { rentalId: rental.id })} />
+          <CtaButton
+            title="거래 상세 보기"
+            onPress={() => navigation.replace('TradeDetail', { rentalId: rental.id })}
+          />
         ) : null}
       </View>
 
@@ -129,7 +140,9 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
       <Popup
         visible={laundryPopupOpen}
         title="세탁 방법을 다시 확인해 주세요"
-        description={'빌린 사람이 드라이클리닝 후 돌려주는 거래예요.\n특별한 세탁 방법이 있다면 수락 후 연락할 때 꼭 알려주세요.'}
+        description={
+          '빌린 사람이 드라이클리닝 후 돌려주는 거래예요.\n특별한 세탁 방법이 있다면 수락 후 연락할 때 꼭 알려주세요.'
+        }
         primaryLabel="확인하고 수락할게요"
         onPressPrimary={() => {
           setLaundryPopupOpen(false);
@@ -140,7 +153,11 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
         onClose={() => setLaundryPopupOpen(false)}
       />
 
-      <RejectReasonSheet visible={rejectOpen} onReject={reject} onClose={() => setRejectOpen(false)} />
+      <RejectReasonSheet
+        visible={rejectOpen}
+        onReject={reject}
+        onClose={() => setRejectOpen(false)}
+      />
     </SafeAreaView>
   );
 }

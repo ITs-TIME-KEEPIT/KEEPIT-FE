@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
@@ -15,7 +7,12 @@ import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
 import { DEMO_PHONES } from '../../mocks/rental';
 import { useClothingItems } from '../../state/clothingStore';
-import { findDemoUser, resetRentals, switchDemoUser, useRentalState } from '../../state/rentalStore';
+import {
+  findDemoUser,
+  resetRentals,
+  switchDemoUser,
+  useRentalState,
+} from '../../state/rentalStore';
 
 import RoundImage from '../../components/common/RoundImage';
 
@@ -31,17 +28,28 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
   const clothes = useClothingItems();
   const me = findDemoUser(currentUserId);
 
-  const mine = rentals.filter((rental) => rental.ownerId === currentUserId || rental.borrowerId === currentUserId);
+  const mine = rentals.filter(
+    (rental) => rental.ownerId === currentUserId || rental.borrowerId === currentUserId,
+  );
   const stats = [
-    { label: '등록한 옷', value: clothes.filter((cloth) => cloth.ownerId === currentUserId && !cloth.deleted).length },
-    { label: '진행 중 거래', value: mine.filter((rental) => IN_PROGRESS.includes(rental.stage)).length },
+    {
+      label: '등록한 옷',
+      value: clothes.filter((cloth) => cloth.ownerId === currentUserId && !cloth.deleted).length,
+    },
+    {
+      label: '진행 중 거래',
+      value: mine.filter((rental) => IN_PROGRESS.includes(rental.stage)).length,
+    },
     { label: '완료 거래', value: mine.filter((rental) => rental.stage === 'completed').length },
   ];
 
   // 마이 메뉴 이동은 아직 비활성. 화면이 연결되면 각 onPress를 이동으로 교체
   const menus = [
     { label: '내 등록 옷 관리', message: '내 등록 옷 관리는 곧 연결될 예정이에요.' },
-    { label: '받은 신청', message: '받은 신청은 내 등록 옷 관리에서 확인할 수 있도록 연결될 예정이에요.' },
+    {
+      label: '받은 신청',
+      message: '받은 신청은 내 등록 옷 관리에서 확인할 수 있도록 연결될 예정이에요.',
+    },
     { label: '알림', message: '알림은 서버 연동 후 사용할 수 있어요.' },
     { label: '로그아웃', message: '로그아웃은 로그인 연동 후 사용할 수 있어요.' },
     { label: '회원 탈퇴', message: '회원 탈퇴는 이후 제공될 예정이에요.', muted: true },
@@ -76,7 +84,16 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
 
         <View style={styles.stats}>
           {stats.map((stat) => (
-            <Pressable key={stat.label} style={styles.stat} accessibilityRole="button" onPress={() => stat.label === '등록한 옷' ? navigation.navigate('MyClothes') : navigation.navigate('MyTrades')}>
+            <Pressable
+              key={stat.label}
+              style={styles.stat}
+              accessibilityRole="button"
+              onPress={() =>
+                stat.label === '등록한 옷'
+                  ? navigation.navigate('MyClothes')
+                  : navigation.navigate('MyTrades')
+              }
+            >
               <Text style={styles.statValue}>{stat.value}</Text>
               <Text style={styles.statLabel}>{stat.label}</Text>
             </Pressable>
@@ -85,11 +102,16 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
 
         <View style={styles.menus}>
           {menus.map((menu) => (
-            <MenuRow key={menu.label} label={menu.label} muted={menu.muted} onPress={() => {
-              if (menu.label === '내 등록 옷 관리') navigation.navigate('MyClothes');
-              else if (menu.label === '받은 신청') navigation.navigate('ReceivedRequests');
-              else preparing(menu.message);
-            }} />
+            <MenuRow
+              key={menu.label}
+              label={menu.label}
+              muted={menu.muted}
+              onPress={() => {
+                if (menu.label === '내 등록 옷 관리') navigation.navigate('MyClothes');
+                else if (menu.label === '받은 신청') navigation.navigate('ReceivedRequests');
+                else preparing(menu.message);
+              }}
+            />
           ))}
         </View>
 
@@ -105,7 +127,10 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
               }}
             />
             {/* 내 등록 옷 관리 연결 전까지 받은 신청 진입용 */}
-            <MenuRow label="받은 신청 바로가기" onPress={() => navigation.navigate('ReceivedRequests')} />
+            <MenuRow
+              label="받은 신청 바로가기"
+              onPress={() => navigation.navigate('ReceivedRequests')}
+            />
             <MenuRow
               label="신청·거래 초기화"
               onPress={() =>
@@ -122,7 +147,15 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
   );
 }
 
-function MenuRow({ label, muted = false, onPress }: { label: string; muted?: boolean; onPress: () => void }) {
+function MenuRow({
+  label,
+  muted = false,
+  onPress,
+}: {
+  label: string;
+  muted?: boolean;
+  onPress: () => void;
+}) {
   return (
     <Pressable onPress={onPress} accessibilityRole="button" style={styles.menu}>
       <Text style={[styles.menuText, muted && styles.menuTextMuted]}>{label}</Text>

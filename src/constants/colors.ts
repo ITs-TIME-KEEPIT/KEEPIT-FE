@@ -1,4 +1,3 @@
-
 export const COLORS = {
   // Main
   primary: '#1F79FF',

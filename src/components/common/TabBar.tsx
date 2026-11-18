@@ -1,12 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
-import {
-  Animated,
-  View,
-  Text,
-  Image,
-  Pressable,
-  StyleSheet,
-} from 'react-native';
+import { Animated, View, Text, Image, Pressable, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { COLORS } from '../../constants/colors';
@@ -26,13 +19,10 @@ const TABS = [
 
 const INSET = 4; // 컨테이너 안쪽 여백 (선택 배경 위치 계산에 사용)
 
-export default function TabBar({
-  active,
-  onPressTab,
-}: TabBarProps) {
+export default function TabBar({ active, onPressTab }: TabBarProps) {
   const { bottom } = useSafeAreaInsets();
   const [tabWidth, setTabWidth] = useState(0);
-  const translateX = useRef(new Animated.Value(0)).current;
+  const translateX = useState(() => new Animated.Value(0))[0];
   const placed = useRef(false);
   const index = TABS.findIndex((tab) => tab.key === active);
 
@@ -81,14 +71,8 @@ export default function TabBar({
             accessibilityState={{ selected: isActive }}
             style={styles.tab}
           >
-            <Image
-              source={icon}
-              style={[styles.icon, { tintColor: color }]}
-              resizeMode="contain"
-            />
-            <Text style={[styles.label, isActive && styles.labelActive, { color }]}>
-              {label}
-            </Text>
+            <Image source={icon} style={[styles.icon, { tintColor: color }]} resizeMode="contain" />
+            <Text style={[styles.label, isActive && styles.labelActive, { color }]}>{label}</Text>
           </Pressable>
         );
       })}

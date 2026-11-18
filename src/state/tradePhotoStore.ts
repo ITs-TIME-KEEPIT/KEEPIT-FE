@@ -7,7 +7,12 @@ export type Checkpoint = 'handoff' | 'receipt' | 'return';
 type PhotoRecord = { photos: CapturedPhotos; savedAt?: number };
 let records: Record<string, PhotoRecord> = {};
 const listeners = new Set<() => void>();
-const subscribe = (fn: () => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; };
+const subscribe = (fn: () => void) => {
+  listeners.add(fn);
+  return () => {
+    listeners.delete(fn);
+  };
+};
 const getSnapshot = () => records;
 export const useTradePhotos = () => useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 export const photoRecordKey = (id: string, checkpoint: Checkpoint) => `${id}:${checkpoint}`;
@@ -20,18 +25,25 @@ export function nextPhotoCheckpoint(rental: Rental, userId: string): Checkpoint 
 }
 function checkAccess(id: string, checkpoint: Checkpoint) {
   const { rentals, currentUserId } = getRentalState();
-  const rental = rentals.find(r => r.id === id);
-  if (!rental || nextPhotoCheckpoint(rental, currentUserId) !== checkpoint) throw new Error('현재 계정이나 거래 단계에서 촬영할 수 없어요.');
+  const rental = rentals.find((r) => r.id === id);
+  if (!rental || nextPhotoCheckpoint(rental, currentUserId) !== checkpoint)
+    throw new Error('현재 계정이나 거래 단계에서 촬영할 수 없어요.');
 }
 export function saveTradePhotoDraft(id: string, checkpoint: Checkpoint, photos: CapturedPhotos) {
   checkAccess(id, checkpoint);
   records = { ...records, [photoRecordKey(id, checkpoint)]: { photos: { ...photos } } };
-  listeners.forEach(fn => fn());
+  listeners.forEach((fn) => fn());
 }
 export function completeTradePhotos(id: string, checkpoint: Checkpoint, photos: CapturedPhotos) {
   checkAccess(id, checkpoint);
   if (!hasRequiredPhotos(photos)) throw new Error('전면·후면·라벨 사진을 촬영해주세요.');
-  records = { ...records, [photoRecordKey(id, checkpoint)]: { photos: { ...photos }, savedAt: Date.now() } };
-  listeners.forEach(fn => fn());
-  setRentalStage(id, checkpoint === 'handoff' ? 'handed-over' : checkpoint === 'receipt' ? 'received' : 'returned');
+  records = {
+    ...records,
+    [photoRecordKey(id, checkpoint)]: { photos: { ...photos }, savedAt: Date.now() },
+  };
+  listeners.forEach((fn) => fn());
+  setRentalStage(
+    id,
+    checkpoint === 'handoff' ? 'handed-over' : checkpoint === 'receipt' ? 'received' : 'returned',
+  );
 }

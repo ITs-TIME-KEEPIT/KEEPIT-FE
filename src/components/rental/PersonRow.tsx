@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -16,11 +12,7 @@ interface PersonRowProps {
 }
 
 /* 신청자·거래 상대 한 줄 (프로필 원 · 이름 · 보조 정보) */
-export default function PersonRow({
-  name,
-  sub,
-  right,
-}: PersonRowProps) {
+export default function PersonRow({ name, sub, right }: PersonRowProps) {
   return (
     <View style={styles.container}>
       <RoundImage size={40} />

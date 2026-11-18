@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../../constants/colors';
 import type { DetailFilter } from '../../../types/filter';
@@ -29,10 +25,7 @@ interface PriceTabProps {
   onChange: (price: Price) => void;
 }
 
-export default function PriceTab({
-  price,
-  onChange,
-}: PriceTabProps) {
+export default function PriceTab({ price, onChange }: PriceTabProps) {
   const { min, max } = price;
 
   // 입력이 끝났을 때 최소가 최대보다 크면 두 값을 바꿈

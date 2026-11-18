@@ -1,10 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -24,9 +19,7 @@ export default function DefaultActiveButton({
       accessibilityState={{ selected: true }}
       style={styles.button}
     >
-      <Text style={styles.label}>
-        {title}
-      </Text>
+      <Text style={styles.label}>{title}</Text>
     </Pressable>
   );
 }

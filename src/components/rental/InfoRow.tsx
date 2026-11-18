@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -14,19 +10,11 @@ interface InfoRowProps {
 }
 
 /* 왼쪽 라벨 · 오른쪽 값 한 줄 (기간, 거래 방식, 비용 등) */
-export default function InfoRow({
-  label,
-  value,
-  highlight = false,
-}: InfoRowProps) {
+export default function InfoRow({ label, value, highlight = false }: InfoRowProps) {
   return (
     <View style={styles.row}>
-      <Text style={styles.label}>
-        {label}
-      </Text>
-      <Text style={[styles.value, highlight && styles.valueHighlight]}>
-        {value}
-      </Text>
+      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.value, highlight && styles.valueHighlight]}>{value}</Text>
     </View>
   );
 }

@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -14,9 +10,7 @@ interface TradeStepperProps {
   current: TradeStep;
 }
 
-export default function TradeStepper({
-  current,
-}: TradeStepperProps) {
+export default function TradeStepper({ current }: TradeStepperProps) {
   const currentIndex = TRADE_STEPS.indexOf(current);
 
   return (
@@ -30,11 +24,7 @@ export default function TradeStepper({
             {/* 점 크기(12/16)가 달라도 라벨 높이가 맞도록 16×16 고정 박스 처리 */}
             <View style={styles.dotBox}>
               <View
-                style={
-                  isCurrent
-                    ? styles.dotCurrent
-                    : [styles.dot, isDone && styles.dotDone]
-                }
+                style={isCurrent ? styles.dotCurrent : [styles.dot, isDone && styles.dotDone]}
               />
             </View>
             <Text

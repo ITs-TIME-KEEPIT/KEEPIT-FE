@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  useWindowDimensions,
-  View,
-} from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -59,7 +52,12 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
   const registered = cloth.detail?.photos?.find((photo) => photo.part === part)?.uri;
 
   const stages = [
-    { title: '1단계 · 등록 시', by: '등록자', uri: registered ?? (part === '전면' ? cloth.imageUrl : undefined), at: cloth.detail?.registeredAt },
+    {
+      title: '1단계 · 등록 시',
+      by: '등록자',
+      uri: registered ?? (part === '전면' ? cloth.imageUrl : undefined),
+      at: cloth.detail?.registeredAt,
+    },
     { title: '2단계 · 전달 직전', by: '등록자', uri: handoff?.photos[part], at: handoff?.savedAt },
     { title: '3단계 · 수령', by: '대여자', uri: receipt?.photos[part], at: receipt?.savedAt },
     { title: '4단계 · 반납', by: '대여자', uri: returned?.photos[part], at: returned?.savedAt },
@@ -72,9 +70,13 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <View style={styles.parts}>
-          {PHOTO_PARTS.map((item) => (item === part
-            ? <ChipActiveButton key={item} title={item} onPress={() => setPart(item)} />
-            : <ChipButton key={item} title={item} onPress={() => setPart(item)} />))}
+          {PHOTO_PARTS.map((item) =>
+            item === part ? (
+              <ChipActiveButton key={item} title={item} onPress={() => setPart(item)} />
+            ) : (
+              <ChipButton key={item} title={item} onPress={() => setPart(item)} />
+            ),
+          )}
         </View>
 
         <View style={styles.grid}>
@@ -86,7 +88,10 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
                 accessibilityRole="button"
                 accessibilityLabel={`${stage.title} 사진 크게 보기`}
               >
-                <SquareImage size={(width - SIDE_PADDING * 2 - GRID_GAP) / 2} source={stage.uri ? { uri: stage.uri } : undefined} />
+                <SquareImage
+                  size={(width - SIDE_PADDING * 2 - GRID_GAP) / 2}
+                  source={stage.uri ? { uri: stage.uri } : undefined}
+                />
               </Pressable>
               <Text style={styles.stageTitle}>{stage.title}</Text>
               <Text style={styles.stageMeta}>
@@ -114,12 +119,19 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
           />
         )}
         <View style={styles.secondary}>
-          <DefaultButton title="문제 신고하기" onPress={() => navigation.navigate('TradeReport', { rentalId: rental.id })} />
+          <DefaultButton
+            title="문제 신고하기"
+            onPress={() => navigation.navigate('TradeReport', { rentalId: rental.id })}
+          />
         </View>
       </View>
 
       {viewing !== null && (
-        <PhotoViewer uris={stages.map((stage) => stage.uri)} startIndex={viewing} onClose={() => setViewing(null)} />
+        <PhotoViewer
+          uris={stages.map((stage) => stage.uri)}
+          startIndex={viewing}
+          onClose={() => setViewing(null)}
+        />
       )}
     </SafeAreaView>
   );

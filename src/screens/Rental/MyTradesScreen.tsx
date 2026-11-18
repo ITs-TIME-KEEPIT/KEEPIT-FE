@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  Pressable,
-  FlatList,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, Pressable, FlatList, StyleSheet } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
@@ -30,7 +23,9 @@ export default function MyTradesScreen({ navigation, route }: MainTabScreenProps
   const [tab, setTab] = useState<(typeof TABS)[number]>(route.params?.tab ?? '빌린 옷');
 
   const lending = tab === '빌려준 옷';
-  const list = rentals.filter((rental) => (lending ? rental.ownerId : rental.borrowerId) === currentUserId);
+  const list = rentals.filter(
+    (rental) => (lending ? rental.ownerId : rental.borrowerId) === currentUserId,
+  );
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -64,16 +59,25 @@ export default function MyTradesScreen({ navigation, route }: MainTabScreenProps
           const goDetail = () =>
             lending && rental.stage === 'requested'
               ? navigation.navigate('ReceivedRequestDetail', { rentalId: rental.id })
-              : navigation.navigate(rental.stage === 'completed' ? 'TradeComplete' : 'TradeDetail', { rentalId: rental.id });
+              : navigation.navigate(
+                  rental.stage === 'completed' ? 'TradeComplete' : 'TradeDetail',
+                  { rentalId: rental.id },
+                );
 
           return (
             <Pressable onPress={goDetail} accessibilityRole="button" style={styles.card}>
-              <SquareImage size={80} source={cloth?.imageUrl ? { uri: cloth.imageUrl } : undefined} />
+              <SquareImage
+                size={80}
+                source={cloth?.imageUrl ? { uri: cloth.imageUrl } : undefined}
+              />
               <View style={styles.cardTexts}>
                 <Badge label={badge.label} tone={badge.tone} />
-                <Text style={styles.cardTitle} numberOfLines={1}>{cloth?.title ?? '-'}</Text>
+                <Text style={styles.cardTitle} numberOfLines={1}>
+                  {cloth?.title ?? '-'}
+                </Text>
                 <Text style={styles.cardMeta} numberOfLines={1}>
-                  {formatMonthDay(new Date(rental.start))} ~ {formatMonthDay(new Date(rental.end))} · {cloth?.region ?? '-'} · {rental.method}
+                  {formatMonthDay(new Date(rental.start))} ~ {formatMonthDay(new Date(rental.end))}{' '}
+                  · {cloth?.region ?? '-'} · {rental.method}
                 </Text>
               </View>
               <Image

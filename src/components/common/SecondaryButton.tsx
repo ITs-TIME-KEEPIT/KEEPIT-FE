@@ -1,12 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-  StyleProp,
-  ViewStyle,
-} from 'react-native';
+import { Pressable, Text, StyleSheet, StyleProp, ViewStyle } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -22,14 +15,8 @@ export default function SecondaryButton({
   style,
 }: SecondaryButtonProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={[styles.button, style]}
-    >
-      <Text style={styles.label}>
-        {title}
-      </Text>
+    <Pressable onPress={onPress} accessibilityRole="button" style={[styles.button, style]}>
+      <Text style={styles.label}>{title}</Text>
     </Pressable>
   );
 }

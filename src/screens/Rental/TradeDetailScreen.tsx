@@ -1,13 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Alert,
-  Linking,
-} from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
 
@@ -17,7 +9,14 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
 import { DEMO_PHONES } from '../../mocks/rental';
 import { useClothingItems } from '../../state/clothingStore';
-import { cancelRental, completeRental, findDemoUser, hoursLeft, markLaundryNoticeSeen, useRentalState } from '../../state/rentalStore';
+import {
+  cancelRental,
+  completeRental,
+  findDemoUser,
+  hoursLeft,
+  markLaundryNoticeSeen,
+  useRentalState,
+} from '../../state/rentalStore';
 import type { Rental } from '../../types/rental';
 import { formatDate, formatDday } from '../../utils/formatDate';
 import { STAGE_STEP } from '../../utils/tradeStage';
@@ -36,38 +35,95 @@ import PersonRow from '../../components/rental/PersonRow';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TradeDetail'>;
 
-const PHOTO_BUTTONS = { handoff: '전달 전 사진 찍기', receipt: '수령 확인 사진 찍기', return: '반납 사진 찍기' } as const;
+const PHOTO_BUTTONS = {
+  handoff: '전달 전 사진 찍기',
+  receipt: '수령 확인 사진 찍기',
+  return: '반납 사진 찍기',
+} as const;
 
 const TODO = '다음에 할 일';
 const WAITING = '진행 중';
 
 // 공통 촬영 진입과 같은 단계·역할을 사용합니다.
-function nextAction(rental: Rental, isOwner: boolean, borrowerWashes: boolean): { label?: string; dday?: string; title: string; desc: string } {
+function nextAction(
+  rental: Rental,
+  isOwner: boolean,
+  borrowerWashes: boolean,
+): { label?: string; dday?: string; title: string; desc: string } {
   switch (rental.stage) {
     case 'requested':
       return isOwner
-        ? { label: TODO, title: '신청을 확인하고 응답해주세요', desc: `${hoursLeft(rental)}시간 안에 수락하거나 거절해주세요.` }
-        : { label: WAITING, title: '등록자의 수락을 기다리고 있어요', desc: '수락되면 서로의 연락처가 공개돼요.' };
+        ? {
+            label: TODO,
+            title: '신청을 확인하고 응답해주세요',
+            desc: `${hoursLeft(rental)}시간 안에 수락하거나 거절해주세요.`,
+          }
+        : {
+            label: WAITING,
+            title: '등록자의 수락을 기다리고 있어요',
+            desc: '수락되면 서로의 연락처가 공개돼요.',
+          };
     case 'accepted':
       return isOwner
-        ? { label: TODO, title: '상대방에게 연락해서 거래를 진행해주세요', desc: `${rental.method === '직거래' ? '직거래 장소와 시간은' : '택배 주소와 보내는 날은'} 연락해서 정해주세요. 번호는 거래 완료 7일 뒤에 숨겨져요.` }
-        : { label: WAITING, title: '등록자가 옷 상태를 찍고 건네줄 거예요', desc: '등록자가 전달 전 사진을 올리면 알림으로 알려드려요. 옷을 받으면 바로 수령 사진을 찍어주세요.' };
+        ? {
+            label: TODO,
+            title: '상대방에게 연락해서 거래를 진행해주세요',
+            desc: `${rental.method === '직거래' ? '직거래 장소와 시간은' : '택배 주소와 보내는 날은'} 연락해서 정해주세요. 번호는 거래 완료 7일 뒤에 숨겨져요.`,
+          }
+        : {
+            label: WAITING,
+            title: '등록자가 옷 상태를 찍고 건네줄 거예요',
+            desc: '등록자가 전달 전 사진을 올리면 알림으로 알려드려요. 옷을 받으면 바로 수령 사진을 찍어주세요.',
+          };
     case 'handed-over':
       return isOwner
-        ? { label: WAITING, title: '빌린 사람이 받은 옷 상태를 확인하고 있어요', desc: '빌린 사람이 수령 사진을 올리면 알림으로 알려드려요.' }
-        : { label: TODO, title: '받은 옷 상태를 바로 찍어주세요', desc: '수령 사진이 있어야 원래 있던 손상으로 청구되지 않아요.' };
+        ? {
+            label: WAITING,
+            title: '빌린 사람이 받은 옷 상태를 확인하고 있어요',
+            desc: '빌린 사람이 수령 사진을 올리면 알림으로 알려드려요.',
+          }
+        : {
+            label: TODO,
+            title: '받은 옷 상태를 바로 찍어주세요',
+            desc: '수령 사진이 있어야 원래 있던 손상으로 청구되지 않아요.',
+          };
     case 'received': {
       const due = formatDate(new Date(rental.end));
       const dday = formatDday(new Date(rental.end));
       return isOwner
-        ? { label: WAITING, dday, title: `${due}에 돌려받아요`, desc: `빌린 사람이 ${borrowerWashes ? '세탁 후 ' : ''}반납 사진을 올리면 알림으로 알려드려요. 옷을 받으면 사진을 비교하고 거래를 완료해주세요.` }
-        : { label: TODO, dday, title: `${due}까지 돌려주세요`, desc: borrowerWashes ? '빌린 사람이 세탁해서 돌려주는 옷이에요. 세탁 후 사진이 꼭 필요해요.' : '돌려주기 전 옷 상태를 사진으로 남겨주세요.' };
+        ? {
+            label: WAITING,
+            dday,
+            title: `${due}에 돌려받아요`,
+            desc: `빌린 사람이 ${borrowerWashes ? '세탁 후 ' : ''}반납 사진을 올리면 알림으로 알려드려요. 옷을 받으면 사진을 비교하고 거래를 완료해주세요.`,
+          }
+        : {
+            label: TODO,
+            dday,
+            title: `${due}까지 돌려주세요`,
+            desc: borrowerWashes
+              ? '빌린 사람이 세탁해서 돌려주는 옷이에요. 세탁 후 사진이 꼭 필요해요.'
+              : '돌려주기 전 옷 상태를 사진으로 남겨주세요.',
+          };
     }
     case 'returned':
-      if (!isOwner) return { label: WAITING, title: '등록자가 돌려받은 옷을 확인하고 있어요', desc: '등록자가 완료를 누르면 거래가 끝나요. 문제가 접수되면 운영자가 4단계 사진을 보고 확인해요.' };
+      if (!isOwner)
+        return {
+          label: WAITING,
+          title: '등록자가 돌려받은 옷을 확인하고 있어요',
+          desc: '등록자가 완료를 누르면 거래가 끝나요. 문제가 접수되면 운영자가 4단계 사진을 보고 확인해요.',
+        };
       return rental.photosReviewed
-        ? { label: TODO, title: '옷에 이상이 없으면 거래 완료를 진행해 주세요.', desc: '비교 사진을 다시 보고 싶다면 다시 보기 버튼을 눌러주세요.' }
-        : { label: TODO, title: '돌려받은 옷을 꼼꼼히 비교 후 확인해주세요', desc: '반납된 옷에 이상이 있다면 문제 신고를 눌러주세요. 운영자가 사진을 보고 확인해요.' };
+        ? {
+            label: TODO,
+            title: '옷에 이상이 없으면 거래 완료를 진행해 주세요.',
+            desc: '비교 사진을 다시 보고 싶다면 다시 보기 버튼을 눌러주세요.',
+          }
+        : {
+            label: TODO,
+            title: '돌려받은 옷을 꼼꼼히 비교 후 확인해주세요',
+            desc: '반납된 옷에 이상이 있다면 문제 신고를 눌러주세요. 운영자가 사진을 보고 확인해요.',
+          };
     case 'completed':
       return { title: '거래가 끝났어요', desc: '' };
     case 'rejected':
@@ -112,16 +168,26 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
   const showReturnInfo = rental.stage === 'received';
   const reviewing = isOwner && rental.stage === 'returned';
 
-  const receiptNoticeDue = rental.stage === 'received' && !isOwner && borrowerWashes && !seen.includes('receipt');
-  const notice = !focused ? null : handoffNoticeOpen ? 'handoff' : receiptNoticeDue ? 'receipt' : null;
+  const receiptNoticeDue =
+    rental.stage === 'received' && !isOwner && borrowerWashes && !seen.includes('receipt');
+  const notice = !focused
+    ? null
+    : handoffNoticeOpen
+      ? 'handoff'
+      : receiptNoticeDue
+        ? 'receipt'
+        : null;
 
   const openSms = (number: string) =>
-    Linking.openURL(`sms:${number}`).catch(() => Alert.alert('연결할 수 없어요', '이 기기에서는 문자를 열 수 없어요.'));
+    Linking.openURL(`sms:${number}`).catch(() =>
+      Alert.alert('연결할 수 없어요', '이 기기에서는 문자를 열 수 없어요.'),
+    );
   const goPhoto = () => navigation.navigate('TradePhoto', { rentalId: rental.id });
   const goCompare = () => navigation.navigate('TradePhotoCompare', { rentalId: rental.id });
 
   const pressPhoto = () => {
-    if (checkpoint === 'handoff' && borrowerWashes && !seen.includes('handoff')) setHandoffNoticeOpen(true);
+    if (checkpoint === 'handoff' && borrowerWashes && !seen.includes('handoff'))
+      setHandoffNoticeOpen(true);
     else goPhoto();
   };
 
@@ -143,10 +209,11 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
     }
   };
 
-  const confirmCancelRequest = () => Alert.alert('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', [
-    { text: '닫기', style: 'cancel' },
-    { text: '신청 취소', style: 'destructive', onPress: () => cancel() },
-  ]);
+  const confirmCancelRequest = () =>
+    Alert.alert('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', [
+      { text: '닫기', style: 'cancel' },
+      { text: '신청 취소', style: 'destructive', onPress: () => cancel() },
+    ]);
 
   const goReport = () => navigation.navigate('TradeReport', { rentalId: rental.id });
 
@@ -167,15 +234,16 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
       : rental.stage === 'returned'
         ? { title: '사진 비교하기', onPress: goCompare }
         : null;
-  const secondary = rental.stage === 'accepted'
-    ? { title: '거래 취소', onPress: () => setCancelOpen(true) }
-    : rental.stage === 'requested' && !isOwner
-      ? { title: '신청 취소', onPress: confirmCancelRequest }
-      : rental.stage === 'handed-over' && !isOwner
-        ? { title: '문제 신고', onPress: goReport }
-        : reviewing && rental.photosReviewed
-          ? { title: '사진 다시 보기', onPress: goCompare }
-          : null;
+  const secondary =
+    rental.stage === 'accepted'
+      ? { title: '거래 취소', onPress: () => setCancelOpen(true) }
+      : rental.stage === 'requested' && !isOwner
+        ? { title: '신청 취소', onPress: confirmCancelRequest }
+        : rental.stage === 'handed-over' && !isOwner
+          ? { title: '문제 신고', onPress: goReport }
+          : reviewing && rental.photosReviewed
+            ? { title: '사진 다시 보기', onPress: goCompare }
+            : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
@@ -207,15 +275,22 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
         </View>
 
         {rental.stage === 'handed-over' && !!defect && (
-          <InfoNote text={`등록 때 고지된 하자: ${defect}. ${isOwner ? '빌린 사람에게도 같은 내용이 보여요' : '그 밖의 하자가 보이면 수령 사진과 함께 신고해주세요'}`} />
+          <InfoNote
+            text={`등록 때 고지된 하자: ${defect}. ${isOwner ? '빌린 사람에게도 같은 내용이 보여요' : '그 밖의 하자가 보이면 수령 사진과 함께 신고해주세요'}`}
+          />
         )}
 
-        {!!rental.report && <InfoNote text="문제 신고가 접수됐어요. 운영자가 1~4단계 사진을 비교해서 확인하고 양쪽에 결과를 알려드려요" />}
+        {!!rental.report && (
+          <InfoNote text="문제 신고가 접수됐어요. 운영자가 1~4단계 사진을 비교해서 확인하고 양쪽에 결과를 알려드려요" />
+        )}
 
         {showReturnInfo && (
           <View style={styles.returnInfo}>
             <InfoRow label="돌려받는 날" value={formatDate(new Date(rental.end))} highlight />
-            <InfoRow label="세탁" value={borrowerWashes ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'} />
+            <InfoRow
+              label="세탁"
+              value={borrowerWashes ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'}
+            />
             <InfoRow label="반납 방법" value={`${rental.method} · ${cloth.region}`} />
           </View>
         )}
@@ -227,7 +302,11 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
               sub={phone ?? '-'}
               right={
                 phone && (
-                  <Pressable onPress={() => openSms(phone)} accessibilityRole="button" style={styles.contactButton}>
+                  <Pressable
+                    onPress={() => openSms(phone)}
+                    accessibilityRole="button"
+                    style={styles.contactButton}
+                  >
                     <Text style={styles.contactButtonText}>문자하기</Text>
                   </Pressable>
                 )
@@ -248,7 +327,11 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
         </View>
       )}
 
-      <CancelReasonSheet visible={cancelOpen} onCancel={cancel} onClose={() => setCancelOpen(false)} />
+      <CancelReasonSheet
+        visible={cancelOpen}
+        onCancel={cancel}
+        onClose={() => setCancelOpen(false)}
+      />
 
       {notice && (
         <LaundryNoticePopup

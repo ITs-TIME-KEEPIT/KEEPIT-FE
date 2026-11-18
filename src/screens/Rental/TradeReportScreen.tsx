@@ -57,13 +57,27 @@ export default function TradeReportScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <Header type="back" title="문제 신고" onPressLeft={() => navigation.goBack()} />
 
-      <KeyboardAvoidingView style={styles.container} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled" showsVerticalScrollIndicator={false}>
-          <Text style={styles.title}>어떤 문제인가요? <Text style={styles.required}>*</Text></Text>
+      <KeyboardAvoidingView
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      >
+        <ScrollView
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          showsVerticalScrollIndicator={false}
+        >
+          <Text style={styles.title}>
+            어떤 문제인가요? <Text style={styles.required}>*</Text>
+          </Text>
 
           <View style={styles.options}>
             {REASONS.map((item) => (
-              <RadioInputField key={item} label={item} selected={reason === item} onPress={() => setReason(item)} />
+              <RadioInputField
+                key={item}
+                label={item}
+                selected={reason === item}
+                onPress={() => setReason(item)}
+              />
             ))}
             <AreaInputField
               label=""
@@ -78,7 +92,11 @@ export default function TradeReportScreen({ navigation, route }: Props) {
         </ScrollView>
 
         <View style={styles.bottomCta}>
-          {canSubmit ? <CtaButton title="신고하기" onPress={submit} /> : <CtaDisabledButton title="신고하기" />}
+          {canSubmit ? (
+            <CtaButton title="신고하기" onPress={submit} />
+          ) : (
+            <CtaDisabledButton title="신고하기" />
+          )}
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>

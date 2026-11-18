@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 import {
   Animated,
@@ -46,7 +46,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const fabCollapse = useRef(new Animated.Value(0)).current;
+  const fabCollapse = useState(() => new Animated.Value(0))[0];
 
   useEffect(() => {
     // width는 네이티브 드라이버로 애니메이션할 수 없음
@@ -57,7 +57,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
     }).start();
   }, [scrolled, fabCollapse]);
 
-  const visibleItems = items.filter(item => !item.hidden && !item.deleted);
+  const visibleItems = items.filter((item) => !item.hidden && !item.deleted);
   const clothes = filterClothItems(visibleItems, category, appliedFilter, region);
   const { price, sizes, colors } = appliedFilter;
   const filterActive = price.min > 0 || price.max !== null || sizes.length > 0 || colors.length > 0;
@@ -97,7 +97,11 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
             accessibilityLabel="날짜 선택"
             style={[styles.toolButton, dateRange && styles.toolButtonActive]}
           >
-            <Image source={require('../../../assets/icons/calendar.png')} style={[styles.toolIcon, dateRange && styles.toolIconActive]} resizeMode="contain" />
+            <Image
+              source={require('../../../assets/icons/calendar.png')}
+              style={[styles.toolIcon, dateRange && styles.toolIconActive]}
+              resizeMode="contain"
+            />
           </Pressable>
           <Pressable
             onPress={() => setFilterOpen(true)}
@@ -105,7 +109,11 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
             accessibilityLabel="상세 필터"
             style={[styles.toolButton, filterActive && styles.toolButtonActive]}
           >
-            <Image source={require('../../../assets/icons/filter.png')} style={[styles.toolIcon, filterActive && styles.toolIconActive]} resizeMode="contain" />
+            <Image
+              source={require('../../../assets/icons/filter.png')}
+              style={[styles.toolIcon, filterActive && styles.toolIconActive]}
+              resizeMode="contain"
+            />
           </Pressable>
         </View>
       </View>
@@ -115,7 +123,9 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         <FlatList
           data={clothes}
           keyExtractor={(item) => item.id}
-          contentContainerStyle={clothes.length ? { paddingBottom: 176 + bottom } : styles.emptyContent}
+          contentContainerStyle={
+            clothes.length ? { paddingBottom: 176 + bottom } : styles.emptyContent
+          }
           onScroll={(event) => setScrolled(event.nativeEvent.contentOffset.y > 0)}
           scrollEventThrottle={16}
           renderItem={({ item }) => (
@@ -136,12 +146,8 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Text style={styles.emptyTitle}>
-                조건에 맞는 옷이 없어요
-              </Text>
-              <Text style={styles.emptySub}>
-                날짜나 카테고리를 바꿔보세요
-              </Text>
+              <Text style={styles.emptyTitle}>조건에 맞는 옷이 없어요</Text>
+              <Text style={styles.emptySub}>날짜나 카테고리를 바꿔보세요</Text>
             </View>
           }
         />
@@ -157,18 +163,26 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
             ]}
           >
             <Pressable
-              onPress={() =>
-                navigation.navigate('ClothRegister')
-              }
+              onPress={() => navigation.navigate('ClothRegister')}
               accessibilityRole="button"
               accessibilityLabel="옷 올리기"
               style={styles.fabButton}
             >
-              <Image source={require('../../../assets/icons/plus.png')} style={styles.fabIcon} resizeMode="contain" />
+              <Image
+                source={require('../../../assets/icons/plus.png')}
+                style={styles.fabIcon}
+                resizeMode="contain"
+              />
               <Animated.Text
                 style={[
                   styles.fabText,
-                  { opacity: fabCollapse.interpolate({ inputRange: [0, 0.6], outputRange: [1, 0], extrapolate: 'clamp' }) },
+                  {
+                    opacity: fabCollapse.interpolate({
+                      inputRange: [0, 0.6],
+                      outputRange: [1, 0],
+                      extrapolate: 'clamp',
+                    }),
+                  },
                 ]}
               >
                 옷 올리기
@@ -209,7 +223,6 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         }}
         onClose={() => setDateOpen(false)}
       />
-
     </SafeAreaView>
   );
 }

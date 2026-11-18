@@ -1,12 +1,5 @@
-
 import React from 'react';
-import {
-  View,
-  Text,
-  Image,
-  StyleSheet,
-  ImageSourcePropType,
-} from 'react-native';
+import { View, Text, Image, StyleSheet, ImageSourcePropType } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -16,11 +9,7 @@ interface RoundImageProps {
   placeholder?: string;
 }
 
-export default function RoundImage({
-  source,
-  size = 64,
-  placeholder = 'Aa',
-}: RoundImageProps) {
+export default function RoundImage({ source, size = 64, placeholder = 'Aa' }: RoundImageProps) {
   return (
     <View
       style={[
@@ -35,16 +24,11 @@ export default function RoundImage({
       {source ? (
         <Image
           source={source}
-          style={[
-            styles.image,
-            { borderRadius: size / 2 },
-          ]}
+          style={[styles.image, { borderRadius: size / 2 }]}
           resizeMode="cover"
         />
       ) : (
-        <Text style={styles.placeholder}>
-          {placeholder}
-        </Text>
+        <Text style={styles.placeholder}>{placeholder}</Text>
       )}
     </View>
   );

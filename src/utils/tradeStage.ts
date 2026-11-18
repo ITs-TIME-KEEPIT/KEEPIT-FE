@@ -15,10 +15,16 @@ export const STAGE_STEP: Record<Rental['stage'], TradeStep> = {
 };
 
 // 내 거래 카드 상태 뱃지 문구
-export function stageBadge(rental: Rental, isOwner: boolean): { label: string; tone: 'primary' | 'gray' } {
+export function stageBadge(
+  rental: Rental,
+  isOwner: boolean,
+): { label: string; tone: 'primary' | 'gray' } {
   switch (rental.stage) {
     case 'requested':
-      return { label: isOwner ? '신청 · 응답하기' : `신청 · 응답 대기 ${hoursLeft(rental)}시간`, tone: 'primary' };
+      return {
+        label: isOwner ? '신청 · 응답하기' : `신청 · 응답 대기 ${hoursLeft(rental)}시간`,
+        tone: 'primary',
+      };
     case 'accepted':
       return { label: '수락 · 연락해서 약속 잡기', tone: 'primary' };
     case 'handed-over':

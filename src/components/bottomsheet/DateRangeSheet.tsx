@@ -1,9 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 import type { DateRange } from '../../types/filter';
@@ -21,22 +17,19 @@ interface DateRangeSheetProps {
   onClose: () => void;
 }
 
-export default function DateRangeSheet({
-  visible,
-  value,
-  onApply,
-  onClose,
-}: DateRangeSheetProps) {
+export default function DateRangeSheet({ visible, value, onApply, onClose }: DateRangeSheetProps) {
   const [start, setStart] = useState<Date | null>(value?.start ?? null);
   const [end, setEnd] = useState<Date | null>(value?.end ?? null);
 
   // 열릴 때마다 적용된 기간을 복사해서 편집 (닫으면 버려짐)
-  useEffect(() => {
+  const [prevVisible, setPrevVisible] = useState(visible);
+  if (visible !== prevVisible) {
+    setPrevVisible(visible);
     if (visible) {
       setStart(value?.start ?? null);
       setEnd(value?.end ?? null);
     }
-  }, [visible]);
+  }
 
   return (
     <BottomSheet

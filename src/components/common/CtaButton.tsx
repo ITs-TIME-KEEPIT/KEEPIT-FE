@@ -1,10 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -13,19 +8,10 @@ interface CtaButtonProps {
   onPress: () => void;
 }
 
-export default function CtaButton({
-  title = 'Button',
-  onPress,
-}: CtaButtonProps) {
+export default function CtaButton({ title = 'Button', onPress }: CtaButtonProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={styles.button}
-    >
-      <Text style={styles.label}>
-        {title}
-      </Text>
+    <Pressable onPress={onPress} accessibilityRole="button" style={styles.button}>
+      <Text style={styles.label}>{title}</Text>
     </Pressable>
   );
 }

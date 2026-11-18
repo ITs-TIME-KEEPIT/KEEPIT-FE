@@ -1,10 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -13,19 +8,10 @@ interface CtaSecondaryButtonProps {
   onPress: () => void;
 }
 
-export default function CtaSecondaryButton({
-  title = 'Button',
-  onPress,
-}: CtaSecondaryButtonProps) {
+export default function CtaSecondaryButton({ title = 'Button', onPress }: CtaSecondaryButtonProps) {
   return (
-    <Pressable
-      onPress={onPress}
-      accessibilityRole="button"
-      style={styles.button}
-    >
-      <Text style={styles.label}>
-        {title}
-      </Text>
+    <Pressable onPress={onPress} accessibilityRole="button" style={styles.button}>
+      <Text style={styles.label}>{title}</Text>
     </Pressable>
   );
 }

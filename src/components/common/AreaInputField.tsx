@@ -1,10 +1,5 @@
 import React from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, TextInput, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -28,11 +23,7 @@ export default function AreaInputField({
   return (
     <View style={styles.container}>
       {/* label=""이면 라벨 줄 없이 입력창만 (거절 사유 기타 입력) */}
-      {!!label && (
-        <Text style={styles.label}>
-          {label}
-        </Text>
-      )}
+      {!!label && <Text style={styles.label}>{label}</Text>}
 
       <TextInput
         style={styles.input}

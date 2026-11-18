@@ -1,11 +1,5 @@
-
 import React from 'react';
-import {
-  Pressable,
-  View,
-  Text,
-  StyleSheet,
-} from 'react-native';
+import { Pressable, View, Text, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -36,9 +30,7 @@ export default function RadioOnInputField({
         <View style={styles.innerCircle} />
       </View>
 
-      <Text style={styles.label}>
-        {label}
-      </Text>
+      <Text style={styles.label}>{label}</Text>
     </Pressable>
   );
 }

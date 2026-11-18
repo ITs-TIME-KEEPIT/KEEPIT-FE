@@ -1,11 +1,5 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  Image,
-  ScrollView,
-  StyleSheet,
-} from 'react-native';
+import { View, Text, Image, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -73,7 +67,9 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
   const methods: TradeMethod[] = cloth.shippingAvailable ? ['직거래', '택배'] : ['직거래'];
   const borrowerWashes = !cloth.laundryIncluded;
   const unavailable = cloth.detail?.unavailablePeriod;
-  const booked = rentals.filter((rental) => rental.clothId === cloth.id && BLOCKING_STAGES.includes(rental.stage));
+  const booked = rentals.filter(
+    (rental) => rental.clothId === cloth.id && BLOCKING_STAGES.includes(rental.stage),
+  );
 
   // 등록자가 정한 대여 불가 기간이나 이미 거래가 잡힌 날은 선택 불가
   const isReserved = (date: Date) => {
@@ -177,7 +173,8 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
             resizeMode="contain"
           />
           <Text style={styles.noteText}>
-            택배를 고르면 받는 날 앞뒤로 2일씩 배송 기간이 자동으로 막혀요. 반납 택배비는 빌린 사람이 내요
+            택배를 고르면 받는 날 앞뒤로 2일씩 배송 기간이 자동으로 막혀요. 반납 택배비는 빌린
+            사람이 내요
           </Text>
         </View>
       </ScrollView>
@@ -209,7 +206,9 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
       <Popup
         visible={laundryPopupOpen}
         title="드라이클리닝 후 돌려주세요"
-        description={'이 옷은 빌린 사람이 세탁해서 돌려줘요.\n기본 세탁은 드라이클리닝이고, 특별한 세탁 방법은 등록자에게 미리 물어봐 주세요.'}
+        description={
+          '이 옷은 빌린 사람이 세탁해서 돌려줘요.\n기본 세탁은 드라이클리닝이고, 특별한 세탁 방법은 등록자에게 미리 물어봐 주세요.'
+        }
         primaryLabel="확인했어요"
         onPressPrimary={() => {
           setLaundryPopupOpen(false);

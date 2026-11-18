@@ -1,9 +1,5 @@
 import React from 'react';
-import {
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import { StyleSheet, Text, View } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
@@ -33,10 +29,16 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
   const isOwner = rental?.ownerId === currentUserId;
 
   // 등록자는 빌려준 옷 탭, 대여자는 빌린 옷 탭에서 결과를 확인합니다.
-  const close = () => navigation.reset({
-    index: 0,
-    routes: [{ name: 'Main', params: { screen: 'MyTrades', params: { tab: isOwner ? '빌려준 옷' : '빌린 옷' } } }],
-  });
+  const close = () =>
+    navigation.reset({
+      index: 0,
+      routes: [
+        {
+          name: 'Main',
+          params: { screen: 'MyTrades', params: { tab: isOwner ? '빌려준 옷' : '빌린 옷' } },
+        },
+      ],
+    });
 
   if (!rental || !cloth) {
     return (
@@ -56,7 +58,11 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
       <Header type="close" onPressLeft={close} />
 
       <View style={styles.body}>
-        <Image source={require('../../../assets/icons/trade-complete-hero.svg')} style={styles.hero} contentFit="contain" />
+        <Image
+          source={require('../../../assets/icons/trade-complete-hero.svg')}
+          style={styles.hero}
+          contentFit="contain"
+        />
         <Text style={styles.title}>거래가 끝났어요!</Text>
         <Text style={styles.description}>
           {isOwner ? '옷을 잘 돌려받았어요.' : '옷을 잘 돌려줬어요.'} 킵잇을 이용해 줘서 고마워요.
@@ -66,19 +72,30 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
           <View style={styles.item}>
             <SquareImage size={48} source={cloth.imageUrl ? { uri: cloth.imageUrl } : undefined} />
             <View style={styles.itemTexts}>
-              <Text style={styles.itemTitle} numberOfLines={1}>{cloth.title}</Text>
-              <Text style={styles.itemSub} numberOfLines={1}>{partner?.name ?? (isOwner ? '대여자' : '등록자')} 님과의 거래</Text>
+              <Text style={styles.itemTitle} numberOfLines={1}>
+                {cloth.title}
+              </Text>
+              <Text style={styles.itemSub} numberOfLines={1}>
+                {partner?.name ?? (isOwner ? '대여자' : '등록자')} 님과의 거래
+              </Text>
             </View>
           </View>
           <View style={styles.line} />
-          <InfoRow label="대여 기간" value={`${formatDate(start)} ~ ${formatDate(end)} · ${rentalDays(start, end)}일`} />
+          <InfoRow
+            label="대여 기간"
+            value={`${formatDate(start)} ~ ${formatDate(end)} · ${rentalDays(start, end)}일`}
+          />
           <InfoRow label="거래 방식" value={rental.method} />
-          <InfoRow label={isOwner ? '받은 대여료' : '낸 대여료'} value={`${cloth.price.toLocaleString('ko-KR')}원`} />
+          <InfoRow
+            label={isOwner ? '받은 대여료' : '낸 대여료'}
+            value={`${cloth.price.toLocaleString('ko-KR')}원`}
+          />
         </View>
 
         {!!rental.completedAt && (
           <Text style={styles.phoneNotice}>
-            상대방 번호는 {formatDate(new Date(rental.completedAt + PHONE_HIDDEN_AFTER))}에 다시 숨겨져요
+            상대방 번호는 {formatDate(new Date(rental.completedAt + PHONE_HIDDEN_AFTER))}에 다시
+            숨겨져요
           </Text>
         )}
       </View>
