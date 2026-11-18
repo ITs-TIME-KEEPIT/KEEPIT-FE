@@ -6,8 +6,6 @@ import type { CompositeScreenProps, NavigatorScreenParams } from '@react-navigat
 
 import SplashScreen from '../screens/Auth/SplashScreen';
 import OnboardingScreen from '../screens/Auth/OnboardingScreen';
-import LoginScreen from '../screens/Auth/LoginScreen';
-import SignupScreen from '../screens/Auth/SignupScreen';
 import ProfileSetupScreen from '../screens/Auth/ProfileSetupScreen';
 import HomeScreen from '../screens/Home/HomeScreen';
 import SearchScreen from '../screens/Home/SearchScreen';
@@ -48,8 +46,6 @@ export type MainTabParamList = {
 export type RootStackParamList = {
   Splash: undefined;
   Onboarding: undefined;
-  Login: undefined;
-  Signup: undefined;
   ProfileSetup: { edit?: boolean } | undefined; // edit: 마이 > 프로필 수정
   Search: undefined;
   UserProfile: { userId: string };
@@ -169,10 +165,6 @@ export default function RootNavigator() {
         component={OnboardingScreen}
         options={{ headerShown: false, gestureEnabled: false }}
       />
-      <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-
-      <Stack.Screen name="Signup" component={SignupScreen} options={{ headerShown: false }} />
-
       <Stack.Screen
         name="ProfileSetup"
         component={ProfileSetupScreen}

@@ -14,6 +14,7 @@ import { Image } from 'expo-image';
 
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
+import { DEMO_LOGIN_MODE } from '../../mocks/demoScenario';
 
 const PAGES = [
   {
@@ -40,10 +41,15 @@ export default function OnboardingScreen({
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(0);
 
-  // TODO: 백엔드 카카오 OAuth 연동 후 가입 여부에 따라 프로필 설정 또는 홈으로 이동
-  const handleStart = () => {
-    if (__DEV__) navigation.navigate('ProfileSetup');
-    else Alert.alert('안내', '카카오 로그인 연동 전입니다.');
+  // 카카오 로그인 하나로 가입·로그인을 함께 처리합니다 (AUTH-100)
+  // TODO: 카카오 OAuth API 연동 후 서버 응답의 신규 회원 여부로 demoMode를 대체
+  const handleKakaoLogin = (demoMode = DEMO_LOGIN_MODE) => {
+    if (!__DEV__) {
+      Alert.alert('안내', '카카오 로그인 연동 전입니다.');
+      return;
+    }
+    if (demoMode === 'new') navigation.navigate('ProfileSetup');
+    else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   return (
@@ -79,7 +85,7 @@ export default function OnboardingScreen({
 
       <View style={styles.footer}>
         <Pressable
-          onPress={handleStart}
+          onPress={() => handleKakaoLogin()}
           accessibilityRole="button"
           accessibilityLabel="카카오로 시작하기"
           style={styles.kakaoButton}
@@ -91,7 +97,8 @@ export default function OnboardingScreen({
           이미 가입하셨나요?{' '}
           <Text
             style={styles.loginLink}
-            onPress={() => navigation.navigate('Login')}
+            // 시연: 이미 가입한 회원으로 바로 홈 진입
+            onPress={() => handleKakaoLogin('existing')}
             accessibilityRole="link"
           >
             로그인
