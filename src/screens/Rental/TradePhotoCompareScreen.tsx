@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
+import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -48,6 +49,7 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
   const handoff = records[photoRecordKey(rental.id, 'handoff')];
   const receipt = records[photoRecordKey(rental.id, 'receipt')];
   const returned = records[photoRecordKey(rental.id, 'return')];
+  const tileSize = (width - SIDE_PADDING * 2 - GRID_GAP) / 2;
   const registered = cloth.detail?.photos?.find((photo) => photo.part === part)?.uri;
 
   const stages = [
@@ -79,7 +81,7 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
 
         <View style={styles.grid}>
           {stages.map((stage, index) => (
-            <View key={stage.title} style={styles.cell}>
+            <View key={stage.title} style={[styles.cell, { width: tileSize }]}>
               <Pressable
                 onPress={() => setViewing(index)}
                 disabled={!stage.uri}
@@ -87,13 +89,23 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
                 accessibilityLabel={`${stage.title} 사진 크게 보기`}
               >
                 <SquareImage
-                  size={(width - SIDE_PADDING * 2 - GRID_GAP) / 2}
+                  size={tileSize}
+                  borderRadius={16}
+                  placeholder={
+                    <Image
+                      source={require('../../../assets/icons/camera-off.svg')}
+                      style={styles.missingPhotoIcon}
+                      contentFit="contain"
+                    />
+                  }
                   source={stage.uri ? { uri: stage.uri } : undefined}
                 />
               </Pressable>
               <Text style={styles.stageTitle}>{stage.title}</Text>
               <Text style={styles.stageMeta}>
-                {stage.by} 촬영{stage.at ? ` · ${formatDateTime(new Date(stage.at))}` : ''}
+                {stage.uri
+                  ? `${stage.by} 촬영${stage.at ? ` · ${formatDateTime(new Date(stage.at))}` : ''}`
+                  : `${part} 사진 없음`}
               </Text>
             </View>
           ))}
@@ -153,7 +165,7 @@ const styles = StyleSheet.create({
 
   parts: {
     flexDirection: 'row',
-    gap: 8,
+    gap: 6,
   },
 
   grid: {
@@ -164,6 +176,12 @@ const styles = StyleSheet.create({
 
   cell: {
     gap: 4,
+  },
+
+  missingPhotoIcon: {
+    width: 24,
+    height: 24,
+    transform: [{ translateX: 1 }, { translateY: 0.5 }],
   },
 
   stageTitle: {

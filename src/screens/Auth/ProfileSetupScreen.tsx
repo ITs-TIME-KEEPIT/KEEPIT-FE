@@ -39,19 +39,33 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   );
   const [phone, setPhone] = useState(me?.phone ?? '');
   // 수정 화면에서 기존 닉네임은 이미 확인된 상태
-  const [nicknameVerified, setNicknameVerified] = useState(isEdit);
+  const [nicknameCheck, setNicknameCheck] = useState<'available' | 'taken' | 'unchecked'>(
+    isEdit ? 'available' : 'unchecked',
+  );
+  const [showLengthError, setShowLengthError] = useState(false);
 
   // 닉네임 유효성 검사
   const nicknameLength = Array.from(nickname).length;
 
-  const isNicknameValid = nicknameLength >= 2 && nicknameLength <= 10;
+  const hasInvalidNicknameCharacters = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/.test(nickname);
+  const isNicknameValid =
+    !hasInvalidNicknameCharacters && nicknameLength >= 2 && nicknameLength <= 10;
+  const nicknameError = hasInvalidNicknameCharacters
+    ? '한글, 영문, 숫자만 입력 가능합니다.'
+    : showLengthError
+      ? '닉네임은 2~10자로 입력해주세요.'
+      : nicknameCheck === 'taken'
+        ? '이미 사용 중인 닉네임입니다.'
+        : undefined;
+  const nicknameMessage =
+    nicknameError ?? (nicknameCheck === 'available' ? '사용 가능한 아이디입니다.' : undefined);
 
   // 휴대폰 번호 유효성 검사
   const isPhoneValid = /^010-\d{4}-\d{4}$/.test(phone);
 
   // 시작하기 활성화 조건
   const changed = !isEdit || nickname !== me?.name || phone !== me?.phone;
-  const canStart = isNicknameValid && isPhoneValid && nicknameVerified && changed;
+  const canStart = isNicknameValid && isPhoneValid && nicknameCheck === 'available' && changed;
 
   // 닉네임 입력
   const handleNicknameChange = (text: string) => {
@@ -60,7 +74,8 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
     setNickname(limited);
 
     // 닉네임 수정 시 기존 중복 확인 결과 초기화 (수정 화면에서 원래 닉네임으로 되돌리면 확인 불필요)
-    setNicknameVerified(isEdit && limited === me?.name);
+    setNicknameCheck(isEdit && limited === me?.name ? 'available' : 'unchecked');
+    setShowLengthError(false);
   };
 
   // 휴대폰 번호 하이픈 자동 입력
@@ -86,17 +101,21 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   // 닉네임 중복 확인
   const handleNicknameCheck = () => {
     if (!isNicknameValid) {
-      Alert.alert('닉네임 확인', '닉네임은 2~10자로 입력해주세요.');
+      setShowLengthError(!hasInvalidNicknameCharacters);
       return;
     }
 
     // TODO: 백엔드 닉네임 중복 확인 API 연동
-    if (__DEV__) {
-      setNicknameVerified(true);
-      Alert.alert('시연용 확인', '서버 중복 확인 전입니다. UI 시연을 위해 진행할 수 있어요.');
-    } else {
+    if (!__DEV__) {
       Alert.alert('중복 확인', '닉네임 중복 확인 API 연동 전입니다.');
+      return;
     }
+
+    const taken = Object.values(DEMO_USERS).some(
+      ({ id }) =>
+        id !== currentUserId && findDemoUser(id)?.name.toLowerCase() === nickname.toLowerCase(),
+    );
+    setNicknameCheck(taken ? 'taken' : 'available');
   };
 
   // 프로필 설정 완료
@@ -153,32 +172,42 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
           {/* 입력 폼 */}
           <View style={styles.form}>
             {/* 닉네임 입력 행 */}
-            <View style={styles.nicknameRow}>
-              {/* 닉네임 입력창 */}
-              <View style={styles.nicknameField}>
-                <Text style={styles.inputLabel}>
-                  닉네임 <Text style={styles.required}>*</Text>
-                </Text>
+            <View style={styles.nicknameGroup}>
+              <View style={styles.nicknameRow}>
+                {/* 닉네임 입력창 */}
+                <View style={styles.nicknameField}>
+                  <Text style={styles.inputLabel}>
+                    닉네임 <Text style={styles.required}>*</Text>
+                  </Text>
 
-                <TextInput
-                  style={styles.nicknameInput}
-                  placeholder="2~10자로 입력해주세요"
-                  placeholderTextColor={COLORS.textSub}
-                  value={nickname}
-                  onChangeText={handleNicknameChange}
-                  maxLength={20}
-                  autoCapitalize="none"
-                  autoCorrect={false}
-                  accessibilityLabel="닉네임"
+                  <TextInput
+                    style={[styles.nicknameInput, nicknameError && styles.nicknameInputError]}
+                    placeholder="2~10자로 입력해주세요"
+                    placeholderTextColor={COLORS.textSub}
+                    value={nickname}
+                    onChangeText={handleNicknameChange}
+                    maxLength={20}
+                    autoCapitalize="none"
+                    autoCorrect={false}
+                    accessibilityLabel="닉네임"
+                  />
+                </View>
+
+                {/* 중복 확인 */}
+                <SecondaryButton
+                  title="중복 확인"
+                  onPress={handleNicknameCheck}
+                  style={styles.duplicateButton}
                 />
               </View>
-
-              {/* 중복 확인 */}
-              <SecondaryButton
-                title="중복 확인"
-                onPress={handleNicknameCheck}
-                style={styles.duplicateButton}
-              />
+              {nicknameMessage && (
+                <Text
+                  accessibilityLiveRegion="polite"
+                  style={[styles.nicknameMessage, nicknameError && styles.nicknameMessageError]}
+                >
+                  {nicknameMessage}
+                </Text>
+              )}
             </View>
 
             <View style={styles.phoneGroup}>
@@ -304,6 +333,10 @@ const styles = StyleSheet.create({
   // 닉네임 입력
   // ===================================
 
+  nicknameGroup: {
+    gap: 4,
+  },
+
   nicknameRow: {
     width: '100%',
     height: 72,
@@ -365,6 +398,23 @@ const styles = StyleSheet.create({
   // ===================================
   // 닉네임 중복 확인 버튼
   // ===================================
+
+  nicknameInputError: {
+    borderColor: COLORS.alert,
+  },
+
+  nicknameMessage: {
+    paddingHorizontal: 4,
+    fontFamily: 'Pretendard-Regular',
+    fontSize: 14,
+    lineHeight: 20.3,
+    color: COLORS.text,
+    includeFontPadding: false,
+  },
+
+  nicknameMessageError: {
+    color: COLORS.alert,
+  },
 
   duplicateButton: {
     width: 86,
