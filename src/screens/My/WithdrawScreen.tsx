@@ -1,14 +1,7 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import {
-  View,
-  Text,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet, Keyboard } from 'react-native';
+import type { ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -41,6 +34,13 @@ export default function WithdrawScreen({
   const [detail, setDetail] = useState('');
   const [agreed, setAgreed] = useState(false);
   const [blockedOpen, setBlockedOpen] = useState(false);
+  const scrollRef = useRef<ScrollViewInstance>(null);
+
+  // 입력칸이 본문 맨 아래라, 키보드가 열리면 끝까지 스크롤해 입력칸 전체를 보여줌
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => scrollRef.current?.scrollToEnd());
+    return () => sub.remove();
+  }, []);
 
   const mine = rentals.filter(
     (rental) => rental.ownerId === currentUserId || rental.borrowerId === currentUserId,
@@ -70,11 +70,14 @@ export default function WithdrawScreen({
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="회원 탈퇴" onPressLeft={() => navigation.goBack()} />
 
-      <KeyboardAvoidingView
-        style={styles.flex}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
-        <ScrollView contentContainerStyle={styles.body} keyboardShouldPersistTaps="handled">
+      {/* Figma: 키보드가 열리면 하단 버튼은 키보드 뒤에 두고, 본문만 스크롤해 입력칸을 보여줌 */}
+      <View style={styles.flex}>
+        <ScrollView
+          ref={scrollRef}
+          contentContainerStyle={styles.body}
+          keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
+        >
           <View style={styles.intro}>
             <Text style={styles.title}>정말 탈퇴하시겠어요?</Text>
             <Text style={styles.description}>
@@ -134,7 +137,7 @@ export default function WithdrawScreen({
             </Pressable>
           </View>
         </View>
-      </KeyboardAvoidingView>
+      </View>
 
       <Popup
         visible={blockedOpen}
