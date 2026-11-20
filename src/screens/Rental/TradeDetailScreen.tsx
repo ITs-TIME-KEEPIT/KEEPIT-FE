@@ -245,7 +245,7 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
             : null;
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="거래 상세" onPressLeft={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
   bottomCta: {
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 32,
     gap: 8,
     backgroundColor: COLORS.white,
   },

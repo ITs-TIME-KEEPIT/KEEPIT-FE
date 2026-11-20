@@ -54,7 +54,7 @@ export default function TradeReportScreen({ navigation, route }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="문제 신고" onPressLeft={() => navigation.goBack()} />
 
       <KeyboardAvoidingView

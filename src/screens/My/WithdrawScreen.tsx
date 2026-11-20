@@ -67,7 +67,7 @@ export default function WithdrawScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="회원 탈퇴" onPressLeft={() => navigation.goBack()} />
 
       <KeyboardAvoidingView
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 12,
+    paddingBottom: 32,
     backgroundColor: COLORS.white,
   },
 

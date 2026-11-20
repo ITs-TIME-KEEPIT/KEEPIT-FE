@@ -173,8 +173,8 @@ const styles = StyleSheet.create({
   body: {
     paddingTop: 20,
     paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 20,
+    paddingBottom: 20,
+    gap: 24,
   },
 
   infoBox: {
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
   },
 
   agreeBox: {
-    padding: 14,
+    padding: 15,
     gap: 14,
     borderWidth: 1,
     borderColor: COLORS.bgGray,

@@ -197,7 +197,7 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
       />
     );
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Pressable
@@ -611,7 +611,7 @@ const styles = StyleSheet.create({
   footer: {
     paddingHorizontal: 20,
     paddingTop: 12,
-    paddingBottom: 12,
+    paddingBottom: 32,
     borderTopWidth: 1,
     borderTopColor: COLORS.line,
   },

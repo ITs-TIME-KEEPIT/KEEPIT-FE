@@ -188,7 +188,7 @@ export default function SearchScreen({
               onPress={() => listRef.current?.scrollToOffset({ offset: 0, animated: true })}
               accessibilityRole="button"
               accessibilityLabel="맨 위로"
-              style={[styles.topButton, { bottom: 24 + bottom }]}
+              style={styles.topButton}
             >
               <Image
                 source={require('../../../assets/icons/chevron-down.png')}
@@ -369,9 +369,11 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
+  // Figma: 화면 오른쪽 30, 맨 아래 31
   topButton: {
     position: 'absolute',
-    right: 25,
+    right: 30,
+    bottom: 31,
     padding: 14,
     borderRadius: 999,
     backgroundColor: COLORS.primary,

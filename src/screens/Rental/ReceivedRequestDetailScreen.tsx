@@ -68,7 +68,7 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="신청 상세" onPressLeft={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
@@ -220,7 +220,7 @@ const styles = StyleSheet.create({
   bottomCta: {
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 32,
     gap: 8,
     backgroundColor: COLORS.white,
   },
