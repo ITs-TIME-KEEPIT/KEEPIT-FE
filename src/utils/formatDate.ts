@@ -31,19 +31,3 @@ export function formatDday(target: Date, now = new Date()) {
 
 // 시작일과 종료일을 모두 세는 대여 일수
 export const rentalDays = (start: Date, end: Date) => dayDiff(start, end) + 1;
-
-// 2일 3시간 45분
-export function formatElapsed(ms: number) {
-  const minutes = Math.floor(ms / 60000);
-  const parts = [
-    [Math.floor(minutes / 1440), '일'],
-    [Math.floor((minutes % 1440) / 60), '시간'],
-    [minutes % 60, '분'],
-  ] as const;
-  return (
-    parts
-      .filter(([value]) => value > 0)
-      .map(([value, unit]) => `${value}${unit}`)
-      .join(' ') || '1분 미만'
-  );
-}
