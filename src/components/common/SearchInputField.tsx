@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TextInput, Image, StyleSheet } from 'react-native';
+import { View, TextInput, Image, Pressable, StyleSheet } from 'react-native';
 
 import { COLORS } from '../../constants/colors';
 
@@ -9,6 +9,8 @@ interface SearchInputFieldProps {
   onChangeText: (text: string) => void;
   onSubmitEditing?: () => void;
   editable?: boolean;
+  autoFocus?: boolean;
+  onClear?: () => void; // 넘기면 입력값이 있을 때 지우기(x) 버튼 표시
 }
 
 export default function SearchInputField({
@@ -17,6 +19,8 @@ export default function SearchInputField({
   onChangeText,
   onSubmitEditing,
   editable = true,
+  autoFocus = false,
+  onClear,
 }: SearchInputFieldProps) {
   return (
     <View style={styles.container}>
@@ -34,12 +38,29 @@ export default function SearchInputField({
         onChangeText={onChangeText}
         onSubmitEditing={onSubmitEditing}
         editable={editable}
+        autoFocus={autoFocus}
         returnKeyType="search"
         autoCorrect={false}
         autoCapitalize="none"
         underlineColorAndroid="transparent"
         accessibilityLabel="검색어 입력"
       />
+
+      {onClear && value.length > 0 && (
+        <Pressable
+          onPress={onClear}
+          accessibilityRole="button"
+          accessibilityLabel="검색어 지우기"
+          hitSlop={8}
+          style={styles.clear}
+        >
+          <Image
+            source={require('../../../assets/icons/x.png')}
+            style={styles.clearIcon}
+            resizeMode="contain"
+          />
+        </Pressable>
+      )}
     </View>
   );
 }
@@ -64,6 +85,21 @@ const styles = StyleSheet.create({
     width: 16,
     height: 16,
     tintColor: COLORS.textPlaceholder,
+  },
+
+  clear: {
+    width: 18,
+    height: 18,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 9,
+    backgroundColor: COLORS.line,
+  },
+
+  clearIcon: {
+    width: 12,
+    height: 12,
+    tintColor: COLORS.textSub,
   },
 
   input: {

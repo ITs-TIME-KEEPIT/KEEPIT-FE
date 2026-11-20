@@ -1,11 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Image, Pressable, ScrollView, StyleSheet, Alert } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
-import { DEMO_PHONES } from '../../mocks/rental';
 import { useClothingItems } from '../../state/clothingStore';
 import {
   findDemoUser,
@@ -15,9 +14,9 @@ import {
 } from '../../state/rentalStore';
 
 import RoundImage from '../../components/common/RoundImage';
+import Popup from '../../components/common/Popup';
+import { ACTIVE_STAGES } from '../../utils/myClothes';
 
-const IN_PROGRESS = ['accepted', 'handed-over', 'received', 'returned'];
-const preparing = (message: string) => Alert.alert('준비 중', message);
 // 010-0000-0001 → 010-****-0001
 const maskPhone = (phone?: string) => phone?.replace(/-(\d{4})-/, '-****-') ?? '-';
 
@@ -27,6 +26,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
   const { currentUserId, rentals } = useRentalState();
   const clothes = useClothingItems();
   const me = findDemoUser(currentUserId);
+  const [logoutOpen, setLogoutOpen] = useState(false);
 
   const mine = rentals.filter(
     (rental) => rental.ownerId === currentUserId || rental.borrowerId === currentUserId,
@@ -38,21 +38,17 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
     },
     {
       label: '진행 중 거래',
-      value: mine.filter((rental) => IN_PROGRESS.includes(rental.stage)).length,
+      value: mine.filter((rental) => ACTIVE_STAGES.includes(rental.stage)).length,
     },
     { label: '완료 거래', value: mine.filter((rental) => rental.stage === 'completed').length },
   ];
 
-  // 마이 메뉴 이동은 아직 비활성. 화면이 연결되면 각 onPress를 이동으로 교체
   const menus = [
-    { label: '내 등록 옷 관리', message: '내 등록 옷 관리는 곧 연결될 예정이에요.' },
-    {
-      label: '받은 신청',
-      message: '받은 신청은 내 등록 옷 관리에서 확인할 수 있도록 연결될 예정이에요.',
-    },
-    { label: '알림', message: '알림은 서버 연동 후 사용할 수 있어요.' },
-    { label: '로그아웃', message: '로그아웃은 로그인 연동 후 사용할 수 있어요.' },
-    { label: '회원 탈퇴', message: '회원 탈퇴는 이후 제공될 예정이에요.', muted: true },
+    { label: '내 등록 옷 관리', onPress: () => navigation.navigate('MyClothes') },
+    { label: '받은 신청', onPress: () => navigation.navigate('ReceivedRequests') },
+    { label: '알림', onPress: () => navigation.navigate('Notifications') },
+    { label: '로그아웃', onPress: () => setLogoutOpen(true) },
+    { label: '회원 탈퇴', onPress: () => navigation.navigate('Withdraw'), muted: true },
   ];
 
   return (
@@ -63,7 +59,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
 
       <ScrollView contentContainerStyle={[styles.body, { paddingBottom: 110 + bottom }]}>
         <Pressable
-          onPress={() => preparing('프로필 수정은 곧 연결될 예정이에요.')}
+          onPress={() => navigation.navigate('ProfileSetup', { edit: true })}
           accessibilityRole="button"
           accessibilityLabel="프로필 수정"
           style={styles.profile}
@@ -72,7 +68,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
           <View style={styles.profileTexts}>
             <Text style={styles.name}>{me?.name ?? '-'}</Text>
             <Text style={styles.sub}>
-              {me?.region.district ?? '-'} · {maskPhone(DEMO_PHONES[currentUserId])}
+              {me?.region.district ?? '-'} · {maskPhone(me?.phone)}
             </Text>
           </View>
           <Image
@@ -106,11 +102,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
               key={menu.label}
               label={menu.label}
               muted={menu.muted}
-              onPress={() => {
-                if (menu.label === '내 등록 옷 관리') navigation.navigate('MyClothes');
-                else if (menu.label === '받은 신청') navigation.navigate('ReceivedRequests');
-                else preparing(menu.message);
-              }}
+              onPress={menu.onPress}
             />
           ))}
         </View>
@@ -143,6 +135,22 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
           </View>
         )}
       </ScrollView>
+
+      <Popup
+        visible={logoutOpen}
+        title="로그아웃 하시겠어요?"
+        description={'로그아웃 시 새로운 대여 신청이나 거래 관련\n알림을 받지 못할 수 있어요.'}
+        primaryLabel="로그아웃"
+        onPressPrimary={() => {
+          setLogoutOpen(false);
+          // TODO: 로그인 연동 후 저장된 로그인 정보 삭제
+          // 탭 안에서는 루트 스택을 초기화해야 온보딩으로 돌아갑니다
+          navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+        }}
+        secondaryLabel="취소"
+        onPressSecondary={() => setLogoutOpen(false)}
+        onClose={() => setLogoutOpen(false)}
+      />
     </SafeAreaView>
   );
 }

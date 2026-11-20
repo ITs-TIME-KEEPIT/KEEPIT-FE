@@ -88,8 +88,8 @@ KEEPIT-FE/
 │   │
 │   └── screens/
 │       ├── Auth/
-│       │   ├── LoginScreen.tsx
-│       │   ├── SignupScreen.tsx
+│       │   ├── SplashScreen.tsx
+│       │   ├── OnboardingScreen.tsx
 │       │   └── ProfileSetupScreen.tsx
 │       └── Home/
 │           └── HomeScreen.tsx
@@ -258,8 +258,6 @@ Figma 디자인 시스템의 Icon을 기준으로 사용합니다.
 | 홈          | Figma 기반 홈 화면 UI                      |
 
 로그인/프로필 설정 화면은 공통 컴포넌트 작업 완료 후 이어서 진행합니다.
-
-기존 `LoginScreen.tsx`, `SignupScreen.tsx`, `HomeScreen.tsx`는 실제 구현 상태를 확인한 후 수정합니다.
 
 ### 화면 구현 시 확인 사항
 

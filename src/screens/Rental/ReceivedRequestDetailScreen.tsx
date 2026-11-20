@@ -73,7 +73,7 @@ export default function ReceivedRequestDetailScreen({ navigation, route }: Props
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
         <Pressable
-          onPress={() => Alert.alert('준비 중', '신청자 프로필은 이후 연결할 예정이에요.')}
+          onPress={() => navigation.navigate('UserProfile', { userId: rental.borrowerId })}
           accessibilityRole="button"
           accessibilityLabel="신청자 프로필"
         >

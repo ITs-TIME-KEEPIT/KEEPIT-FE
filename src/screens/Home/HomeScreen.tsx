@@ -1,43 +1,27 @@
 import React, { useEffect, useState } from 'react';
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
-import {
-  Animated,
-  View,
-  Text,
-  Image,
-  Pressable,
-  ScrollView,
-  FlatList,
-  StyleSheet,
-  Alert,
-} from 'react-native';
+import { Animated, View, Text, Image, Pressable, FlatList, StyleSheet } from 'react-native';
 import { useSafeAreaInsets, SafeAreaView } from 'react-native-safe-area-context';
 
 import { COLORS } from '../../constants/colors';
 
 import Header from '../../components/common/Header';
-import ChipButton from '../../components/common/ChipButton';
-import ChipActiveButton from '../../components/common/ChipActiveButton';
 import ClothCard from '../../components/clothing/ClothCard';
+import FilterBar, { type CategoryChip } from '../../components/clothing/FilterBar';
 import FilterSheet from '../../components/bottomsheet/FilterSheet';
 import RegionSheet from '../../components/bottomsheet/RegionSheet';
 import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
 
-import { CATEGORIES } from '../../constants/clothing';
 import type { Region } from '../../constants/regions';
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
 import { useClothingItems } from '../../state/clothingStore';
-import { filterClothItems } from '../../utils/filterClothItems';
-
-const CATEGORY_CHIPS = ['전체', ...CATEGORIES] as const;
-
-const showPreparing = (message: string) => Alert.alert('준비 중', message);
+import { clothBadges, filterClothItems, isFilterActive } from '../../utils/filterClothItems';
 
 export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const { bottom } = useSafeAreaInsets();
   const items = useClothingItems();
-  const [category, setCategory] = useState<(typeof CATEGORY_CHIPS)[number]>('전체');
+  const [category, setCategory] = useState<CategoryChip>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
   const [region, setRegion] = useState<Region>(null);
@@ -59,64 +43,25 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 
   const visibleItems = items.filter((item) => !item.hidden && !item.deleted);
   const clothes = filterClothItems(visibleItems, category, appliedFilter, region);
-  const { price, sizes, colors } = appliedFilter;
-  const filterActive = price.min > 0 || price.max !== null || sizes.length > 0 || colors.length > 0;
+  const filterActive = isFilterActive(appliedFilter);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header
         location={region?.district ?? '전체'}
         onPressLocation={() => setRegionOpen(true)}
-        // 알림은 서버(푸시·알림 API) 연동 후 제공
-        onPressBell={() => showPreparing('알림은 서버 연동 후 사용할 수 있어요.')}
+        onPressSearch={() => navigation.navigate('Search')}
+        onPressBell={() => navigation.navigate('Notifications')}
       />
 
-      {/* 필터 바 */}
-      <View style={styles.filterBar}>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.chipScroll}
-          contentContainerStyle={styles.chips}
-        >
-          {CATEGORY_CHIPS.map((item) =>
-            item === category ? (
-              <ChipActiveButton key={item} title={item} onPress={() => setCategory(item)} />
-            ) : (
-              <ChipButton key={item} title={item} onPress={() => setCategory(item)} />
-            ),
-          )}
-        </ScrollView>
-
-        <View style={styles.divider} />
-
-        <View style={styles.tools}>
-          <Pressable
-            onPress={() => setDateOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel="날짜 선택"
-            style={[styles.toolButton, dateRange && styles.toolButtonActive]}
-          >
-            <Image
-              source={require('../../../assets/icons/calendar.png')}
-              style={[styles.toolIcon, dateRange && styles.toolIconActive]}
-              resizeMode="contain"
-            />
-          </Pressable>
-          <Pressable
-            onPress={() => setFilterOpen(true)}
-            accessibilityRole="button"
-            accessibilityLabel="상세 필터"
-            style={[styles.toolButton, filterActive && styles.toolButtonActive]}
-          >
-            <Image
-              source={require('../../../assets/icons/filter.png')}
-              style={[styles.toolIcon, filterActive && styles.toolIconActive]}
-              resizeMode="contain"
-            />
-          </Pressable>
-        </View>
-      </View>
+      <FilterBar
+        category={category}
+        onChangeCategory={setCategory}
+        dateActive={!!dateRange}
+        filterActive={filterActive}
+        onPressDate={() => setDateOpen(true)}
+        onPressFilter={() => setFilterOpen(true)}
+      />
 
       {/* 옷 목록 + FAB */}
       <View style={styles.listArea}>
@@ -137,10 +82,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
               size={item.size}
               date={item.detail?.postedLabel}
               price={item.price}
-              badges={[
-                ...(item.laundryIncluded ? [{ label: '세탁 포함' }] : []),
-                ...(item.shippingAvailable ? [{ label: '택배 가능', tone: 'gray' as const }] : []),
-              ]}
+              badges={clothBadges(item)}
               onPress={() => navigation.navigate('ClothDetail', { clothId: item.id })}
             />
           )}
@@ -231,63 +173,6 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
-  },
-
-  filterBar: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 16,
-    height: 54,
-    borderBottomWidth: 1,
-    borderBottomColor: COLORS.line,
-  },
-
-  chipScroll: {
-    flex: 1,
-    marginRight: 5,
-  },
-
-  chips: {
-    alignItems: 'center',
-    gap: 12,
-  },
-
-  divider: {
-    width: 1,
-    height: 20,
-    backgroundColor: COLORS.line,
-  },
-
-  tools: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-
-  toolButton: {
-    width: 34,
-    height: 34,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: COLORS.white,
-    borderWidth: 1,
-    borderColor: COLORS.line,
-    borderRadius: 999,
-  },
-
-  toolButtonActive: {
-    backgroundColor: COLORS.primary,
-    borderColor: COLORS.primary,
-  },
-
-  toolIcon: {
-    width: 20,
-    height: 20,
-    tintColor: COLORS.text,
-  },
-
-  toolIconActive: {
-    tintColor: COLORS.white,
   },
 
   listArea: {
