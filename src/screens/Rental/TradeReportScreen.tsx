@@ -44,7 +44,7 @@ export default function TradeReportScreen({ navigation, route }: Props) {
 
   const submit = () => {
     try {
-      reportRental(route.params.rentalId, text ? `${reason}: ${text}` : reason!);
+      reportRental(route.params.rentalId, reason === ETC ? `${reason}: ${text}` : reason!);
       Alert.alert('신고를 접수했어요', '운영자가 사진을 확인하고 양쪽에 결과를 알려드려요.', [
         { text: '확인', onPress: () => navigation.goBack() },
       ]);
@@ -71,7 +71,7 @@ export default function TradeReportScreen({ navigation, route }: Props) {
           </Text>
 
           <View style={styles.options}>
-            {REASONS.map((item) => (
+            {REASONS.filter((item) => item !== ETC).map((item) => (
               <RadioInputField
                 key={item}
                 label={item}
@@ -79,13 +79,22 @@ export default function TradeReportScreen({ navigation, route }: Props) {
                 onPress={() => setReason(item)}
               />
             ))}
-            <AreaInputField
-              label=""
-              placeholder="어디에 어떤 문제가 있는지 적어주세요"
-              value={detail}
-              onChangeText={setDetail}
-              maxLength={500}
-            />
+            <View style={styles.etc}>
+              <RadioInputField
+                label={ETC}
+                selected={reason === ETC}
+                onPress={() => setReason(ETC)}
+              />
+              {/* '기타'를 골라야만 입력 가능 */}
+              <AreaInputField
+                label=""
+                placeholder="어디에 어떤 문제가 있는지 적어주세요"
+                value={detail}
+                onChangeText={setDetail}
+                editable={reason === ETC}
+                maxLength={500}
+              />
+            </View>
           </View>
 
           <InfoNote text="운영자가 1~4단계 사진을 비교해서 확인하고 양쪽에 결과를 알려드려요 (11/7 데모는 운영자 수동 처리)" />
@@ -130,6 +139,11 @@ const styles = StyleSheet.create({
 
   options: {
     gap: 20,
+  },
+
+  // Figma: '기타'와 입력칸 사이 12
+  etc: {
+    gap: 12,
   },
 
   bottomCta: {

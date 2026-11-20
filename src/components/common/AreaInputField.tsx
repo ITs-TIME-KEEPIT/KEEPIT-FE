@@ -10,6 +10,7 @@ interface AreaInputFieldProps {
   onChangeText: (text: string) => void;
   editable?: boolean;
   maxLength?: number;
+  onFocus?: () => void;
 }
 
 export default function AreaInputField({
@@ -19,6 +20,7 @@ export default function AreaInputField({
   onChangeText,
   editable = true,
   maxLength,
+  onFocus,
 }: AreaInputFieldProps) {
   return (
     <View style={styles.container}>
@@ -33,6 +35,7 @@ export default function AreaInputField({
         onChangeText={onChangeText}
         editable={editable}
         maxLength={maxLength}
+        onFocus={onFocus}
         multiline={true}
         textAlignVertical="top"
         underlineColorAndroid="transparent"

@@ -26,7 +26,8 @@ import { useClothingItems } from '../../state/clothingStore';
 import { findDemoUser, useRentalState } from '../../state/rentalStore';
 import { ACTIVE_STAGES } from '../../utils/myClothes';
 
-const REASONS = ['원하는 옷이 없어요', '거래 과정이 번거로워요', '다른 서비스를 써요', '기타'];
+const ETC = '기타';
+const REASONS = ['원하는 옷이 없어요', '거래 과정이 번거로워요', '다른 서비스를 써요', ETC];
 const AGREE_LABEL = '안내를 모두 확인했고 탈퇴에 동의해요';
 
 /* 회원 탈퇴 (Figma F. 회원 탈퇴) */
@@ -105,6 +106,7 @@ export default function WithdrawScreen({
               placeholder="어떤 점이 아쉬우셨나요? 보내주신 의견은 서비스 개선에 반영할 예정이에요."
               value={detail}
               onChangeText={setDetail}
+              editable={reason === ETC}
               maxLength={500}
             />
           </View>
