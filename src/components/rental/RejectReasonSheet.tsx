@@ -65,15 +65,15 @@ export default function RejectReasonSheet({ visible, onReject, onClose }: Reject
           />
         ))}
 
-        {reason === ETC && (
-          <AreaInputField
-            label=""
-            placeholder="입력해주세요"
-            value={etcText}
-            onChangeText={setEtcText}
-            maxLength={200}
-          />
-        )}
+        {/* 입력칸은 처음부터 보이고, 누르면 '기타'가 선택됨 */}
+        <AreaInputField
+          label=""
+          placeholder="입력해주세요"
+          value={etcText}
+          onChangeText={setEtcText}
+          onFocus={() => setReason(ETC)}
+          maxLength={200}
+        />
       </View>
     </BottomSheet>
   );

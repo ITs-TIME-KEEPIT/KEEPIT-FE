@@ -80,7 +80,7 @@ export default function TradePhotoScreen({
 
   if (captured) {
     return (
-      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <SafeAreaView style={styles.container} edges={['top']}>
         <StatusBar style="dark" />
         <View style={styles.body}>
           <View style={styles.iconCircle}>

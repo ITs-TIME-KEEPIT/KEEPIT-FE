@@ -10,7 +10,6 @@ import PriceTab from './filter/PriceTab';
 import SizeTab from './filter/SizeTab';
 import ColorTab from './filter/ColorTab';
 import CtaButton from '../common/CtaButton';
-import CtaDisabledButton from '../common/CtaDisabledButton';
 
 const TABS = ['가격', '사이즈', '컬러'] as const;
 type Tab = (typeof TABS)[number];
@@ -77,14 +76,8 @@ export default function FilterSheet({
       visible={visible}
       title="필터"
       onClose={onClose}
-      footer={
-        // 0개일 때 비활성 여부는 디자인 확인 필요
-        count > 0 ? (
-          <CtaButton title={`${count}개 옷 보기`} onPress={apply} />
-        ) : (
-          <CtaDisabledButton title="0개 옷 보기" />
-        )
-      }
+      // Figma BRW-202: 0개여도 적용해서 결과 없음 화면을 보여줌
+      footer={<CtaButton title={`${count}개 옷 보기`} onPress={apply} />}
     >
       <View style={styles.tabs}>
         {TABS.map((t) => (

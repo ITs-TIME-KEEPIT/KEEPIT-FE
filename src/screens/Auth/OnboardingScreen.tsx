@@ -53,7 +53,7 @@ export default function OnboardingScreen({
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.body}>
         <FlatList
           data={PAGES}
@@ -183,7 +183,7 @@ const styles = StyleSheet.create({
   footer: {
     gap: 12,
     paddingHorizontal: 16,
-    paddingBottom: 8,
+    paddingBottom: 32,
   },
 
   kakaoButton: {

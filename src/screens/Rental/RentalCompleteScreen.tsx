@@ -67,8 +67,8 @@ const styles = StyleSheet.create({
   },
 
   icon: {
-    width: 32,
-    height: 32,
+    width: 48,
+    height: 48,
     tintColor: COLORS.primary,
   },
 

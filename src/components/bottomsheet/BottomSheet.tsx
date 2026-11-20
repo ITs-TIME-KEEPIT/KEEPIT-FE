@@ -1,16 +1,15 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   Text,
   Image,
   Modal,
+  Keyboard,
   Pressable,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
-
 import { COLORS } from '../../constants/colors';
 
 interface BottomSheetProps {
@@ -28,7 +27,22 @@ export default function BottomSheet({
   children,
   footer,
 }: BottomSheetProps) {
-  const { bottom } = useSafeAreaInsets();
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    // iOS는 키보드가 움직이기 전에 알려주는 will 이벤트가 있어 여백이 함께 바뀜
+    const ios = Platform.OS === 'ios';
+    const show = Keyboard.addListener(ios ? 'keyboardWillShow' : 'keyboardDidShow', () =>
+      setKeyboardOpen(true),
+    );
+    const hide = Keyboard.addListener(ios ? 'keyboardWillHide' : 'keyboardDidHide', () =>
+      setKeyboardOpen(false),
+    );
+    return () => {
+      show.remove();
+      hide.remove();
+    };
+  }, []);
 
   return (
     <Modal visible={visible} transparent animationType="slide" onRequestClose={onClose}>
@@ -43,7 +57,8 @@ export default function BottomSheet({
           style={styles.dim}
         />
 
-        <View style={[styles.sheet, { paddingBottom: 24 + bottom }]}>
+        {/* Figma: 마지막 요소는 화면 맨 아래에서 32, 키보드가 열리면 키보드 위 24 */}
+        <View style={[styles.sheet, { paddingBottom: keyboardOpen ? 24 : 32 }]}>
           <View style={styles.handle} />
           <View style={styles.titleRow}>
             <Text style={styles.title}>{title}</Text>

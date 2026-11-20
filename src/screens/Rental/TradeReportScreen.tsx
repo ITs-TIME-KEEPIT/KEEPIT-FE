@@ -1,13 +1,6 @@
-import React, { useState } from 'react';
-import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { Alert, Keyboard, ScrollView, StyleSheet, Text, View } from 'react-native';
+import type { ScrollViewInstance } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -38,13 +31,20 @@ const ETC = REASONS[5];
 export default function TradeReportScreen({ navigation, route }: Props) {
   const [reason, setReason] = useState<(typeof REASONS)[number] | null>(null);
   const [detail, setDetail] = useState('');
+  const scrollRef = useRef<ScrollViewInstance>(null);
+
+  // 입력칸이 본문 맨 아래라, 키보드가 열리면 끝까지 스크롤해 입력칸 전체를 보여줌
+  useEffect(() => {
+    const sub = Keyboard.addListener('keyboardDidShow', () => scrollRef.current?.scrollToEnd());
+    return () => sub.remove();
+  }, []);
 
   const text = detail.trim();
   const canSubmit = !!reason && (reason !== ETC || !!text);
 
   const submit = () => {
     try {
-      reportRental(route.params.rentalId, text ? `${reason}: ${text}` : reason!);
+      reportRental(route.params.rentalId, reason === ETC ? `${reason}: ${text}` : reason!);
       Alert.alert('신고를 접수했어요', '운영자가 사진을 확인하고 양쪽에 결과를 알려드려요.', [
         { text: '확인', onPress: () => navigation.goBack() },
       ]);
@@ -54,16 +54,16 @@ export default function TradeReportScreen({ navigation, route }: Props) {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="문제 신고" onPressLeft={() => navigation.goBack()} />
 
-      <KeyboardAvoidingView
-        style={styles.container}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      >
+      {/* Figma: 키보드가 열리면 하단 버튼은 키보드 뒤에 두고, 본문만 스크롤해 입력칸을 보여줌 */}
+      <View style={styles.container}>
         <ScrollView
+          ref={scrollRef}
           contentContainerStyle={styles.body}
           keyboardShouldPersistTaps="handled"
+          automaticallyAdjustKeyboardInsets
           showsVerticalScrollIndicator={false}
         >
           <Text style={styles.title}>
@@ -71,7 +71,7 @@ export default function TradeReportScreen({ navigation, route }: Props) {
           </Text>
 
           <View style={styles.options}>
-            {REASONS.map((item) => (
+            {REASONS.filter((item) => item !== ETC).map((item) => (
               <RadioInputField
                 key={item}
                 label={item}
@@ -79,13 +79,22 @@ export default function TradeReportScreen({ navigation, route }: Props) {
                 onPress={() => setReason(item)}
               />
             ))}
-            <AreaInputField
-              label=""
-              placeholder="어디에 어떤 문제가 있는지 적어주세요"
-              value={detail}
-              onChangeText={setDetail}
-              maxLength={500}
-            />
+            <View style={styles.etc}>
+              <RadioInputField
+                label={ETC}
+                selected={reason === ETC}
+                onPress={() => setReason(ETC)}
+              />
+              {/* '기타'를 골라야만 입력 가능 */}
+              <AreaInputField
+                label=""
+                placeholder="어디에 어떤 문제가 있는지 적어주세요"
+                value={detail}
+                onChangeText={setDetail}
+                editable={reason === ETC}
+                maxLength={500}
+              />
+            </View>
           </View>
 
           <InfoNote text="운영자가 1~4단계 사진을 비교해서 확인하고 양쪽에 결과를 알려드려요 (11/7 데모는 운영자 수동 처리)" />
@@ -98,7 +107,7 @@ export default function TradeReportScreen({ navigation, route }: Props) {
             <CtaDisabledButton title="신고하기" />
           )}
         </View>
-      </KeyboardAvoidingView>
+      </View>
     </SafeAreaView>
   );
 }
@@ -130,6 +139,11 @@ const styles = StyleSheet.create({
 
   options: {
     gap: 20,
+  },
+
+  // Figma: '기타'와 입력칸 사이 12
+  etc: {
+    gap: 12,
   },
 
   bottomCta: {

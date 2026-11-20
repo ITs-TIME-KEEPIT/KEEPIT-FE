@@ -54,7 +54,7 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
   const partner = findDemoUser(isOwner ? rental.borrowerId : rental.ownerId);
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="close" onPressLeft={close} />
 
       <View style={styles.body}>

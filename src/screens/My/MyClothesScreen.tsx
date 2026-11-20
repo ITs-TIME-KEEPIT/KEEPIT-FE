@@ -88,16 +88,6 @@ export default function MyClothesScreen({
               style={styles.action}
               accessibilityRole="button"
               onPress={() => {
-                setSelectedId(null);
-                navigation.navigate('ClothDetail', { clothId: selected.id });
-              }}
-            >
-              <Text style={styles.actionText}>옷 상세 보기</Text>
-            </Pressable>
-            <Pressable
-              style={styles.action}
-              accessibilityRole="button"
-              onPress={() => {
                 if (hasActiveTrade(rentals, selected.id)) {
                   Alert.alert('수정할 수 없어요', '진행 중인 거래를 먼저 완료해주세요.');
                   return;

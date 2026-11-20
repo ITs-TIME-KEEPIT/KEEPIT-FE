@@ -12,13 +12,12 @@ import CtaButton from '../../components/common/CtaButton';
 import DefaultButton from '../../components/common/DefaultButton';
 import Header from '../../components/common/Header';
 import SquareImage from '../../components/common/SquareImage';
-import InfoRow from '../../components/rental/InfoRow';
 import PhotoViewer from '../../components/rental/PhotoViewer';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import { markPhotosReviewed, useRentalState } from '../../state/rentalStore';
 import { photoRecordKey, useTradePhotos } from '../../state/tradePhotoStore';
-import { formatDateTime, formatElapsed } from '../../utils/formatDate';
+import { formatDateTime } from '../../utils/formatDate';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TradePhotoCompare'>;
 
@@ -62,10 +61,9 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
     { title: '3단계 · 수령', by: '대여자', uri: receipt?.photos[part], at: receipt?.savedAt },
     { title: '4단계 · 반납', by: '대여자', uri: returned?.photos[part], at: returned?.savedAt },
   ];
-  const elapsed = (from?: number, to?: number) => (from && to ? formatElapsed(to - from) : '-');
 
   return (
-    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+    <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="사진 비교" onPressLeft={() => navigation.goBack()} />
 
       <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
@@ -99,12 +97,6 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
               </Text>
             </View>
           ))}
-        </View>
-
-        <View style={styles.elapsed}>
-          <Text style={styles.elapsedTitle}>단계 사이 경과 시간</Text>
-          <InfoRow label="전달 → 수령" value={elapsed(handoff?.savedAt, receipt?.savedAt)} />
-          <InfoRow label="수령 → 반납" value={elapsed(receipt?.savedAt, returned?.savedAt)} />
         </View>
       </ScrollView>
 
@@ -191,25 +183,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  elapsed: {
-    gap: 8,
-    padding: 16,
-    borderRadius: 8,
-    backgroundColor: COLORS.bgLight,
-  },
-
-  elapsedTitle: {
-    fontFamily: 'Pretendard-SemiBold',
-    fontSize: 14,
-    lineHeight: 20.3,
-    color: COLORS.text,
-    includeFontPadding: false,
-  },
-
   bottomCta: {
     paddingTop: 12,
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingBottom: 32,
     gap: 8,
     backgroundColor: COLORS.white,
   },
