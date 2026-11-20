@@ -89,8 +89,13 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           )}
           ListEmptyComponent={
             <View style={styles.empty}>
+              <Image
+                source={require('../../../assets/icons/char-error.png')}
+                style={styles.character}
+                resizeMode="contain"
+              />
               <Text style={styles.emptyTitle}>조건에 맞는 옷이 없어요</Text>
-              <Text style={styles.emptySub}>날짜나 카테고리를 바꿔보세요</Text>
+              <Text style={styles.emptySub}>날짜나 필터를 바꿔보세요</Text>
               {filterActive && (
                 <SecondaryButton
                   title="필터 초기화"
@@ -191,17 +196,24 @@ const styles = StyleSheet.create({
     flexGrow: 1,
   },
 
+  // Figma: 필터 바 아래에서 144, 캐릭터~제목 20, 제목~안내 8
   empty: {
-    flex: 1,
     alignItems: 'center',
-    justifyContent: 'center',
-    gap: 10,
+    gap: 8,
+    paddingTop: 144,
+    paddingHorizontal: 20,
+  },
+
+  character: {
+    width: 90,
+    height: 98,
+    marginBottom: 12,
   },
 
   emptyTitle: {
     fontFamily: 'Pretendard-SemiBold',
-    fontSize: 20,
-    lineHeight: 29,
+    fontSize: 16,
+    lineHeight: 23.2,
     color: COLORS.text,
     includeFontPadding: false,
   },
@@ -214,10 +226,10 @@ const styles = StyleSheet.create({
     includeFontPadding: false,
   },
 
-  // Figma: 안내 문구와 버튼 사이 16 (gap 10 + 6)
+  // Figma: 안내 문구와 버튼 사이 17 (gap 8 + 9)
   resetButton: {
     alignSelf: 'center',
-    marginTop: 6,
+    marginTop: 9,
   },
 
   fab: {

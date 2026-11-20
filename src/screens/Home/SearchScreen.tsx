@@ -7,6 +7,7 @@ import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
 
 import SearchInputField from '../../components/common/SearchInputField';
+import SecondaryButton from '../../components/common/SecondaryButton';
 import ClothCard from '../../components/clothing/ClothCard';
 import FilterBar, { type CategoryChip } from '../../components/clothing/FilterBar';
 import FilterSheet from '../../components/bottomsheet/FilterSheet';
@@ -179,6 +180,14 @@ export default function SearchScreen({
                 />
                 <Text style={styles.emptyTitle}>{`'${query}'에 맞는 옷이 없어요`}</Text>
                 <Text style={styles.emptySub}>검색어나 필터를 바꿔보세요</Text>
+                {/* BRW-204: 필터가 걸려 있으면 필터 초기화 (홈 결과 없음과 같은 규칙) */}
+                {isFilterActive(appliedFilter) && (
+                  <SecondaryButton
+                    title="필터 초기화"
+                    onPress={() => setAppliedFilter(INITIAL_FILTER)}
+                    style={styles.resetButton}
+                  />
+                )}
               </View>
             }
           />
@@ -370,6 +379,12 @@ const styles = StyleSheet.create({
   },
 
   // Figma: 화면 오른쪽 30, 맨 아래 31
+  // 홈 결과 없음과 같게 안내 문구와 버튼 사이 17 (gap 10 + 7)
+  resetButton: {
+    alignSelf: 'center',
+    marginTop: 7,
+  },
+
   topButton: {
     position: 'absolute',
     right: 30,
