@@ -8,6 +8,7 @@ import { COLORS } from '../../constants/colors';
 import Header from '../../components/common/Header';
 import ClothCard from '../../components/clothing/ClothCard';
 import FilterBar, { type CategoryChip } from '../../components/clothing/FilterBar';
+import SecondaryButton from '../../components/common/SecondaryButton';
 import FilterSheet from '../../components/bottomsheet/FilterSheet';
 import RegionSheet from '../../components/bottomsheet/RegionSheet';
 import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
@@ -90,6 +91,13 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
             <View style={styles.empty}>
               <Text style={styles.emptyTitle}>조건에 맞는 옷이 없어요</Text>
               <Text style={styles.emptySub}>날짜나 카테고리를 바꿔보세요</Text>
+              {filterActive && (
+                <SecondaryButton
+                  title="필터 초기화"
+                  onPress={() => setAppliedFilter(INITIAL_FILTER)}
+                  style={styles.resetButton}
+                />
+              )}
             </View>
           }
         />
@@ -204,6 +212,12 @@ const styles = StyleSheet.create({
     lineHeight: 20.3,
     color: COLORS.textSub,
     includeFontPadding: false,
+  },
+
+  // Figma: 안내 문구와 버튼 사이 16 (gap 10 + 6)
+  resetButton: {
+    alignSelf: 'center',
+    marginTop: 6,
   },
 
   fab: {
