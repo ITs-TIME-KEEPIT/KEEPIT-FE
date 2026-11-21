@@ -26,3 +26,72 @@ export type Rental = {
   cancelReason?: string;
   report?: { reason: string; reporterId: string; reportedAt: number }; // 운영자 확인 전까지 거래 진행은 막지 않습니다
 };
+
+/* ---- 서버 응답 (Swagger 기준) ---- */
+
+export type RentalStatus =
+  | 'REQUESTED'
+  | 'ACCEPTED'
+  | 'HANDED_OVER'
+  | 'RECEIVED'
+  | 'RETURNED'
+  | 'COMPLETED'
+  | 'REJECTED'
+  | 'EXPIRED'
+  | 'INVALIDATED'
+  | 'CANCELED';
+
+export type ApiTradeMethod = 'DIRECT' | 'DELIVERY';
+
+export type RentalActor = 'BORROWER' | 'OWNER' | 'ADMIN' | 'SYSTEM';
+
+export type RentalNextAction =
+  'WAIT_RESPONSE' | 'HANDOVER' | 'RECEIVE' | 'RETURN' | 'COMPLETE' | 'NONE';
+
+// 날짜는 서버 문자열 그대로 둡니다. date는 'YYYY-MM-DD', date-time은 시간대 없는 'YYYY-MM-DDTHH:mm:ss'
+export type ReceivedRentalRequestResponse = {
+  rentalId: number;
+  status: RentalStatus;
+  clothingId: number;
+  clothingTitle: string;
+  borrowerId: number;
+  borrowerNickname: string;
+  borrowerProfileImageKey: string | null;
+  startDate: string;
+  endDate: string;
+  tradeMethod: ApiTradeMethod;
+  requestedAt: string;
+  expiresAt: string; // 응답 기한 (신청 + 48시간)
+};
+
+export type RentalDetailResponse = {
+  rentalId: number;
+  status: RentalStatus;
+  nextAction: RentalNextAction;
+  nextActionBy: RentalActor | null; // nextAction이 NONE이면 null
+  viewerRole: RentalActor;
+  clothingId: number;
+  clothingTitle: string;
+  ownerId: number;
+  ownerNickname: string;
+  borrowerId: number;
+  borrowerNickname: string;
+  startDate: string;
+  endDate: string;
+  tradeMethod: ApiTradeMethod;
+  rentalFee: number;
+  deliveryFee: number | null; // 직거래면 null
+  laundryBy: 'BORROWER' | 'OWNER';
+  laundryMethod: 'DRY_CLEAN' | 'DISCUSS';
+  rejectReason?: 'OWNER_USE' | 'BAD_CONDITION' | 'TOO_FAR' | 'ETC';
+  rejectReasonDetail?: string;
+  cancelReason?: string;
+  canceledBy?: RentalActor;
+  requestedAt: string;
+  expiresAt: string;
+  acceptedAt?: string;
+  handedOverAt?: string;
+  receivedAt?: string;
+  returnedAt?: string;
+  completedAt?: string;
+};
