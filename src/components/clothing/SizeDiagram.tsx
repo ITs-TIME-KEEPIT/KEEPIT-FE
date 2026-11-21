@@ -140,7 +140,8 @@ export default function SizeDiagram({
               width: layer.width * scale,
               height: layer.height * scale,
             }}
-            contentFit="contain"
+            // 1.5pt 선은 래스터화 때 픽셀이 반올림돼 contain이면 길이가 줄어 눈금과 끊김
+            contentFit="fill"
             allowDownscaling={false}
           />
         ))}
