@@ -1,5 +1,5 @@
 import type { TradeStep } from '../components/common/TradeStepper';
-import type { Rental } from '../types/rental';
+import type { ApiTradeMethod, Rental, RentalStatus, TradeMethod } from '../types/rental';
 import { hoursLeft } from '../state/rentalStore';
 
 // demoScenario 공통 키 -> 화면 스테퍼 단계. 거절·취소는 신청 단계에서 멈춘 것으로 표시
@@ -41,3 +41,26 @@ export function stageBadge(
       return { label: '거래 취소', tone: 'gray' };
   }
 }
+
+// 서버 status -> 화면 단계. 만료(48시간 무응답)와 무효(다른 신청 수락)는 수락되지 못한 신청이라 거절로 표시
+export const STATUS_STAGE: Record<RentalStatus, Rental['stage']> = {
+  REQUESTED: 'requested',
+  ACCEPTED: 'accepted',
+  HANDED_OVER: 'handed-over',
+  RECEIVED: 'received',
+  RETURNED: 'returned',
+  COMPLETED: 'completed',
+  REJECTED: 'rejected',
+  EXPIRED: 'rejected',
+  INVALIDATED: 'rejected',
+  CANCELED: 'cancelled',
+};
+
+export const TRADE_METHOD: Record<ApiTradeMethod, TradeMethod> = {
+  DIRECT: '직거래',
+  DELIVERY: '택배',
+};
+
+// expiresAt까지 남은 시간(시간 단위, 내림). 서버가 시간대 없이 주므로 기기 시간대(KST) 기준으로 읽습니다
+export const hoursUntil = (expiresAt: string, now = Date.now()) =>
+  Math.max(0, Math.floor((new Date(expiresAt).getTime() - now) / (60 * 60 * 1000)));
