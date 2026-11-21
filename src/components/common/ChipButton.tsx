@@ -30,7 +30,7 @@ const styles = StyleSheet.create({
 
     backgroundColor: COLORS.bgGray,
     borderWidth: 1,
-    borderColor: COLORS.chipBorder,
+    borderColor: COLORS.line,
     borderRadius: 999,
   },
 

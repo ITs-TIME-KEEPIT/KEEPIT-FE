@@ -287,7 +287,7 @@ const styles = StyleSheet.create({
     left: 0,
     borderWidth: 2,
     borderStyle: 'dashed',
-    borderColor: 'rgba(255,255,255,0.9)',
+    borderColor: COLORS.camLine,
     borderRadius: 16,
     justifyContent: 'center',
     alignItems: 'center',

@@ -37,7 +37,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20.3,
     letterSpacing: 0,
-    color: COLORS.dangerText,
+    color: COLORS.alert,
     includeFontPadding: false,
   },
 });

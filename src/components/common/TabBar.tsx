@@ -90,7 +90,7 @@ const styles = StyleSheet.create({
     borderRadius: 40,
     flexDirection: 'row',
 
-    backgroundColor: 'rgba(255,255,255,0.92)',
+    backgroundColor: COLORS.glassTab,
     borderTopWidth: 1,
     borderTopColor: COLORS.glassLine,
     shadowColor: COLORS.black,

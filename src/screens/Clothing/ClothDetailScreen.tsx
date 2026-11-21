@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
-    backgroundColor: 'rgba(0,0,0,0.5)',
+    backgroundColor: COLORS.dim,
   },
   paginationText: {
     fontFamily: 'Pretendard-Medium',
