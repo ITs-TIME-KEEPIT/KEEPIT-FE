@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useIsFocused } from '@react-navigation/native';
@@ -6,6 +6,7 @@ import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
+import { getRentalDetail } from '../../api/rental';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import {
@@ -16,9 +17,9 @@ import {
   markLaundryNoticeSeen,
   useRentalState,
 } from '../../state/rentalStore';
-import type { Rental } from '../../types/rental';
+import type { Rental, RentalDetailResponse } from '../../types/rental';
 import { formatDate, formatDday } from '../../utils/formatDate';
-import { STAGE_STEP } from '../../utils/tradeStage';
+import { isServerRentalId, STAGE_STEP, toRental } from '../../utils/tradeStage';
 
 import Header from '../../components/common/Header';
 import TradeStepper from '../../components/common/TradeStepper';
@@ -132,8 +133,116 @@ function nextAction(
   }
 }
 
-/* 거래 상세 뼈대 */
-export default function TradeDetailScreen({ navigation, route }: Props) {
+type Action = ReturnType<typeof nextAction>;
+
+function NextActionView({ action }: { action: Action }) {
+  return (
+    <View style={styles.nextAction}>
+      {!!action.label && <Text style={styles.nextLabel}>{action.label}</Text>}
+      <Text style={styles.nextTitle}>
+        {!!action.dday && <Text style={styles.dday}>{action.dday} </Text>}
+        {action.title}
+      </Text>
+      {!!action.desc && <Text style={styles.nextDesc}>{action.desc}</Text>}
+    </View>
+  );
+}
+
+// shortcut: 숫자 id는 서버 거래로 보고 mock 화면과 따로 그립니다, 전체 API 연동 후 mock 제거하며 합칩니다
+export default function TradeDetailScreen(props: Props) {
+  return isServerRentalId(props.route.params.rentalId) ? (
+    <ServerTradeDetail {...props} />
+  ) : (
+    <LocalTradeDetail {...props} />
+  );
+}
+
+/* 서버 거래 상세. 거래 진행 API 연동 전이라 보기 전용입니다 */
+function ServerTradeDetail({ navigation, route }: Props) {
+  const rentalId = Number(route.params.rentalId);
+  const [state, setState] = useState<{ data?: RentalDetailResponse; error?: string }>({});
+
+  useEffect(() => {
+    let alive = true;
+    getRentalDetail(rentalId)
+      .then((data) => alive && setState({ data }))
+      .catch((error: Error) => alive && setState({ error: error.message }));
+    return () => {
+      alive = false;
+    };
+  }, [rentalId]);
+
+  const header = <Header type="back" title="거래 상세" onPressLeft={() => navigation.goBack()} />;
+  const { data, error } = state;
+
+  if (!data) {
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        {header}
+        <Text style={styles.empty}>{error ?? '거래를 불러오고 있어요.'}</Text>
+      </SafeAreaView>
+    );
+  }
+
+  const rental = toRental(data, String(data.ownerId));
+  const isOwner = data.viewerRole === 'OWNER';
+  const borrowerWashes = data.laundryBy === 'BORROWER';
+  // 문구는 기존 것을 쓰고, 누구 차례인지는 서버의 nextActionBy를 따릅니다
+  const action: Action = {
+    ...nextAction(rental, isOwner, borrowerWashes),
+    label:
+      data.nextAction === 'NONE'
+        ? undefined
+        : data.nextActionBy === data.viewerRole
+          ? TODO
+          : WAITING,
+  };
+
+  return (
+    <SafeAreaView style={styles.container} edges={['top']}>
+      {header}
+
+      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+        <View style={styles.top}>
+          <ItemSummary
+            title={data.clothingTitle}
+            price={data.rentalFee}
+            ownerNickname={data.ownerNickname}
+            region=""
+            meta={`${formatDate(new Date(rental.start))} ~ ${formatDate(new Date(rental.end))} · ${rental.method}`}
+            divider={false}
+          />
+          <TradeStepper current={STAGE_STEP[rental.stage]} />
+        </View>
+
+        <View style={styles.line} />
+
+        <NextActionView action={action} />
+
+        {rental.stage === 'received' && (
+          <View style={styles.returnInfo}>
+            <InfoRow label="돌려받는 날" value={formatDate(new Date(rental.end))} highlight />
+            <InfoRow
+              label="세탁"
+              value={borrowerWashes ? '빌린 사람이 세탁해서 돌려줘요' : '등록자가 세탁해요'}
+            />
+            <InfoRow label="반납 방법" value={rental.method} />
+          </View>
+        )}
+
+        <View style={styles.contact}>
+          <PersonRow
+            name={isOwner ? data.borrowerNickname : data.ownerNickname}
+            sub={isOwner ? '대여자' : '등록자'}
+          />
+        </View>
+      </ScrollView>
+    </SafeAreaView>
+  );
+}
+
+/* 거래 상세 뼈대 (mock) */
+function LocalTradeDetail({ navigation, route }: Props) {
   const { currentUserId, rentals } = useRentalState();
   const clothes = useClothingItems();
   // 촬영 화면 아래에 깔려 있을 때 팝업(Modal)이 위로 뜨지 않게 합니다.
@@ -264,14 +373,7 @@ export default function TradeDetailScreen({ navigation, route }: Props) {
 
         <View style={styles.line} />
 
-        <View style={styles.nextAction}>
-          {!!action.label && <Text style={styles.nextLabel}>{action.label}</Text>}
-          <Text style={styles.nextTitle}>
-            {!!action.dday && <Text style={styles.dday}>{action.dday} </Text>}
-            {action.title}
-          </Text>
-          {!!action.desc && <Text style={styles.nextDesc}>{action.desc}</Text>}
-        </View>
+        <NextActionView action={action} />
 
         {rental.stage === 'handed-over' && !!defect && (
           <InfoNote
