@@ -120,18 +120,16 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
           <Text style={styles.empty}>아직 받은 신청이 없어요</Text>
         )}
 
-        {cards.map(({ rental, name, sub, clothTitle, hours, fromServer }) => {
-          const hasOverlap = cards.some(
-            (other) =>
-              other.fromServer === fromServer &&
-              other.rental.id !== rental.id &&
-              other.rental.clothId === rental.clothId &&
-              overlaps(other.rental, rental),
-          );
-
-          return (
-            <View key={`${fromServer ? 'server' : 'mock'}-${rental.id}`} style={styles.group}>
+        {groupOverlaps(cards).map((group) => (
+          <View
+            key={group
+              .map(({ rental, fromServer }) => `${fromServer ? 'server' : 'mock'}-${rental.id}`)
+              .join()}
+            style={styles.group}
+          >
+            {group.map(({ rental, name, sub, clothTitle, hours, fromServer }) => (
               <Pressable
+                key={rental.id}
                 // 서버 신청은 수락, 거절 API 연동 전이라 보기 전용 거래 상세로 엽니다
                 onPress={() =>
                   navigation.navigate(fromServer ? 'TradeDetail' : 'ReceivedRequestDetail', {
@@ -162,25 +160,45 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
                   />
                 </View>
               </Pressable>
+            ))}
 
-              {hasOverlap && (
-                <View style={styles.note}>
-                  <Image
-                    source={require('../../../assets/icons/info.png')}
-                    style={styles.noteIcon}
-                    resizeMode="contain"
-                  />
-                  <Text style={styles.noteText}>
-                    신청과 기간이 겹쳐요. 하나를 수락하면 다른 신청은 자동으로 무효돼요
-                  </Text>
-                </View>
-              )}
-            </View>
-          );
-        })}
+            {/* 기간이 겹치는 신청은 모아 두고 안내는 묶음 아래에 한 번만 보여 줍니다 */}
+            {group.length > 1 && (
+              <View style={styles.note}>
+                <Image
+                  source={require('../../../assets/icons/info.png')}
+                  style={styles.noteIcon}
+                  resizeMode="contain"
+                />
+                <Text style={styles.noteText}>
+                  신청과 기간이 겹쳐요. 하나를 수락하면 다른 신청은 자동으로 무효돼요
+                </Text>
+              </View>
+            )}
+          </View>
+        ))}
       </ScrollView>
     </SafeAreaView>
   );
+}
+
+// 같은 옷에서 기간이 겹치는 신청끼리 묶습니다. 한 신청이 여러 묶음과 겹치면 그 묶음들을 합칩니다
+function groupOverlaps(cards: Card[]): Card[][] {
+  let groups: Card[][] = [];
+  for (const card of cards) {
+    const hits = groups.filter((group) =>
+      group.some(
+        (other) =>
+          other.fromServer === card.fromServer &&
+          other.rental.clothId === card.rental.clothId &&
+          overlaps(other.rental, card.rental),
+      ),
+    );
+    const at = hits.length ? groups.indexOf(hits[0]) : groups.length;
+    const rest = (list: Card[][]) => list.filter((group) => !hits.includes(group));
+    groups = [...rest(groups.slice(0, at)), [...hits.flat(), card], ...rest(groups.slice(at))];
+  }
+  return groups;
 }
 
 function Row({ label, value }: { label: string; value: string }) {
