@@ -17,6 +17,7 @@ import { useRentalState } from '../../state/rentalStore';
 import { COLORS } from '../../constants/colors';
 import Badge from '../../components/common/Badge';
 import CtaButton from '../../components/common/CtaButton';
+import PhotoViewer from '../../components/rental/PhotoViewer';
 import SquareImage from '../../components/common/SquareImage';
 import SizeDiagram from '../../components/clothing/SizeDiagram';
 import { COLORS as CLOTH_COLORS } from '../../constants/clothing';
@@ -55,6 +56,9 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
   const { width } = useWindowDimensions();
   const { bottom } = useSafeAreaInsets();
   const [page, setPage] = useState(0);
+  const [viewer, setViewer] = useState<{ uris: (string | undefined)[]; index: number } | null>(
+    null,
+  );
   if (!item)
     return (
       <SafeAreaView style={styles.container}>
@@ -70,6 +74,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
       : item.imageUrl
         ? [item.imageUrl]
         : [undefined];
+  const defectPhotos = detail?.defect?.photoUris;
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <ScrollView contentContainerStyle={{ paddingBottom: 20 }}>
@@ -83,13 +88,20 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
             }
           >
             {photos.map((uri, index) => (
-              <View key={index} style={[styles.photo, { width, height: width }]}>
+              <Pressable
+                key={index}
+                style={[styles.photo, { width, height: width }]}
+                disabled={!uri}
+                accessibilityRole="button"
+                accessibilityLabel={`옷 사진 ${index + 1} 크게 보기`}
+                onPress={() => setViewer({ uris: photos, index })}
+              >
                 {uri ? (
                   <Image source={{ uri }} style={StyleSheet.absoluteFill} resizeMode="cover" />
                 ) : (
                   <Text style={styles.caption}>옷 사진 (체크포인트 1단계, 앱 내 촬영)</Text>
                 )}
-              </View>
+              </Pressable>
             ))}
           </ScrollView>
           <Pressable
@@ -206,11 +218,21 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
                   showsHorizontalScrollIndicator={false}
                   contentContainerStyle={{ gap: 8 }}
                 >
-                  {(detail.defect.photoUris?.length
-                    ? detail.defect.photoUris
+                  {(defectPhotos?.length
+                    ? defectPhotos
                     : [undefined, undefined, undefined, undefined]
                   ).map((uri, index) => (
-                    <SquareImage key={index} source={uri ? { uri } : undefined} />
+                    <Pressable
+                      key={index}
+                      disabled={!uri}
+                      accessibilityRole="button"
+                      accessibilityLabel={`하자 사진 ${index + 1} 크게 보기`}
+                      onPress={() => {
+                        if (defectPhotos) setViewer({ uris: defectPhotos, index });
+                      }}
+                    >
+                      <SquareImage source={uri ? { uri } : undefined} />
+                    </Pressable>
                   ))}
                 </ScrollView>
               </>
@@ -219,6 +241,9 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
           {detail?.views !== undefined && <Text style={styles.label}>조회 {detail.views}</Text>}
         </View>
       </ScrollView>
+      {viewer && (
+        <PhotoViewer uris={viewer.uris} startIndex={viewer.index} onClose={() => setViewer(null)} />
+      )}
       <View style={[styles.footer, { paddingBottom: Math.max(bottom, 16) }]}>
         <CtaButton
           title={isMine ? '받은 신청 보기' : '대여 신청'}

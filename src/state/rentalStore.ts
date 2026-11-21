@@ -4,7 +4,7 @@ import { DEMO_PHONES } from '../mocks/rental';
 import type { LaundryNotice, Rental, TradeMethod, TradeStage } from '../types/rental';
 
 // 백엔드 연동 전 앱 실행 중의 신청·거래와 현재 계정을 여러 화면에서 함께 사용합니다.
-type Profile = { name: string; phone: string };
+type Profile = { name: string; phone: string; photoUri?: string };
 type RentalState = {
   currentUserId: string;
   rentals: Rental[];
@@ -153,6 +153,7 @@ export function findDemoUser(id: string) {
     ...user,
     name: profile?.name ?? (user.name as string),
     phone: profile?.phone ?? (DEMO_PHONES[id] as string | undefined),
+    photoUri: profile?.photoUri,
   };
 }
 

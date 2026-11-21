@@ -15,6 +15,7 @@ export const DEMO_USERS = {
   owner: {
     id: DEMO_IDS.owner,
     name: '한수빈',
+    joinedMonth: '2026.10',
     age: 26,
     occupation: '회사원',
     region: { sido: '서울', district: '마포구' },
@@ -23,6 +24,7 @@ export const DEMO_USERS = {
   borrower: {
     id: DEMO_IDS.borrower,
     name: '이지민',
+    joinedMonth: '2026.10',
     age: 23,
     occupation: '대학생',
     region: { sido: '서울', district: '서대문구' },

@@ -6,9 +6,16 @@ import { COLORS } from '../../constants/colors';
 interface SquareImageProps {
   source?: ImageSourcePropType;
   size?: number;
+  borderRadius?: number;
+  placeholder?: React.ReactNode;
 }
 
-export default function SquareImage({ source, size = 64 }: SquareImageProps) {
+export default function SquareImage({
+  source,
+  size = 64,
+  borderRadius = 12,
+  placeholder = <Text style={styles.placeholder}>Image</Text>,
+}: SquareImageProps) {
   return (
     <View
       style={[
@@ -16,14 +23,11 @@ export default function SquareImage({ source, size = 64 }: SquareImageProps) {
         {
           width: size,
           height: size,
+          borderRadius,
         },
       ]}
     >
-      {source ? (
-        <Image source={source} style={styles.image} resizeMode="cover" />
-      ) : (
-        <Text style={styles.placeholder}>Image</Text>
-      )}
+      {source ? <Image source={source} style={styles.image} resizeMode="cover" /> : placeholder}
     </View>
   );
 }
@@ -36,7 +40,6 @@ const styles = StyleSheet.create({
     backgroundColor: COLORS.bgGray,
     borderWidth: 1,
     borderColor: COLORS.border,
-    borderRadius: 12,
 
     alignItems: 'center',
     justifyContent: 'center',
