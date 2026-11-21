@@ -64,7 +64,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
           accessibilityLabel="프로필 수정"
           style={styles.profile}
         >
-          <RoundImage size={56} />
+          <RoundImage size={56} source={me?.photoUri ? { uri: me.photoUri } : undefined} />
           <View style={styles.profileTexts}>
             <Text style={styles.name}>{me?.name ?? '-'}</Text>
             <Text style={styles.sub}>

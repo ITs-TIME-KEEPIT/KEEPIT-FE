@@ -95,9 +95,11 @@ const fullLabels: Record<string, string> = {
 export default function SizeDiagram({
   category,
   measurements = {},
+  showEmptyMeasurements = false,
 }: {
   category: Category;
   measurements?: Record<string, number>;
+  showEmptyMeasurements?: boolean;
 }) {
   const { width } = useWindowDimensions();
   const scale = Math.min(1, Math.max(0, width - 66) / 326);
@@ -105,58 +107,70 @@ export default function SizeDiagram({
     category === '원피스' ? layers.dress : category === '하의' ? layers.pants : layers.top;
   const kind = category === '원피스' ? 'dress' : category === '하의' ? 'pants' : 'top';
   const known = (key: string) => Number.isFinite(measurements[key]) && measurements[key] > 0;
+  const shouldShow = (key: string) => showEmptyMeasurements || known(key);
   return (
     <View
       style={{ width: 326 * scale, height: 236 * scale, alignSelf: 'center' }}
       accessibilityLabel={`${category} 실측 도식`}
     >
-      <View style={[styles.frame, { transform: [{ scale }], transformOrigin: 'top left' }]}>
-        {selected.map((layer, index) => (
+      {selected.map((layer, index) => (
+        <Image
+          key={index}
+          source={layer.source}
+          style={{
+            position: 'absolute',
+            left: layer.left * scale,
+            top: layer.top * scale,
+            width: layer.width * scale,
+            height: layer.height * scale,
+          }}
+          contentFit="contain"
+        />
+      ))}
+      {measurementLayers[kind]
+        .filter((layer) => shouldShow(layer.measurement))
+        .map((layer, index) => (
           <Image
-            key={index}
+            key={`guide-${index}`}
             source={layer.source}
             style={{
               position: 'absolute',
-              left: layer.left,
-              top: layer.top,
-              width: layer.width,
-              height: layer.height,
+              left: layer.left * scale,
+              top: layer.top * scale,
+              width: layer.width * scale,
+              height: layer.height * scale,
             }}
             contentFit="contain"
+            allowDownscaling={false}
           />
         ))}
-        {measurementLayers[kind]
-          .filter((layer) => known(layer.measurement))
-          .map((layer, index) => (
-            <Image
-              key={`guide-${index}`}
-              source={layer.source}
-              style={{
-                position: 'absolute',
-                left: layer.left,
-                top: layer.top,
-                width: layer.width,
-                height: layer.height,
-              }}
-              contentFit="contain"
-            />
-          ))}
-        {measurementLabels[kind]
-          .filter((label) => known(fullLabels[label.label]))
-          .map((label) => (
-            <View key={label.label} style={[styles.label, { left: label.left, top: label.top }]}>
-              <Text style={styles.labelText}>
-                {label.label}{' '}
-                <Text style={styles.value}>{measurements[fullLabels[label.label]]} cm</Text>
+      {measurementLabels[kind]
+        .filter((label) => shouldShow(fullLabels[label.label]))
+        .map((label) => (
+          <View
+            key={label.label}
+            style={[
+              styles.label,
+              {
+                left: label.left * scale,
+                top: label.top * scale,
+                transform: [{ scale }],
+                transformOrigin: 'top left',
+              },
+            ]}
+          >
+            <Text style={styles.labelText}>
+              {label.label}{' '}
+              <Text style={styles.value}>
+                {known(fullLabels[label.label]) ? measurements[fullLabels[label.label]] : '-'} cm
               </Text>
-            </View>
-          ))}
-      </View>
+            </Text>
+          </View>
+        ))}
     </View>
   );
 }
 const styles = StyleSheet.create({
-  frame: { width: 326, height: 236 },
   label: {
     position: 'absolute',
     paddingHorizontal: 8,

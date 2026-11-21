@@ -45,11 +45,14 @@ export default function UserProfileScreen({
       {/* 프로필 정보는 스크롤되고 탭은 상단에 고정 */}
       <ScrollView stickyHeaderIndices={[1]} contentContainerStyle={styles.scroll}>
         <View style={styles.profile}>
-          <RoundImage size={64} />
+          <RoundImage size={64} source={user?.photoUri ? { uri: user.photoUri } : undefined} />
           <View style={styles.profileTexts}>
             <Text style={styles.name}>{user?.name ?? '등록자'}</Text>
-            {/* 가입일은 회원 API 연동 후 '· 2026.10 가입' 형태로 추가 */}
-            {user && <Text style={styles.sub}>{user.region.district}</Text>}
+            {user && (
+              <Text style={styles.sub}>
+                {user.region.district} · {user.joinedMonth} 가입
+              </Text>
+            )}
           </View>
         </View>
 

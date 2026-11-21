@@ -1,6 +1,7 @@
-import { useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import {
   Alert,
+  BackHandler,
   Image,
   KeyboardAvoidingView,
   Platform,
@@ -11,6 +12,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useFocusEffect } from '@react-navigation/native';
 import { StatusBar } from 'expo-status-bar';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -32,6 +34,7 @@ import DateRangeCalendar from '../../components/common/DateRangeCalendar';
 import { COLORS } from '../../constants/colors';
 import { CATEGORIES, SIZES } from '../../constants/clothing';
 import {
+  clothingInfoErrors,
   createRegistrationDraft,
   draftFromCloth,
   fillScenario,
@@ -99,8 +102,18 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
   const initialDraft = () =>
     savedDrafts.get(draftKey) ?? (original ? draftFromCloth(original) : createRegistrationDraft());
   const [draft, setDraft] = useState<RegistrationDraft>(initialDraft);
-  const [phase, setPhase] = useState<'camera' | 'form'>(() =>
+  const [phase, setPhase] = useState<'camera' | 'form' | 'trade'>(() =>
     editingId || hasRequiredPhotos(initialDraft().photos) ? 'form' : 'camera',
+  );
+  useFocusEffect(
+    useCallback(() => {
+      if (phase !== 'trade') return;
+      const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
+        setPhase('form');
+        return true;
+      });
+      return () => subscription.remove();
+    }, [phase]),
   );
   const [regionOpen, setRegionOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
@@ -133,7 +146,8 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
     setEnd(draft.unavailable ? new Date(draft.unavailable.end) : null);
     setCalendarOpen(true);
   };
-  const errors = registrationErrors(draft);
+  const errors = phase === 'trade' ? registrationErrors(draft) : clothingInfoErrors(draft);
+  const buttonTitle = phase === 'trade' ? (editingId ? '수정 완료' : '등록하기') : '다음';
   const submit = () => {
     if (submitting.current) return;
     if (errors.length) {
@@ -201,14 +215,21 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Pressable
-          onPress={close}
+          onPress={phase === 'trade' ? () => setPhase('form') : close}
           accessibilityRole="button"
-          accessibilityLabel="등록 닫기"
+          accessibilityLabel={phase === 'trade' ? '옷 정보 입력으로 돌아가기' : '등록 닫기'}
           hitSlop={10}
         >
-          <Image source={require('../../../assets/icons/x.png')} style={styles.icon} />
+          <Image
+            source={
+              phase === 'trade'
+                ? require('../../../assets/icons/chevron-left.png')
+                : require('../../../assets/icons/x.png')
+            }
+            style={styles.icon}
+          />
         </Pressable>
-        <Text style={styles.heading}>{editingId ? '옷 수정' : '옷 올리기'}</Text>
+        <Text style={styles.heading}>{phase === 'trade' ? '거래 정보 입력' : '옷 정보 입력'}</Text>
         <Pressable
           onPress={() => {
             savedDrafts.set(draftKey, draft);
@@ -223,266 +244,295 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
         style={styles.flex}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView keyboardShouldPersistTaps="handled" contentContainerStyle={styles.body}>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={styles.photoRow}
-          >
-            <Pressable
-              onPress={() => setPhase('camera')}
-              accessibilityRole="button"
-              accessibilityLabel="촬영한 사진 수정"
-              style={styles.photoButton}
-            >
-              <Image source={require('../../../assets/icons/camera.png')} style={styles.icon} />
-              <Text style={styles.small}>{Object.keys(draft.photos).length}/4</Text>
-            </Pressable>
-            {PHOTO_PARTS.map((part) =>
-              draft.photos[part] ? (
+        <ScrollView
+          key={phase}
+          keyboardShouldPersistTaps="handled"
+          contentContainerStyle={styles.body}
+        >
+          {phase === 'form' ? (
+            <>
+              <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.photoRow}
+              >
                 <Pressable
-                  key={part}
                   onPress={() => setPhase('camera')}
                   accessibilityRole="button"
-                  accessibilityLabel={`${part} 사진 확인`}
+                  accessibilityLabel="촬영한 사진 수정"
+                  style={styles.photoButton}
                 >
-                  <Image source={{ uri: draft.photos[part] }} style={styles.thumbnail} />
-                  <Text style={styles.small}>{part}</Text>
+                  <Image source={require('../../../assets/icons/camera.png')} style={styles.icon} />
+                  <Text style={styles.small}>{Object.keys(draft.photos).length}/4</Text>
                 </Pressable>
-              ) : null,
-            )}
-          </ScrollView>
-          {__DEV__ && (
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => {
-                setDraft(fillScenario(draft));
-                Alert.alert(
-                  '시연 정보 입력',
-                  '라벤더 원피스 시나리오를 입력 예시로 불러왔어요. 실측과 택배비는 프론트 시연용 예시입니다. 등록하면 기존 데이터와 별개의 새 옷으로 추가됩니다.',
-                );
-              }}
-            >
-              <Text style={styles.link}>시나리오 정보로 채우기</Text>
-            </Pressable>
-          )}
-          <TextInputField
-            label="제목 *"
-            placeholder="예) 트위드 싱글 재킷 (2~30자)"
-            value={draft.title}
-            onChangeText={(value) => update('title', value.slice(0, 30))}
-          />
-          <Section label="카테고리 *">
-            <View style={styles.chips}>
-              {CATEGORIES.map((category) =>
-                category === draft.category ? (
-                  <ChipActiveButton key={category} title={category} onPress={() => {}} />
-                ) : (
-                  <ChipButton
-                    key={category}
-                    title={category}
+                {PHOTO_PARTS.map((part) =>
+                  draft.photos[part] ? (
+                    <Pressable
+                      key={part}
+                      onPress={() => setPhase('camera')}
+                      accessibilityRole="button"
+                      accessibilityLabel={`${part} 사진 확인`}
+                    >
+                      <Image source={{ uri: draft.photos[part] }} style={styles.thumbnail} />
+                      <Text style={styles.small}>{part}</Text>
+                    </Pressable>
+                  ) : null,
+                )}
+              </ScrollView>
+              {__DEV__ && (
+                <Pressable
+                  accessibilityRole="button"
+                  onPress={() => {
+                    setDraft(fillScenario(draft));
+                    Alert.alert(
+                      '시연 정보 입력',
+                      '라벤더 원피스 시나리오를 입력 예시로 불러왔어요. 실측과 택배비는 프론트 시연용 예시입니다. 등록하면 기존 데이터와 별개의 새 옷으로 추가됩니다.',
+                    );
+                  }}
+                >
+                  <Text style={styles.link}>시나리오 정보로 채우기</Text>
+                </Pressable>
+              )}
+              <TextInputField
+                label="제목 *"
+                placeholder="예) 트위드 싱글 재킷 (2~30자)"
+                value={draft.title}
+                onChangeText={(value) => update('title', value.slice(0, 30))}
+              />
+              <Section label="카테고리 *">
+                <View style={styles.chips}>
+                  {CATEGORIES.map((category) =>
+                    category === draft.category ? (
+                      <ChipActiveButton key={category} title={category} onPress={() => {}} />
+                    ) : (
+                      <ChipButton
+                        key={category}
+                        title={category}
+                        onPress={() =>
+                          setDraft((current) => ({
+                            ...current,
+                            category,
+                            size: category === '잡화' ? 'FREE' : current.size,
+                            measurements: {},
+                          }))
+                        }
+                      />
+                    ),
+                  )}
+                </View>
+              </Section>
+              {draft.category !== '잡화' && (
+                <Section label="표기 사이즈 *">
+                  <View style={styles.chips}>
+                    {SIZES.map((size) =>
+                      size === draft.size ? (
+                        <ChipActiveButton key={size} title={size} onPress={() => {}} />
+                      ) : (
+                        <ChipButton key={size} title={size} onPress={() => update('size', size)} />
+                      ),
+                    )}
+                  </View>
+                </Section>
+              )}
+              <Section label="컬러 *  (최대 2개 선택할 수 있어요)">
+                <ColorChipGroup
+                  selected={draft.colors}
+                  onChange={(colors) => {
+                    if (colors.length <= 2) update('colors', colors);
+                    else Alert.alert('컬러 선택', '컬러는 최대 2개까지 선택할 수 있어요.');
+                  }}
+                />
+              </Section>
+              {draft.category && draft.category !== '잡화' && (
+                <Section label="실측 사이즈 (cm)">
+                  <SizeDiagram
+                    category={draft.category}
+                    showEmptyMeasurements
+                    measurements={Object.fromEntries(
+                      Object.entries(draft.measurements).map(([key, value]) => [
+                        key,
+                        Number(value),
+                      ]),
+                    )}
+                  />
+                  <View style={styles.measurements}>
+                    {MEASUREMENT_LABELS[draft.category].map((label) => (
+                      <View key={label} style={styles.measurement}>
+                        <TextInputField
+                          label={`${label}${label === '총장' ? ' *' : ''}`}
+                          keyboardType="decimal-pad"
+                          placeholder="0"
+                          value={draft.measurements[label] ?? ''}
+                          onChangeText={(value) =>
+                            update('measurements', { ...draft.measurements, [label]: value })
+                          }
+                        />
+                      </View>
+                    ))}
+                  </View>
+                  <Note>
+                    그림처럼 옷을 평평하게 놓고 재주세요. 필수가 아닌 항목은 비워둬도 돼요
+                  </Note>
+                </Section>
+              )}
+              <Section label="하자 여부 *">
+                <View style={styles.chips}>
+                  <RadioInputField
+                    label="없음"
+                    selected={draft.hasDefect === false}
+                    onPress={() => update('hasDefect', false)}
+                  />
+                  <RadioInputField
+                    label="있음"
+                    selected={draft.hasDefect === true}
+                    onPress={() => update('hasDefect', true)}
+                  />
+                </View>
+                {draft.hasDefect && (
+                  <View style={styles.defect}>
+                    <Pressable
+                      onPress={() => setPhase('camera')}
+                      accessibilityRole="button"
+                      accessibilityLabel="디테일 하자 사진 촬영"
+                      style={styles.photoButton}
+                    >
+                      {draft.photos.디테일 ? (
+                        <Image source={{ uri: draft.photos.디테일 }} style={styles.thumbnail} />
+                      ) : (
+                        <Image
+                          source={require('../../../assets/icons/camera.png')}
+                          style={styles.icon}
+                        />
+                      )}
+                    </Pressable>
+                    <AreaInputField
+                      label="하자 설명 *"
+                      placeholder="하자의 위치와 상태를 알려주세요"
+                      value={draft.defectDescription}
+                      onChangeText={(value) => update('defectDescription', value)}
+                      maxLength={500}
+                    />
+                  </View>
+                )}
+              </Section>
+              <AreaInputField
+                label="설명 [선택]"
+                placeholder="옷의 소재, 착용감, 보관 상태 등을 알려주세요"
+                value={draft.description}
+                onChangeText={(value) => update('description', value)}
+                maxLength={2000}
+              />
+            </>
+          ) : (
+            <>
+              <SelectRow
+                label="거래 가능 지역 *"
+                value={
+                  draft.region
+                    ? `${draft.region.sido} ${draft.region.district}`
+                    : '시/구를 선택해주세요'
+                }
+                onPress={() => setRegionOpen(true)}
+              />
+              <Section label="대여 불가능 기간 *">
+                <View style={styles.chips}>
+                  <RadioInputField
+                    label="없음"
+                    selected={draft.unavailableConfirmed && !draft.unavailable}
                     onPress={() =>
                       setDraft((current) => ({
                         ...current,
-                        category,
-                        size: category === '잡화' ? 'FREE' : current.size,
-                        measurements: {},
+                        unavailable: null,
+                        unavailableConfirmed: true,
                       }))
                     }
                   />
-                ),
-              )}
-            </View>
-          </Section>
-          {draft.category !== '잡화' && (
-            <Section label="표기 사이즈 *">
-              <View style={styles.chips}>
-                {SIZES.map((size) =>
-                  size === draft.size ? (
-                    <ChipActiveButton key={size} title={size} onPress={() => {}} />
-                  ) : (
-                    <ChipButton key={size} title={size} onPress={() => update('size', size)} />
-                  ),
-                )}
-              </View>
-            </Section>
-          )}
-          <Section label="컬러 *  (최대 2개 선택할 수 있어요)">
-            <ColorChipGroup
-              selected={draft.colors}
-              onChange={(colors) => {
-                if (colors.length <= 2) update('colors', colors);
-                else Alert.alert('컬러 선택', '컬러는 최대 2개까지 선택할 수 있어요.');
-              }}
-            />
-          </Section>
-          {draft.category && draft.category !== '잡화' && (
-            <Section label="실측 사이즈 (cm)">
-              <SizeDiagram
-                category={draft.category}
-                measurements={Object.fromEntries(
-                  Object.entries(draft.measurements).map(([key, value]) => [key, Number(value)]),
-                )}
-              />
-              <View style={styles.measurements}>
-                {MEASUREMENT_LABELS[draft.category].map((label) => (
-                  <View key={label} style={styles.measurement}>
-                    <TextInputField
-                      label={`${label}${label === '총장' ? ' *' : ''}`}
-                      keyboardType="decimal-pad"
-                      placeholder="0"
-                      value={draft.measurements[label] ?? ''}
-                      onChangeText={(value) =>
-                        update('measurements', { ...draft.measurements, [label]: value })
-                      }
-                    />
-                  </View>
-                ))}
-              </View>
-              <Note>그림처럼 옷을 평평하게 놓고 재주세요. 필수가 아닌 항목은 비워둬도 돼요</Note>
-            </Section>
-          )}
-          <Section label="하자 여부 *">
-            <View style={styles.chips}>
-              <RadioInputField
-                label="없음"
-                selected={draft.hasDefect === false}
-                onPress={() => update('hasDefect', false)}
-              />
-              <RadioInputField
-                label="있음"
-                selected={draft.hasDefect === true}
-                onPress={() => update('hasDefect', true)}
-              />
-            </View>
-            {draft.hasDefect && (
-              <View style={styles.defect}>
-                <Pressable
-                  onPress={() => setPhase('camera')}
-                  accessibilityRole="button"
-                  accessibilityLabel="디테일 하자 사진 촬영"
-                  style={styles.photoButton}
-                >
-                  {draft.photos.디테일 ? (
-                    <Image source={{ uri: draft.photos.디테일 }} style={styles.thumbnail} />
-                  ) : (
+                  <RadioInputField
+                    label="기간 선택"
+                    selected={!!draft.unavailable}
+                    onPress={openCalendar}
+                  />
+                </View>
+                {draft.unavailable && (
+                  <Pressable
+                    onPress={openCalendar}
+                    style={styles.select}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.selectText}>
+                      {formatDate(new Date(draft.unavailable.start))} ~{' '}
+                      {formatDate(new Date(draft.unavailable.end))}
+                    </Text>
                     <Image
-                      source={require('../../../assets/icons/camera.png')}
+                      source={require('../../../assets/icons/calendar.png')}
                       style={styles.icon}
                     />
-                  )}
-                </Pressable>
-                <AreaInputField
-                  label="하자 설명 *"
-                  placeholder="하자의 위치와 상태를 알려주세요"
-                  value={draft.defectDescription}
-                  onChangeText={(value) => update('defectDescription', value)}
-                  maxLength={500}
+                  </Pressable>
+                )}
+                <Note>
+                  직접 입어야 하거나 세탁·보관 등 대여할 수 없는 날짜를 미리 설정해 주세요.
+                </Note>
+              </Section>
+              <TextInputField
+                label="대여료 (한 벌 1회) *"
+                placeholder="₩ 대여료"
+                keyboardType="number-pad"
+                value={draft.price}
+                onChangeText={(value) => update('price', value)}
+              />
+              <View style={styles.toggleRow}>
+                <View>
+                  <Text style={styles.label}>택배 거래 허용</Text>
+                  <Text style={styles.small}>직거래는 기본으로 가능해요</Text>
+                </View>
+                <ToggleInputField
+                  value={draft.shippingAvailable}
+                  onValueChange={(value) => update('shippingAvailable', value)}
+                  accessibilityLabel="택배 거래 허용"
                 />
               </View>
-            )}
-          </Section>
-          <AreaInputField
-            label="설명 [선택]"
-            placeholder="옷의 소재, 착용감, 보관 상태 등을 알려주세요"
-            value={draft.description}
-            onChangeText={(value) => update('description', value)}
-            maxLength={2000}
-          />
-          <SelectRow
-            label="거래 가능 지역 *"
-            value={
-              draft.region
-                ? `${draft.region.sido} ${draft.region.district}`
-                : '시/구를 선택해주세요'
-            }
-            onPress={() => setRegionOpen(true)}
-          />
-          <Section label="대여 불가능 기간 *">
-            <View style={styles.chips}>
-              <RadioInputField
-                label="없음"
-                selected={draft.unavailableConfirmed && !draft.unavailable}
-                onPress={() =>
-                  setDraft((current) => ({
-                    ...current,
-                    unavailable: null,
-                    unavailableConfirmed: true,
-                  }))
-                }
-              />
-              <RadioInputField
-                label="기간 선택"
-                selected={!!draft.unavailable}
-                onPress={openCalendar}
-              />
-            </View>
-            {draft.unavailable && (
-              <Pressable onPress={openCalendar} style={styles.select} accessibilityRole="button">
-                <Text style={styles.selectText}>
-                  {formatDate(new Date(draft.unavailable.start))} ~{' '}
-                  {formatDate(new Date(draft.unavailable.end))}
-                </Text>
-                <Image source={require('../../../assets/icons/calendar.png')} style={styles.icon} />
-              </Pressable>
-            )}
-            <Note>직접 입어야 하거나 세탁·보관 등 대여할 수 없는 날짜를 미리 설정해 주세요.</Note>
-          </Section>
-          <TextInputField
-            label="대여료 (한 벌 1회) *"
-            placeholder="₩ 대여료"
-            keyboardType="number-pad"
-            value={draft.price}
-            onChangeText={(value) => update('price', value)}
-          />
-          <View style={styles.toggleRow}>
-            <View>
-              <Text style={styles.label}>택배 거래 허용</Text>
-              <Text style={styles.small}>직거래는 기본으로 가능해요</Text>
-            </View>
-            <ToggleInputField
-              value={draft.shippingAvailable}
-              onValueChange={(value) => update('shippingAvailable', value)}
-              accessibilityLabel="택배 거래 허용"
-            />
-          </View>
-          {draft.shippingAvailable && (
-            <Section label="택배비 [택배 가능일 때 필수]">
-              <TextInputField
-                label="보내는 택배비"
-                placeholder="₩ 택배비"
-                keyboardType="number-pad"
-                value={draft.shippingFee}
-                onChangeText={(value) => update('shippingFee', value)}
-              />
-              <Text style={styles.small}>
-                보내는 택배비만 적어주세요. 반납 택배비는 빌린 사람이 내요
-              </Text>
-            </Section>
+              {draft.shippingAvailable && (
+                <Section label="택배비 [택배 가능일 때 필수]">
+                  <TextInputField
+                    label="보내는 택배비"
+                    placeholder="₩ 택배비"
+                    keyboardType="number-pad"
+                    value={draft.shippingFee}
+                    onChangeText={(value) => update('shippingFee', value)}
+                  />
+                  <Text style={styles.small}>
+                    보내는 택배비만 적어주세요. 반납 택배비는 빌린 사람이 내요
+                  </Text>
+                </Section>
+              )}
+              <Section label="세탁은 누가 하나요? *">
+                <RadioInputField
+                  label="빌린 사람이 세탁해서 돌려줘요 (기본)"
+                  selected={draft.laundryBy === 'borrower'}
+                  onPress={() => update('laundryBy', 'borrower')}
+                />
+                <RadioInputField
+                  label="제가 직접 세탁할게요"
+                  selected={draft.laundryBy === 'owner'}
+                  onPress={() => update('laundryBy', 'owner')}
+                />
+                <Note>
+                  빌린 사람이 세탁하면 세탁 과정에서 옷이 변형될 수 있어요. 드라이클리닝이 필요한
+                  옷은 직접 세탁을 추천해요
+                </Note>
+              </Section>
+            </>
           )}
-          <Section label="세탁은 누가 하나요? *">
-            <RadioInputField
-              label="빌린 사람이 세탁해서 돌려줘요 (기본)"
-              selected={draft.laundryBy === 'borrower'}
-              onPress={() => update('laundryBy', 'borrower')}
-            />
-            <RadioInputField
-              label="제가 직접 세탁할게요"
-              selected={draft.laundryBy === 'owner'}
-              onPress={() => update('laundryBy', 'owner')}
-            />
-            <Note>
-              빌린 사람이 세탁하면 세탁 과정에서 옷이 변형될 수 있어요. 드라이클리닝이 필요한 옷은
-              직접 세탁을 추천해요
-            </Note>
-          </Section>
           {errors.length > 0 && <Text style={styles.error}>{errors[0]}</Text>}
         </ScrollView>
         <View style={styles.footer}>
           {errors.length ? (
-            <CtaDisabledButton title={editingId ? '수정 완료' : '등록하기'} />
+            <CtaDisabledButton title={buttonTitle} />
           ) : (
-            <CtaButton title={editingId ? '수정 완료' : '등록하기'} onPress={submit} />
+            <CtaButton
+              title={buttonTitle}
+              onPress={phase === 'trade' ? submit : () => setPhase('trade')}
+            />
           )}
         </View>
       </KeyboardAvoidingView>
