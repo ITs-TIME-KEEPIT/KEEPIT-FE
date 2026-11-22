@@ -12,6 +12,7 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { serverClothesId, useServerClothing } from '../../api/clothing';
 import { useClothingItems } from '../../state/clothingStore';
 import { useRentalState } from '../../state/rentalStore';
 import { COLORS } from '../../constants/colors';
@@ -52,7 +53,9 @@ function Row({
 export default function ClothDetailScreen({ navigation, route }: Props) {
   const items = useClothingItems();
   const { currentUserId } = useRentalState();
-  const item = items.find((cloth) => cloth.id === route.params.clothId);
+  const remoteId = serverClothesId(route.params.clothId);
+  const remote = useServerClothing(remoteId);
+  const item = remoteId ? remote.item : items.find((cloth) => cloth.id === route.params.clothId);
   const { width } = useWindowDimensions();
   const { bottom } = useSafeAreaInsets();
   const [page, setPage] = useState(0);
@@ -62,6 +65,12 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
   if (!item)
     return (
       <SafeAreaView style={styles.container}>
+        {remoteId && (
+          <Text style={styles.label}>
+            {remote.detailError ? '옷 상세를 불러오지 못했어요.' : '옷 상세를 불러오는 중이에요.'}
+          </Text>
+        )}
+        {remote.detailError && <CtaButton title="다시 시도" onPress={remote.retry} />}
         <CtaButton title="홈으로 돌아가기" onPress={() => navigation.goBack()} />
       </SafeAreaView>
     );
@@ -121,6 +130,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
         <Pressable
           style={styles.profile}
           accessibilityRole="button"
+          disabled={!!remoteId}
           accessibilityLabel="등록자 프로필"
           onPress={() => navigation.navigate('UserProfile', { userId: item.ownerId ?? '' })}
         >
@@ -172,7 +182,16 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
               label="거래 방식"
               value={`직거래 (${item.region})${item.shippingAvailable ? ' · 택배 가능' : ''}`}
             />
-            {detail?.unavailablePeriod ? (
+            {detail?.unavailablePeriods ? (
+              <Row
+                label="등록자 지정 대여 불가 기간"
+                value={
+                  detail.unavailablePeriods
+                    .map(({ startDate, endDate }) => startDate + ' ~ ' + endDate)
+                    .join(', ') || '없음'
+                }
+              />
+            ) : detail?.unavailablePeriod ? (
               <Row
                 label="대여 불가능 기간"
                 value={`${formatDate(new Date(detail.unavailablePeriod.start))} ~ ${formatDate(new Date(detail.unavailablePeriod.end))}`}
@@ -182,6 +201,45 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
                 label={detail?.region ? '대여 불가능 기간' : '대여 가능 기간'}
                 value={detail?.region ? '없음' : (detail?.availablePeriod ?? '-')}
               />
+            )}
+            {remoteId && remote.schedule && (
+              <>
+                <Row
+                  label="대여 상태"
+                  value={remote.schedule.rentable ? '신청 가능' : '대여 중지'}
+                />
+                {remote.schedule.rentable && (
+                  <>
+                    <Row
+                      label="일정 조회 범위"
+                      value={remote.schedule.from + ' ~ ' + remote.schedule.to}
+                    />
+                    <Row label="최대 대여 기간" value={remote.schedule.maxRentalDays + '일'} />
+                    <Row
+                      label="직거래 불가 날짜"
+                      value={
+                        remote.schedule.directUnavailableDates.map(({ date }) => date).join(', ') ||
+                        '없음'
+                      }
+                    />
+                    {remote.schedule.deliveryAvailable && (
+                      <Row
+                        label="택배 불가 날짜"
+                        value={
+                          remote.schedule.deliveryUnavailableDates
+                            .map(({ date }) => date)
+                            .join(', ') || '없음'
+                        }
+                      />
+                    )}
+                  </>
+                )}
+              </>
+            )}
+            {remoteId && remote.scheduleError && (
+              <Text accessibilityRole="button" onPress={remote.retry} style={styles.label}>
+                대여 일정을 불러오지 못했어요. 눌러서 다시 시도
+              </Text>
             )}
           </View>
           {item.category !== '잡화' && (
@@ -207,7 +265,13 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
             <View style={styles.row}>
               <Text style={styles.label}>하자 고지</Text>
               <Text style={[styles.value, detail?.defect ? styles.alert : undefined]}>
-                {detail?.defect ? `있음 · ${detail.defect.count}곳` : detail ? '없음' : '-'}
+                {detail?.defect
+                  ? detail.defect.count
+                    ? '있음 · ' + detail.defect.count + '곳'
+                    : '있음'
+                  : detail
+                    ? '없음'
+                    : '-'}
               </Text>
             </View>
             {detail?.defect && (
@@ -250,7 +314,7 @@ export default function ClothDetailScreen({ navigation, route }: Props) {
           onPress={() =>
             isMine
               ? navigation.navigate('ReceivedRequests', { clothId: item.id })
-              : item.hidden || item.deleted
+              : item.hidden || item.deleted || remote.schedule?.rentable === false
                 ? Alert.alert('대여 신청', '현재 대여할 수 없는 옷이에요.')
                 : navigation.navigate('RentalRequest', { clothId: item.id })
           }

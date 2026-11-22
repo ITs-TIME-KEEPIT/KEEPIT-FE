@@ -31,3 +31,10 @@ export function formatDday(target: Date, now = new Date()) {
 
 // 시작일과 종료일을 모두 세는 대여 일수
 export const rentalDays = (start: Date, end: Date) => dayDiff(start, end) + 1;
+
+// Calendar dates are local wall-clock days, independent of UTC offset.
+export function toApiDate(date: Date) {
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${date.getFullYear()}-${month}-${day}`;
+}

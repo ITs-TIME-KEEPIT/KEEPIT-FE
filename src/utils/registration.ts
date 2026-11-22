@@ -61,7 +61,7 @@ const money = (value: string, allowZero = false) =>
   Number.isSafeInteger(Number(value)) &&
   Number(value) >= (allowZero ? 0 : 1) &&
   Number(value) <= 10000000;
-export function clothingInfoErrors(d: RegistrationDraft): string[] {
+export function clothingInfoErrors(d: RegistrationDraft, server = false): string[] {
   const errors: string[] = [];
   if (!hasRequiredPhotos(d.photos)) errors.push('전면·후면·라벨 사진을 촬영해주세요.');
   if (d.title.trim().length < 2 || d.title.trim().length > 30)
@@ -81,12 +81,14 @@ export function clothingInfoErrors(d: RegistrationDraft): string[] {
   if (d.hasDefect === null) errors.push('하자 여부를 선택해주세요.');
   if (d.hasDefect && !d.defectDescription.trim()) errors.push('하자 설명을 입력해주세요.');
   if (d.defectDescription.length > 500) errors.push('하자 설명은 500자 이내로 입력해주세요.');
-  if (d.description.length > 2000) errors.push('설명은 2,000자 이내로 입력해주세요.');
+  const descriptionLimit = server ? 500 : 2000;
+  if (d.description.length > descriptionLimit)
+    errors.push(`설명은 ${descriptionLimit.toLocaleString('ko-KR')}자 이내로 입력해주세요.`);
   return errors;
 }
 
-export function registrationErrors(d: RegistrationDraft): string[] {
-  const errors = clothingInfoErrors(d);
+export function registrationErrors(d: RegistrationDraft, server = false): string[] {
+  const errors = clothingInfoErrors(d, server);
   if (!d.region || !REGIONS[d.region.sido]?.some((district) => district === d.region?.district))
     errors.push('거래 가능 지역을 선택해주세요.');
   if (!d.unavailableConfirmed) errors.push('대여 불가능 기간을 정하거나 없음을 선택해주세요.');

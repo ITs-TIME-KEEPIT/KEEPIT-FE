@@ -15,7 +15,7 @@ import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
 
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
-import { useClothingItems } from '../../state/clothingStore';
+import { useClothingCatalog } from '../../api/clothing';
 import {
   clothBadges,
   filterClothItems,
@@ -35,7 +35,7 @@ export default function SearchScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'Search'>) {
   const { bottom } = useSafeAreaInsets();
-  const items = useClothingItems();
+  const { items, catalogError, retryCatalog } = useClothingCatalog();
   const listRef = useRef<FlatList>(null);
   const [text, setText] = useState('');
   const [query, setQuery] = useState(''); // 검색 버튼을 누른 검색어
@@ -97,6 +97,11 @@ export default function SearchScreen({
         </View>
       </View>
 
+      {catalogError && (
+        <Text accessibilityRole="button" onPress={retryCatalog} style={styles.catalogNotice}>
+          서버 목록을 불러오지 못했어요. 눌러서 다시 시도
+        </Text>
+      )}
       {!query ? (
         <View style={styles.recent}>
           {recent.length > 0 && (
@@ -234,6 +239,7 @@ export default function SearchScreen({
 }
 
 const styles = StyleSheet.create({
+  catalogNotice: { paddingHorizontal: 16, paddingVertical: 8, color: COLORS.primary },
   container: {
     flex: 1,
     backgroundColor: COLORS.white,

@@ -65,7 +65,7 @@ export type RootStackParamList = {
     end: number;
     method: TradeMethod;
   };
-  RentalComplete: undefined;
+  RentalComplete: { rentalId: number } | undefined;
   ReceivedRequests: { clothId?: string } | undefined;
   ReceivedRequestDetail: { rentalId: string };
   TradeDetail: { rentalId: string };

@@ -31,9 +31,10 @@ export type ClothItem = {
     measurements?: Record<string, number>;
     region?: { sido: string; district: string };
     unavailablePeriod?: { start: number; end: number };
+    unavailablePeriods?: { startDate: string; endDate: string }[];
     photoUris?: string[];
     photos?: { part: '전면' | '후면' | '라벨' | '디테일'; uri?: string }[];
     views?: number;
-    defect?: { count: number; description: string; photoUris?: string[] };
+    defect?: { count?: number; description: string; photoUris?: string[] };
   };
 };

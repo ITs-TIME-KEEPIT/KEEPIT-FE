@@ -16,12 +16,12 @@ import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
 import type { Region } from '../../constants/regions';
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
-import { useClothingItems } from '../../state/clothingStore';
+import { useClothingCatalog } from '../../api/clothing';
 import { clothBadges, filterClothItems, isFilterActive } from '../../utils/filterClothItems';
 
 export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
   const { bottom } = useSafeAreaInsets();
-  const items = useClothingItems();
+  const { items, catalog, catalogError, retryCatalog } = useClothingCatalog();
   const [category, setCategory] = useState<CategoryChip>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
@@ -54,6 +54,12 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
         onPressSearch={() => navigation.navigate('Search')}
         onPressBell={() => navigation.navigate('Notifications')}
       />
+
+      {catalogError && (
+        <Text accessibilityRole="button" onPress={retryCatalog} style={styles.catalogNotice}>
+          서버 목록을 불러오지 못했어요. 눌러서 다시 시도
+        </Text>
+      )}
 
       <FilterBar
         category={category}
@@ -107,7 +113,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           }
         />
 
-        {clothes.length > 0 && (
+        {(catalog || clothes.length > 0) && (
           <Animated.View
             style={[
               styles.fab,
@@ -183,6 +189,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
 }
 
 const styles = StyleSheet.create({
+  catalogNotice: { paddingHorizontal: 16, paddingVertical: 8, color: COLORS.primary },
   container: {
     flex: 1,
     backgroundColor: COLORS.white,
