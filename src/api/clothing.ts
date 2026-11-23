@@ -133,17 +133,15 @@ function toCard(card: Card): ClothItem {
 
 async function getCatalog() {
   const items = new Map<string, ClothItem>();
-  let page = 0;
+  // Swagger 기준 cursor 방식: 처음엔 cursor 없이, 다음 묶음은 응답의 nextCursor로 요청합니다
+  let cursor: number | undefined;
   let hasNext: boolean;
   do {
-    const result = await apiGet<{ content: Card[]; page: number; hasNext: boolean }>(
+    const result = await apiGet<{ content: Card[]; nextCursor?: number; hasNext: boolean }>(
       '/api/v1/clothes',
-      {
-        page,
-        size: 50,
-      },
+      { cursor, size: 50 },
     );
-    if (result.page !== page || (result.hasNext && !result.content.length)) {
+    if (result.hasNext && (!result.content.length || result.nextCursor === undefined)) {
       throw new Error('옷 목록 페이지 정보가 올바르지 않습니다.');
     }
     for (const card of result.content) {
@@ -151,7 +149,7 @@ async function getCatalog() {
       const item = toCard(card);
       if (!items.has(item.id)) items.set(item.id, item);
     }
-    page += 1;
+    cursor = result.nextCursor;
     hasNext = result.hasNext;
   } while (hasNext);
   return [...items.values()];
