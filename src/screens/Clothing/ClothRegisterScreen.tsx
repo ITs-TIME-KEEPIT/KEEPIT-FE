@@ -41,7 +41,8 @@ import {
   buildRegisteredCloth,
 } from '../../utils/registration';
 import type { RegistrationDraft } from '../../types/registration';
-import { saveClothing, updateClothing, useClothingItems } from '../../state/clothingStore';
+import { registerServerClothing } from '../../api/clothingRegistration';
+import { updateClothing, useClothingItems } from '../../state/clothingStore';
 import { findDemoUser, getRentalState, useRentalState } from '../../state/rentalStore';
 import { hasActiveTrade } from '../../utils/myClothes';
 import { formatDate } from '../../utils/formatDate';
@@ -103,21 +104,23 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
   const [phase, setPhase] = useState<'camera' | 'form' | 'trade'>(() =>
     editingId || hasRequiredPhotos(initialDraft().photos) ? 'form' : 'camera',
   );
+  const [pending, setPending] = useState(false);
   useFocusEffect(
     useCallback(() => {
       if (phase !== 'trade') return;
       const subscription = BackHandler.addEventListener('hardwareBackPress', () => {
-        setPhase('form');
+        if (!pending) setPhase('form');
         return true;
       });
       return () => subscription.remove();
-    }, [phase]),
+    }, [phase, pending]),
   );
   const [regionOpen, setRegionOpen] = useState(false);
   const [calendarOpen, setCalendarOpen] = useState(false);
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
   const submitting = useRef(false);
+  const uploaded = useRef(new Map<string, number>());
   const update = <K extends keyof RegistrationDraft>(key: K, value: RegistrationDraft[K]) =>
     setDraft((current) => ({ ...current, [key]: value }));
   const close = () =>
@@ -144,22 +147,26 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
     setEnd(draft.unavailable ? new Date(draft.unavailable.end) : null);
     setCalendarOpen(true);
   };
-  const errors = phase === 'trade' ? registrationErrors(draft) : clothingInfoErrors(draft);
+  const errors =
+    phase === 'trade'
+      ? registrationErrors(draft, !editingId)
+      : clothingInfoErrors(draft, !editingId);
   const buttonTitle = phase === 'trade' ? (editingId ? '수정 완료' : '등록하기') : '다음';
-  const submit = () => {
+  const submit = async () => {
     if (submitting.current) return;
     if (errors.length) {
       Alert.alert('등록 정보 확인', errors[0]);
       return;
     }
     submitting.current = true;
+    setPending(true);
     try {
       if (getRentalState().currentUserId !== draftOwnerId)
         throw new Error('계정이 변경됐어요. 다시 등록해주세요.');
-      const owner = findDemoUser(draftOwnerId);
-      if (!owner) throw new Error('등록자 정보를 확인해주세요.');
-      const built = buildRegisteredCloth(draft, owner);
       if (editingId) {
+        const owner = findDemoUser(draftOwnerId);
+        if (!owner) throw new Error('등록자 정보를 확인해주세요.');
+        const built = buildRegisteredCloth(draft, owner);
         if (!original) throw new Error('수정할 옷을 찾을 수 없어요.');
         const item = {
           ...original,
@@ -177,12 +184,13 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
         savedDrafts.delete(draftKey);
         navigation.replace('ClothDetail', { clothId: item.id });
       } else {
-        saveClothing(built);
+        const clothId = await registerServerClothing(draft, uploaded.current);
         savedDrafts.delete(draftKey);
-        navigation.replace('ClothRegisterComplete', { clothId: built.id });
+        navigation.replace('ClothRegisterComplete', { clothId });
       }
     } catch (error) {
       submitting.current = false;
+      setPending(false);
       Alert.alert(
         '등록 정보 확인',
         error instanceof Error ? error.message : '입력 내용을 확인해주세요.',
@@ -213,6 +221,7 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
       <StatusBar style="dark" />
       <View style={styles.header}>
         <Pressable
+          disabled={pending}
           onPress={phase === 'trade' ? () => setPhase('form') : close}
           accessibilityRole="button"
           accessibilityLabel={phase === 'trade' ? '옷 정보 입력으로 돌아가기' : '등록 닫기'}
@@ -412,7 +421,7 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
               placeholder="옷의 소재, 착용감, 보관 상태 등을 알려주세요"
               value={draft.description}
               onChangeText={(value) => update('description', value)}
-              maxLength={2000}
+              maxLength={editingId ? 2000 : 500}
             />
           </>
         ) : (
@@ -512,8 +521,8 @@ export default function ClothRegisterScreen({ navigation, route }: Props) {
         {errors.length > 0 && <Text style={styles.error}>{errors[0]}</Text>}
       </ScrollView>
       <View style={styles.footer}>
-        {errors.length ? (
-          <CtaDisabledButton title={buttonTitle} />
+        {errors.length || pending ? (
+          <CtaDisabledButton title={pending ? '등록 중…' : buttonTitle} />
         ) : (
           <CtaButton
             title={buttonTitle}

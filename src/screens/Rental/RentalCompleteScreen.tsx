@@ -11,7 +11,7 @@ import CtaButton from '../../components/common/CtaButton';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'RentalComplete'>;
 
-export default function RentalCompleteScreen({ navigation }: Props) {
+export default function RentalCompleteScreen({ navigation, route }: Props) {
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
       <View style={styles.body}>
@@ -24,6 +24,7 @@ export default function RentalCompleteScreen({ navigation }: Props) {
         </View>
 
         <Text style={styles.title}>대여를 신청했어요</Text>
+        {route.params && <Text style={styles.description}>신청 번호 {route.params.rentalId}</Text>}
         <Text style={styles.description}>
           등록자가 48시간 안에 수락하면 알림으로 알려드릴게요.{'\n'}
           수락되면 서로의 연락처가 공개돼요.

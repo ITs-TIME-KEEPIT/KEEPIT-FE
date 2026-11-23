@@ -40,6 +40,31 @@ export async function apiGet<T>(path: string, query: Query = {}): Promise<T> {
     throw new ApiError('서버에 연결할 수 없습니다.', 0);
   }
 
+  return unwrapResponse<T>(res);
+}
+
+export async function apiPost<T>(path: string, payload: FormData | object): Promise<T> {
+  const multipart = payload instanceof FormData;
+  let res: Response;
+  try {
+    res = await fetch(`${BASE_URL}${path}`, {
+      method: 'POST',
+      headers: multipart ? undefined : { 'Content-Type': 'application/json' },
+      body: multipart ? payload : JSON.stringify(payload),
+    });
+  } catch {
+    throw new ApiError(
+      '서버 응답을 확인할 수 없어요. 다시 신청하거나 등록하기 전에 처리 여부를 확인해주세요.',
+      0,
+    );
+  }
+  if (res.status === 401 || res.status === 403) {
+    throw new ApiError('서버에서 인증 또는 권한을 확인할 수 없어요.', res.status);
+  }
+  return unwrapResponse<T>(res);
+}
+
+async function unwrapResponse<T>(res: Response): Promise<T> {
   const body = (await res.json().catch(() => null)) as ApiResponse<T> | null;
   if (!res.ok || !body?.success) {
     throw new ApiError(body?.message ?? '요청에 실패했습니다.', res.status, body?.code);

@@ -10,7 +10,8 @@ import type { TradeMethod } from '../../types/rental';
 import { MOCK_HOLIDAY } from '../../mocks/rental';
 import { useClothingItems } from '../../state/clothingStore';
 import { useRentalState } from '../../state/rentalStore';
-import { formatDate } from '../../utils/formatDate';
+import { serverClothesId, useServerClothing } from '../../api/clothing';
+import { formatDate, toApiDate } from '../../utils/formatDate';
 
 import Header from '../../components/common/Header';
 import DateRangeCalendar from '../../components/common/DateRangeCalendar';
@@ -43,11 +44,14 @@ const overlapsHoliday = (start: Date, end: Date) =>
 const BLOCKING_STAGES = ['accepted', 'handed-over', 'received', 'returned'];
 
 export default function RentalRequestScreen({ navigation, route }: Props) {
-  const cloth = useClothingItems().find((item) => item.id === route.params.clothId);
+  const local = useClothingItems().find((item) => item.id === route.params.clothId);
+  const serverId = serverClothesId(route.params.clothId);
+  const remote = useServerClothing(serverId);
+  const cloth = serverId ? remote.item : local;
   const { rentals } = useRentalState();
   const [start, setStart] = useState<Date | null>(null);
   const [end, setEnd] = useState<Date | null>(null);
-  const [method, setMethod] = useState<TradeMethod | null>(null);
+  const [method, setMethod] = useState<TradeMethod | null>(serverId ? '직거래' : null);
   // 연휴 택배 안내는 같은 신청에서 한 번만 노출
   const [holidayNoticeShown, setHolidayNoticeShown] = useState(false);
   const [holidayPopupOpen, setHolidayPopupOpen] = useState(false);
@@ -59,12 +63,26 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <Header type="back" title="대여 신청" onPressLeft={() => navigation.goBack()} />
-        <Text style={styles.empty}>옷 정보를 찾을 수 없어요.</Text>
+        <Text style={styles.empty}>
+          {serverId && !remote.detailError && !cloth
+            ? '옷 정보를 불러오는 중이에요.'
+            : '대여 가능한 옷 정보를 찾을 수 없어요.'}
+        </Text>
+        {remote.detailError && <CtaButton title="다시 시도" onPress={remote.retry} />}
       </SafeAreaView>
     );
   }
 
-  const methods: TradeMethod[] = cloth.shippingAvailable ? ['직거래', '택배'] : ['직거래'];
+  const schedule = remote.schedule;
+  const shippingAvailable = schedule?.deliveryAvailable ?? cloth.shippingAvailable;
+  const methods: TradeMethod[] = shippingAvailable ? ['직거래', '택배'] : ['직거래'];
+  const maxDays = schedule?.maxRentalDays ?? MAX_RENTAL_DAYS;
+  const unavailableDates = new Set(
+    (method === '택배'
+      ? schedule?.deliveryUnavailableDates
+      : schedule?.directUnavailableDates
+    )?.map(({ date }) => date),
+  );
   const borrowerWashes = !cloth.laundryIncluded;
   const unavailable = cloth.detail?.unavailablePeriod;
   const booked = rentals.filter(
@@ -73,12 +91,18 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
 
   // 등록자가 정한 대여 불가 기간이나 이미 거래가 잡힌 날은 선택 불가
   const isReserved = (date: Date) => {
+    if (serverId) {
+      const iso = toApiDate(date);
+      return (
+        !schedule?.rentable || iso < schedule.from || iso > schedule.to || unavailableDates.has(iso)
+      );
+    }
     const time = date.getTime();
     if (unavailable && time >= unavailable.start && time <= unavailable.end) return true;
     return booked.some((rental) => time >= rental.start && time <= rental.end);
   };
 
-  const canNext = !!start && !!end && !!method;
+  const canNext = !!start && !!end && !!method && (!serverId || !!schedule?.rentable);
 
   const goToConfirm = (selected: TradeMethod) => {
     if (!start || !end) return;
@@ -100,7 +124,11 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
   };
 
   const onPressNext = () => {
-    if (!start || !end || !method) return;
+    if (!canNext || !start || !end || !method) return;
+    if (serverId) {
+      goToConfirm(method);
+      return;
+    }
     if (method === '택배' && !holidayNoticeShown && overlapsHoliday(start, end)) {
       setHolidayNoticeShown(true);
       setHolidayPopupOpen(true);
@@ -129,10 +157,25 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
           <View style={styles.titleGroup}>
             <Text style={styles.sectionTitle}>언제 빌릴까요?</Text>
             <Text style={styles.sectionDescription}>
-              받는 날부터 돌려주는 날까지 골라주세요 (최대 {MAX_RENTAL_DAYS}일)
+              받는 날부터 돌려주는 날까지 골라주세요 (최대 {maxDays}일)
             </Text>
           </View>
 
+          {serverId &&
+            !schedule &&
+            (remote.scheduleError ? (
+              <CtaButton title="대여 일정 다시 불러오기" onPress={remote.retry} />
+            ) : (
+              <Text style={styles.sectionDescription}>대여 일정을 불러오는 중이에요.</Text>
+            ))}
+          {schedule?.rentable === false && (
+            <Text style={styles.sectionDescription}>현재 대여 신청을 받지 않아요.</Text>
+          )}
+          {schedule?.rentable && (
+            <Text style={styles.sectionDescription}>
+              일정 조회 범위 {schedule.from} ~ {schedule.to}
+            </Text>
+          )}
           <DateRangeCalendar
             start={start}
             end={end}
@@ -141,7 +184,7 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
               setEnd(e);
             }}
             isReserved={isReserved}
-            maxDays={MAX_RENTAL_DAYS}
+            maxDays={maxDays}
           />
         </View>
 
@@ -161,7 +204,13 @@ export default function RentalRequestScreen({ navigation, route }: Props) {
               key={item}
               label={item === '직거래' ? `직거래 · ${cloth.region}` : item}
               selected={method === item}
-              onPress={() => setMethod(item)}
+              onPress={() => {
+                if (serverId && item !== method) {
+                  setStart(null);
+                  setEnd(null);
+                }
+                setMethod(item);
+              }}
             />
           ))}
         </View>
