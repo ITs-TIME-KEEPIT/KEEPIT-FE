@@ -6,7 +6,13 @@ import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
-import { getRentalDetail } from '../../api/rental';
+import {
+  acceptRentalRequest,
+  advanceRental,
+  cancelRentalRequest,
+  getRentalDetail,
+  rejectRentalRequest,
+} from '../../api/rental';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import {
@@ -17,7 +23,7 @@ import {
   markLaundryNoticeSeen,
   useRentalState,
 } from '../../state/rentalStore';
-import type { Rental, RentalDetailResponse } from '../../types/rental';
+import type { RejectReason, Rental, RentalDetailResponse } from '../../types/rental';
 import { formatDate, formatDday } from '../../utils/formatDate';
 import { isServerRentalId, STAGE_STEP, toRental } from '../../utils/tradeStage';
 
@@ -32,6 +38,7 @@ import InfoRow from '../../components/rental/InfoRow';
 import ItemSummary from '../../components/rental/ItemSummary';
 import LaundryNoticePopup from '../../components/rental/LaundryNoticePopup';
 import PersonRow from '../../components/rental/PersonRow';
+import RejectReasonSheet, { REJECT_REASONS } from '../../components/rental/RejectReasonSheet';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TradeDetail'>;
 
@@ -157,10 +164,29 @@ export default function TradeDetailScreen(props: Props) {
   );
 }
 
-/* 서버 거래 상세. 거래 진행 API 연동 전이라 보기 전용입니다 */
+// 서버 nextAction별 버튼. 사진 API가 없어 기존 화면의 사진 단계 없이 바로 처리합니다
+const SERVER_STEPS = {
+  HANDOVER: { title: '전달 완료', confirm: '옷을 건네줬나요?', step: 'handover' },
+  RECEIVE: { title: '수령 확인', confirm: '옷을 받았나요?', step: 'receipt' },
+  RETURN: { title: '반납 완료', confirm: '옷을 돌려줬나요?', step: 'return' },
+  COMPLETE: { title: '거래 완료', confirm: '돌려받은 옷을 확인했나요?', step: 'complete' },
+} as const;
+
+const REJECT_CODES: RejectReason[] = ['OWNER_USE', 'BAD_CONDITION', 'TOO_FAR'];
+
+const confirm = (title: string, message: string, ok: string, onOk: () => void) =>
+  Alert.alert(title, message, [
+    { text: '닫기', style: 'cancel' },
+    { text: ok, onPress: onOk },
+  ]);
+
+/* 서버 거래 상세. 내 차례인 단계의 버튼만 보여 주고, 처리 후 다시 불러옵니다 */
 function ServerTradeDetail({ navigation, route }: Props) {
   const rentalId = Number(route.params.rentalId);
   const [state, setState] = useState<{ data?: RentalDetailResponse; error?: string }>({});
+  const [reload, setReload] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -170,7 +196,23 @@ function ServerTradeDetail({ navigation, route }: Props) {
     return () => {
       alive = false;
     };
-  }, [rentalId]);
+  }, [rentalId, reload]);
+
+  // 실패해도 화면은 그대로 두고 서버 메시지를 알려 줍니다
+  const run = async (request: () => Promise<unknown>) => {
+    setBusy(true);
+    try {
+      await request();
+      setReload((value) => value + 1);
+    } catch (error) {
+      Alert.alert(
+        '처리하지 못했어요',
+        error instanceof Error ? error.message : '다시 시도해주세요.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const header = <Header type="back" title="거래 상세" onPressLeft={() => navigation.goBack()} />;
   const { data, error } = state;
@@ -184,7 +226,14 @@ function ServerTradeDetail({ navigation, route }: Props) {
     );
   }
 
-  const rental = toRental(data, String(data.ownerId));
+  const rental: Rental = {
+    ...toRental(data, String(data.ownerId)),
+    rejectReason:
+      data.rejectReason === 'ETC'
+        ? data.rejectReasonDetail
+        : data.rejectReason && REJECT_REASONS[REJECT_CODES.indexOf(data.rejectReason)],
+    cancelReason: data.cancelReason,
+  };
   const isOwner = data.viewerRole === 'OWNER';
   const borrowerWashes = data.laundryBy === 'BORROWER';
   // 문구는 기존 것을 쓰고, 누구 차례인지는 서버의 nextActionBy를 따릅니다
@@ -197,6 +246,61 @@ function ServerTradeDetail({ navigation, route }: Props) {
           ? TODO
           : WAITING,
   };
+
+  const myTurn = data.nextAction !== 'NONE' && data.nextActionBy === data.viewerRole;
+  const step =
+    data.nextAction in SERVER_STEPS && SERVER_STEPS[data.nextAction as keyof typeof SERVER_STEPS];
+
+  const accept = () =>
+    confirm('신청을 수락할까요?', '기간이 겹치는 다른 신청은 자동으로 무효돼요.', '수락', () =>
+      run(async () => {
+        const { invalidatedRentalIds } = await acceptRentalRequest(rentalId);
+        if (invalidatedRentalIds.length > 0)
+          Alert.alert(
+            '신청을 수락했어요',
+            `기간이 겹친 신청 ${invalidatedRentalIds.length}건은 무효 처리됐어요.`,
+          );
+      }),
+    );
+
+  const reject = (text: string) => {
+    setRejectOpen(false);
+    const index = REJECT_REASONS.indexOf(text as (typeof REJECT_REASONS)[number]);
+    run(() =>
+      rejectRentalRequest(
+        rentalId,
+        index >= 0 && index < REJECT_CODES.length
+          ? { reason: REJECT_CODES[index] }
+          : { reason: 'ETC', reasonDetail: text },
+      ),
+    );
+  };
+
+  const primary = !myTurn
+    ? null
+    : data.nextAction === 'WAIT_RESPONSE'
+      ? { title: '수락하기', onPress: accept }
+      : step
+        ? {
+            title: step.title,
+            onPress: () =>
+              confirm(step.confirm, '처리하면 다음 단계로 넘어가요.', step.title, () =>
+                run(() => advanceRental(rentalId, step.step)),
+              ),
+          }
+        : null;
+  const secondary =
+    myTurn && data.nextAction === 'WAIT_RESPONSE'
+      ? { title: '거절하기', onPress: () => setRejectOpen(true) }
+      : data.status === 'REQUESTED' && data.viewerRole === 'BORROWER'
+        ? {
+            title: '신청 취소',
+            onPress: () =>
+              confirm('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', '신청 취소', () =>
+                run(() => cancelRentalRequest(rentalId)),
+              ),
+          }
+        : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -237,6 +341,23 @@ function ServerTradeDetail({ navigation, route }: Props) {
           />
         </View>
       </ScrollView>
+
+      {(primary || secondary) && (
+        <View style={styles.bottomCta} pointerEvents={busy ? 'none' : 'auto'}>
+          {primary && <CtaButton title={primary.title} onPress={primary.onPress} />}
+          {secondary && (
+            <View style={styles.secondary}>
+              <DefaultButton title={secondary.title} onPress={secondary.onPress} />
+            </View>
+          )}
+        </View>
+      )}
+
+      <RejectReasonSheet
+        visible={rejectOpen}
+        onReject={reject}
+        onClose={() => setRejectOpen(false)}
+      />
     </SafeAreaView>
   );
 }
