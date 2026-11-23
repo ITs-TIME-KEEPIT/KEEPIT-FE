@@ -43,6 +43,8 @@ export type RentalStatus =
 
 export type ApiTradeMethod = 'DIRECT' | 'DELIVERY';
 
+export type RejectReason = 'OWNER_USE' | 'BAD_CONDITION' | 'TOO_FAR' | 'ETC';
+
 export type RentalActor = 'BORROWER' | 'OWNER' | 'ADMIN' | 'SYSTEM';
 
 export type RentalNextAction =
@@ -83,7 +85,7 @@ export type RentalDetailResponse = {
   deliveryFee: number | null; // 직거래면 null
   laundryBy: 'BORROWER' | 'OWNER';
   laundryMethod: 'DRY_CLEAN' | 'DISCUSS';
-  rejectReason?: 'OWNER_USE' | 'BAD_CONDITION' | 'TOO_FAR' | 'ETC';
+  rejectReason?: RejectReason;
   rejectReasonDetail?: string;
   cancelReason?: string;
   canceledBy?: RentalActor;
