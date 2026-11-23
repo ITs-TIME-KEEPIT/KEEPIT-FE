@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { View, Text, Image, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { useIsFocused } from '@react-navigation/native';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
+import { serverClothesId } from '../../api/clothing';
 import { getReceivedRentalRequests } from '../../api/rental';
 import { COLORS } from '../../constants/colors';
 import { DEMO_IDS } from '../../mocks/demoScenario';
@@ -48,18 +50,25 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
   const cloth = clothId ? clothes.find((item) => item.id === clothId) : undefined;
 
   // shortcut: 서버 신청을 mock과 함께 보여 줍니다, 전체 API 연동 후 mock 제거
-  // 서버의 '나'는 임시 옷 주인 id라 데모 등록자일 때만 부르고, mock 옷 id는 서버 옷 id와 달라 옷별 화면에서는 부르지 않습니다
-  const skipServer = currentUserId !== DEMO_IDS.owner || !!clothId;
+  // 로그인 연동 전이라 서버의 '나'는 .env 토큰의 사용자입니다. 데모 등록자일 때만 부르고, 옷별 화면은 서버 옷일 때만 부릅니다
+  const serverClothId = clothId ? serverClothesId(clothId) : undefined;
+  const skipServer = currentUserId !== DEMO_IDS.owner || (!!clothId && !serverClothId);
   const [server, setServer] = useState<{
     items: ReceivedRentalRequestResponse[];
     loading: boolean;
     error?: string;
   }>({ items: [], loading: true });
 
+  // 상세에서 수락, 거절하고 돌아오면 목록을 다시 불러옵니다
+  const focused = useIsFocused();
+
   useEffect(() => {
-    if (skipServer) return;
+    if (skipServer || !focused) return;
     let alive = true;
-    getReceivedRentalRequests({ status: 'REQUESTED' })
+    getReceivedRentalRequests({
+      status: 'REQUESTED',
+      clothesId: serverClothId ? Number(serverClothId) : undefined,
+    })
       .then((items) => alive && setServer({ items, loading: false }))
       .catch(
         (error: Error) => alive && setServer({ items: [], loading: false, error: error.message }),
@@ -67,7 +76,7 @@ export default function ReceivedRequestsScreen({ navigation, route }: Props) {
     return () => {
       alive = false;
     };
-  }, [skipServer]);
+  }, [skipServer, serverClothId, focused]);
 
   const serverLoading = !skipServer && server.loading;
   const cards: Card[] = [
