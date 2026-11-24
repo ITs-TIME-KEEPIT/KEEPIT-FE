@@ -9,6 +9,7 @@ import BottomSheet from './BottomSheet';
 import DateRangeCalendar from '../common/DateRangeCalendar';
 import CtaButton from '../common/CtaButton';
 import CtaDisabledButton from '../common/CtaDisabledButton';
+import SecondaryButton from '../common/SecondaryButton';
 
 interface DateRangeSheetProps {
   visible: boolean;
@@ -49,6 +50,7 @@ export default function DateRangeSheet({ visible, value, onApply, onClose }: Dat
         <DateRangeCalendar
           start={start}
           end={end}
+          maxDays={92}
           onChange={(s, e) => {
             setStart(s);
             setEnd(e);
@@ -60,6 +62,7 @@ export default function DateRangeSheet({ visible, value, onApply, onClose }: Dat
         <Text style={styles.summaryText}>받는 날 {start ? formatDate(start) : '-'}</Text>
         <Text style={styles.summaryText}>돌려주는 날 {end ? formatDate(end) : '-'}</Text>
       </View>
+      {value && <SecondaryButton title="날짜 초기화" onPress={() => onApply(null)} />}
     </BottomSheet>
   );
 }
