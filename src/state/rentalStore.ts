@@ -158,7 +158,7 @@ export function findDemoUser(id: string) {
 }
 
 // 48시간 안에 응답해야 하는 신청의 남은 시간 (시간 단위, 최소 0)
-export const hoursLeft = (rental: Rental, now = Date.now()) =>
+export const hoursLeft = (rental: Pick<Rental, 'createdAt'>, now = Date.now()) =>
   Math.max(0, 48 - Math.floor((now - rental.createdAt) / (60 * 60 * 1000)));
 
 export const overlaps = (a: Rental, b: Rental) => a.start <= b.end && b.start <= a.end;
