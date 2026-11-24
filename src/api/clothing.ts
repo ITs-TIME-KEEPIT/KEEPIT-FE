@@ -195,7 +195,7 @@ export function useClothingCatalog() {
   };
 }
 
-async function getClothingDetail(id: string): Promise<ClothItem> {
+export async function getClothingDetail(id: string): Promise<ClothItem> {
   const clothing = await apiGet<Detail>('/api/v1/clothes/' + id);
   const card = toCard(clothing);
   const photos = [...(clothing.photos ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
@@ -236,6 +236,9 @@ async function getClothingDetail(id: string): Promise<ClothItem> {
   };
 }
 
+export const getClothingAvailability = (id: string, range?: { from: string; to: string }) =>
+  apiGet<Availability>('/api/v1/clothes/' + id + '/availability', range);
+
 export function useServerClothing(id: string | undefined, loadSchedule = true) {
   const [detail, setDetail] = useState<{ id: string; item?: ClothItem }>();
   const [availability, setAvailability] = useState<{ id: string; data?: Availability }>();
@@ -253,7 +256,7 @@ export function useServerClothing(id: string | undefined, loadSchedule = true) {
       },
     );
     if (loadSchedule)
-      apiGet<Availability>('/api/v1/clothes/' + id + '/availability').then(
+      getClothingAvailability(id).then(
         (data) => {
           if (active) setAvailability({ id, data });
         },

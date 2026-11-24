@@ -23,7 +23,7 @@ const TAB_HEADINGS: Record<Tab, { title: string; hint: string }> = {
 interface FilterSheetProps {
   visible: boolean;
   value: DetailFilter; // 홈에 적용된 필터
-  countFor: (filter: DetailFilter) => number; // 실시간 개수 계산
+  countFor: (filter: DetailFilter) => number | undefined; // 실시간 개수 계산
   onApply: (filter: DetailFilter) => void;
   onClose: () => void;
 }
@@ -77,7 +77,12 @@ export default function FilterSheet({
       title="필터"
       onClose={onClose}
       // Figma BRW-202: 0개여도 적용해서 결과 없음 화면을 보여줌
-      footer={<CtaButton title={`${count}개 옷 보기`} onPress={apply} />}
+      footer={
+        <CtaButton
+          title={count === undefined ? '필터 적용' : `${count}개 옷 보기`}
+          onPress={apply}
+        />
+      }
     >
       <View style={styles.tabs}>
         {TABS.map((t) => (

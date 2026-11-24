@@ -16,6 +16,7 @@ import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
 import { useClothingCatalog } from '../../api/clothing';
+import { useClothingFilterData } from '../../api/clothingFilters';
 import {
   clothBadges,
   filterClothItems,
@@ -43,7 +44,6 @@ export default function SearchScreen({
   const [category, setCategory] = useState<CategoryChip>('전체');
   const [appliedFilter, setAppliedFilter] = useState<DetailFilter>(INITIAL_FILTER);
   const [filterOpen, setFilterOpen] = useState(false);
-  // shortcut: 홈과 같이 더미 데이터에 예약 날짜가 없어 기간은 결과에 반영하지 않음
   const [dateRange, setDateRange] = useState<DateRange>(null);
   const [dateOpen, setDateOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
@@ -65,7 +65,12 @@ export default function SearchScreen({
   const matched = items.filter(
     (item) => !item.hidden && !item.deleted && matchesQuery(item, query),
   );
-  const results = filterClothItems(matched, category, appliedFilter);
+  const filterData = useClothingFilterData(
+    query ? filterClothItems(matched, category, INITIAL_FILTER) : [],
+    dateRange,
+    filterOpen || appliedFilter.colors.length > 0,
+  );
+  const results = filterClothItems(filterData.filteredItems, category, appliedFilter);
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -102,6 +107,13 @@ export default function SearchScreen({
           서버 목록을 불러오지 못했어요. 눌러서 다시 시도
         </Text>
       )}
+      {filterData.loading && <Text style={styles.catalogNotice}>필터 정보를 불러오고 있어요</Text>}
+      {filterData.error && (
+        <Text accessibilityRole="button" onPress={filterData.retry} style={styles.catalogNotice}>
+          일부 옷의 필터 정보를 확인하지 못했어요. 눌러서 다시 시도
+        </Text>
+      )}
+
       {!query ? (
         <View style={styles.recent}>
           {recent.length > 0 && (
@@ -177,23 +189,25 @@ export default function SearchScreen({
               />
             )}
             ListEmptyComponent={
-              <View style={styles.empty}>
-                <Image
-                  source={require('../../../assets/icons/char-error.png')}
-                  style={styles.character}
-                  resizeMode="contain"
-                />
-                <Text style={styles.emptyTitle}>{`'${query}'에 맞는 옷이 없어요`}</Text>
-                <Text style={styles.emptySub}>검색어나 필터를 바꿔보세요</Text>
-                {/* BRW-204: 필터가 걸려 있으면 필터 초기화 (홈 결과 없음과 같은 규칙) */}
-                {isFilterActive(appliedFilter) && (
-                  <SecondaryButton
-                    title="필터 초기화"
-                    onPress={() => setAppliedFilter(INITIAL_FILTER)}
-                    style={styles.resetButton}
+              filterData.loading || filterData.error ? undefined : (
+                <View style={styles.empty}>
+                  <Image
+                    source={require('../../../assets/icons/char-error.png')}
+                    style={styles.character}
+                    resizeMode="contain"
                   />
-                )}
-              </View>
+                  <Text style={styles.emptyTitle}>{`'${query}'에 맞는 옷이 없어요`}</Text>
+                  <Text style={styles.emptySub}>검색어나 필터를 바꿔보세요</Text>
+                  {/* BRW-204: 필터가 걸려 있으면 필터 초기화 (홈 결과 없음과 같은 규칙) */}
+                  {isFilterActive(appliedFilter) && (
+                    <SecondaryButton
+                      title="필터 초기화"
+                      onPress={() => setAppliedFilter(INITIAL_FILTER)}
+                      style={styles.resetButton}
+                    />
+                  )}
+                </View>
+              )
             }
           />
 
@@ -217,7 +231,11 @@ export default function SearchScreen({
       <FilterSheet
         visible={filterOpen}
         value={appliedFilter}
-        countFor={(filter) => filterClothItems(matched, category, filter).length}
+        countFor={(filter) =>
+          (dateRange || filter.colors.length > 0) && (filterData.loading || filterData.error)
+            ? undefined
+            : filterClothItems(filterData.filteredItems, category, filter).length
+        }
         onApply={(filter) => {
           setAppliedFilter(filter);
           setFilterOpen(false);
