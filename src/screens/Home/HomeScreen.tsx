@@ -12,6 +12,7 @@ import SecondaryButton from '../../components/common/SecondaryButton';
 import FilterSheet from '../../components/bottomsheet/FilterSheet';
 import RegionSheet from '../../components/bottomsheet/RegionSheet';
 import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
+import Keepee from '../../components/common/Keepee';
 
 import type { Region } from '../../constants/regions';
 import { INITIAL_FILTER } from '../../types/filter';
@@ -108,11 +109,7 @@ export default function HomeScreen({ navigation }: MainTabScreenProps<'Home'>) {
           ListEmptyComponent={
             filterData.loading || filterData.error ? undefined : (
               <View style={styles.empty}>
-                <Image
-                  source={require('../../../assets/icons/char-error.png')}
-                  style={styles.character}
-                  resizeMode="contain"
-                />
+                <Keepee motion="error" style={styles.character} />
                 <Text style={styles.emptyTitle}>조건에 맞는 옷이 없어요</Text>
                 <Text style={styles.emptySub}>날짜나 필터를 바꿔보세요</Text>
                 {filterActive && (
