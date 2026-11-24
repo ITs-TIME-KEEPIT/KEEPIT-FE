@@ -58,14 +58,16 @@ async function send<T>(
   const multipart = payload instanceof FormData;
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}`, {
-      method,
-      headers: {
-        ...authHeader(),
-        ...(payload && !multipart ? { 'Content-Type': 'application/json' } : {}),
-      },
-      body: multipart ? payload : payload && JSON.stringify(payload),
-    });
+    res = multipart
+      ? await sendMultipart(method, path, payload)
+      : await fetch(`${BASE_URL}${path}`, {
+          method,
+          headers: {
+            ...authHeader(),
+            ...(payload ? { 'Content-Type': 'application/json' } : {}),
+          },
+          body: payload && JSON.stringify(payload),
+        });
   } catch {
     throw new ApiError(
       '서버 응답을 확인할 수 없어요. 다시 신청하거나 등록하기 전에 처리 여부를 확인해주세요.',
@@ -73,6 +75,19 @@ async function send<T>(
     );
   }
   return unwrapResponse<T>(res);
+}
+
+// Expo의 기본 fetch(expo/fetch)는 React Native 파일 첨부({ uri, name, type })를 보내지 못해서
+// ("Unsupported FormDataPart implementation"), 파일 업로드만 React Native의 XMLHttpRequest로 보냅니다
+function sendMultipart(method: string, path: string, body: FormData) {
+  return new Promise<Response>((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open(method, `${BASE_URL}${path}`);
+    for (const [key, value] of Object.entries(authHeader())) xhr.setRequestHeader(key, value);
+    xhr.onload = () => resolve(new Response(xhr.responseText, { status: xhr.status }));
+    xhr.onerror = () => reject(new Error('network'));
+    xhr.send(body);
+  });
 }
 
 async function unwrapResponse<T>(res: Response): Promise<T> {
