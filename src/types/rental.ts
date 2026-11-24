@@ -43,6 +43,35 @@ export type RentalStatus =
 
 export type ApiTradeMethod = 'DIRECT' | 'DELIVERY';
 
+export type CheckpointStage = 'HANDOVER' | 'RECEIVE' | 'RETURN';
+
+export type RentalCheckpointResponse = {
+  rentalId: number;
+  // 항상 REGISTER → HANDOVER → RECEIVE → RETURN 순서 4개
+  stages: {
+    step: 'REGISTER' | CheckpointStage;
+    takenBy: RentalActor;
+    takenAt: string | null;
+    photos: { photoPart: string; imageUrl: string; serverReceivedAt: string }[];
+  }[];
+};
+
+export type MyRentalResponse = {
+  rentalId: number;
+  status: RentalStatus;
+  clothingId: number;
+  clothingTitle: string;
+  thumbnailUrl: string | null;
+  regionName: string;
+  startDate: string;
+  endDate: string;
+  tradeMethod: ApiTradeMethod;
+  counterpartId: number;
+  counterpartNickname: string;
+  requestedAt: string;
+  expiresAt: string;
+};
+
 export type RejectReason = 'OWNER_USE' | 'BAD_CONDITION' | 'TOO_FAR' | 'ETC';
 
 export type RentalActor = 'BORROWER' | 'OWNER' | 'ADMIN' | 'SYSTEM';

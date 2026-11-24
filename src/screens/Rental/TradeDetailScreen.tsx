@@ -23,7 +23,12 @@ import {
   markLaundryNoticeSeen,
   useRentalState,
 } from '../../state/rentalStore';
-import type { RejectReason, Rental, RentalDetailResponse } from '../../types/rental';
+import type {
+  CheckpointStage,
+  RejectReason,
+  Rental,
+  RentalDetailResponse,
+} from '../../types/rental';
 import { formatDate, formatDday } from '../../utils/formatDate';
 import { isServerRentalId, STAGE_STEP, toRental } from '../../utils/tradeStage';
 
@@ -164,13 +169,8 @@ export default function TradeDetailScreen(props: Props) {
   );
 }
 
-// 서버 nextAction별 버튼. 사진 API가 없어 기존 화면의 사진 단계 없이 바로 처리합니다
-const SERVER_STEPS = {
-  HANDOVER: { title: '전달 완료', confirm: '옷을 건네줬나요?', step: 'handover' },
-  RECEIVE: { title: '수령 확인', confirm: '옷을 받았나요?', step: 'receipt' },
-  RETURN: { title: '반납 완료', confirm: '옷을 돌려줬나요?', step: 'return' },
-  COMPLETE: { title: '거래 완료', confirm: '돌려받은 옷을 확인했나요?', step: 'complete' },
-} as const;
+// 전달·수령·반납은 서버가 단계 사진을 먼저 요구해서 촬영 화면으로 보냅니다 (사진 등록 후 촬영 화면이 단계를 처리)
+const PHOTO_STAGES = { HANDOVER: 'handoff', RECEIVE: 'receipt', RETURN: 'return' } as const;
 
 const REJECT_CODES: RejectReason[] = ['OWNER_USE', 'BAD_CONDITION', 'TOO_FAR'];
 
@@ -187,8 +187,11 @@ function ServerTradeDetail({ navigation, route }: Props) {
   const [reload, setReload] = useState(0);
   const [busy, setBusy] = useState(false);
   const [rejectOpen, setRejectOpen] = useState(false);
+  // 촬영 화면에서 단계를 처리하고 돌아오면 다시 불러옵니다
+  const focused = useIsFocused();
 
   useEffect(() => {
+    if (!focused) return;
     let alive = true;
     getRentalDetail(rentalId)
       .then((data) => alive && setState({ data }))
@@ -196,7 +199,7 @@ function ServerTradeDetail({ navigation, route }: Props) {
     return () => {
       alive = false;
     };
-  }, [rentalId, reload]);
+  }, [rentalId, reload, focused]);
 
   // 실패해도 화면은 그대로 두고 서버 메시지를 알려 줍니다
   const run = async (request: () => Promise<unknown>) => {
@@ -248,8 +251,7 @@ function ServerTradeDetail({ navigation, route }: Props) {
   };
 
   const myTurn = data.nextAction !== 'NONE' && data.nextActionBy === data.viewerRole;
-  const step =
-    data.nextAction in SERVER_STEPS && SERVER_STEPS[data.nextAction as keyof typeof SERVER_STEPS];
+  const photoStage = data.nextAction in PHOTO_STAGES ? (data.nextAction as CheckpointStage) : null;
 
   const accept = () =>
     confirm('신청을 수락할까요?', '기간이 겹치는 다른 신청은 자동으로 무효돼요.', '수락', () =>
@@ -280,27 +282,46 @@ function ServerTradeDetail({ navigation, route }: Props) {
     ? null
     : data.nextAction === 'WAIT_RESPONSE'
       ? { title: '수락하기', onPress: accept }
-      : step
+      : photoStage
         ? {
-            title: step.title,
+            title: PHOTO_BUTTONS[PHOTO_STAGES[photoStage]],
             onPress: () =>
-              confirm(step.confirm, '처리하면 다음 단계로 넘어가요.', step.title, () =>
-                run(() => advanceRental(rentalId, step.step)),
-              ),
+              navigation.navigate('TradePhoto', {
+                rentalId: route.params.rentalId,
+                stage: photoStage,
+                ownerWashes: data.laundryBy === 'OWNER',
+              }),
           }
-        : null;
+        : data.nextAction === 'COMPLETE'
+          ? {
+              title: '거래 완료',
+              onPress: () =>
+                confirm(
+                  '돌려받은 옷을 확인했나요?',
+                  '거래 완료 후에는 되돌릴 수 없어요.',
+                  '거래 완료',
+                  () => run(() => advanceRental(rentalId, 'complete')),
+                ),
+            }
+          : null;
   const secondary =
     myTurn && data.nextAction === 'WAIT_RESPONSE'
       ? { title: '거절하기', onPress: () => setRejectOpen(true) }
-      : data.status === 'REQUESTED' && data.viewerRole === 'BORROWER'
+      : myTurn && data.nextAction === 'COMPLETE'
         ? {
-            title: '신청 취소',
+            title: '사진 비교하기',
             onPress: () =>
-              confirm('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', '신청 취소', () =>
-                run(() => cancelRentalRequest(rentalId)),
-              ),
+              navigation.navigate('TradePhotoCompare', { rentalId: route.params.rentalId }),
           }
-        : null;
+        : data.status === 'REQUESTED' && data.viewerRole === 'BORROWER'
+          ? {
+              title: '신청 취소',
+              onPress: () =>
+                confirm('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', '신청 취소', () =>
+                  run(() => cancelRentalRequest(rentalId)),
+                ),
+            }
+          : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>

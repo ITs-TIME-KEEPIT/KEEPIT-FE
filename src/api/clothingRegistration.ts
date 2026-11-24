@@ -17,9 +17,9 @@ const measurementFields: Record<string, string> = {
   허벅지단면: 'thighWidth',
   밑단단면: 'hemWidth',
 };
-const photoParts = { 전면: 'FRONT', 후면: 'BACK', 라벨: 'LABEL', 디테일: 'DETAIL' };
+export const photoParts = { 전면: 'FRONT', 후면: 'BACK', 라벨: 'LABEL', 디테일: 'DETAIL' };
 
-async function uploadPhoto(uri: string) {
+export async function uploadPhoto(uri: string) {
   const form = new FormData();
   const png = /^data:image\/png[;,]/i.test(uri) || /\.png(?:[?#]|$)/i.test(uri);
   const filename = png ? 'clothing.png' : 'clothing.jpg';
