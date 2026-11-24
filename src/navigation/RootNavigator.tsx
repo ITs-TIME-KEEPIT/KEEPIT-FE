@@ -35,7 +35,7 @@ import TradeReportScreen from '../screens/Rental/TradeReportScreen';
 import TabBar, { type TabKey } from '../components/common/TabBar';
 
 import { DEMO_START_SCREEN } from '../mocks/demoScenario';
-import type { TradeMethod } from '../types/rental';
+import type { CheckpointStage, TradeMethod } from '../types/rental';
 
 export type MainTabParamList = {
   Home: undefined;
@@ -70,7 +70,8 @@ export type RootStackParamList = {
   ReceivedRequestDetail: { rentalId: string };
   TradeDetail: { rentalId: string };
   MyClothes: undefined;
-  TradePhoto: { rentalId: string };
+  // stage가 있으면 서버 거래 사진입니다 (ownerWashes는 반납 안내 문구용)
+  TradePhoto: { rentalId: string; stage?: CheckpointStage; ownerWashes?: boolean };
   TradePhotoCompare: { rentalId: string };
   TradeComplete: { rentalId: string };
   TradeReport: { rentalId: string };

@@ -11,6 +11,7 @@ import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import { useRentalState } from '../../state/rentalStore';
 import { formatFullDateTime } from '../../utils/formatDate';
+import { submitCheckpoint } from '../../api/rental';
 import {
   completeTradePhotos,
   nextPhotoCheckpoint,
@@ -36,6 +37,8 @@ const CHECKPOINT_COPY = {
     done: '세탁 후 옷 상태 사진을 올려주시면\n반납 절차가 진행돼요.',
   },
 } as const;
+const SERVER_CHECKPOINT = { HANDOVER: 'handoff', RECEIVE: 'receipt', RETURN: 'return' } as const;
+
 const OWNER_WASHES_RETURN = {
   title: '반납 전 사진',
   guide: '돌려줄 옷 상태를\n앞면부터 찍어주세요',
@@ -49,13 +52,17 @@ export default function TradePhotoScreen({
   const { currentUserId, rentals } = useRentalState();
   const records = useTradePhotos();
   const clothes = useClothingItems();
-  const rental = rentals.find((r) => r.id === route.params.rentalId);
+  const { rentalId, stage } = route.params;
+  const rental = rentals.find((r) => r.id === rentalId);
   // 완료하면 거래 단계가 바뀌므로, 나가는 동안 다른 제목·안내가 보이지 않게 진입 시점 값으로 고정합니다.
-  const [checkpoint] = useState(() => (rental ? nextPhotoCheckpoint(rental, currentUserId) : null));
+  const [checkpoint] = useState(() =>
+    stage ? SERVER_CHECKPOINT[stage] : rental ? nextPhotoCheckpoint(rental, currentUserId) : null,
+  );
   const [captured, setCaptured] = useState<CapturedPhotos | null>(null);
+  const [sending, setSending] = useState(false);
   const finished = useRef(false);
 
-  if (!rental || !checkpoint)
+  if ((!rental && !stage) || !checkpoint)
     return (
       <SafeAreaView style={{ flex: 1 }}>
         <Header type="back" title="거래 사진" onPressLeft={() => navigation.goBack()} />
@@ -63,14 +70,32 @@ export default function TradePhotoScreen({
       </SafeAreaView>
     );
 
-  const ownerWashes = clothes.find((c) => c.id === rental.clothId)?.laundryIncluded;
+  const ownerWashes = stage
+    ? route.params.ownerWashes
+    : clothes.find((c) => c.id === rental?.clothId)?.laundryIncluded;
   const copy =
     checkpoint === 'return' && ownerWashes ? OWNER_WASHES_RETURN : CHECKPOINT_COPY[checkpoint];
 
-  const finish = (photos: CapturedPhotos) => {
-    if (finished.current) return;
+  const finish = async (photos: CapturedPhotos) => {
+    if (finished.current || sending) return;
+    if (stage) {
+      setSending(true);
+      try {
+        await submitCheckpoint(Number(rentalId), stage, photos);
+        finished.current = true;
+        navigation.goBack();
+      } catch (error) {
+        Alert.alert(
+          '사진을 올리지 못했어요',
+          error instanceof Error ? error.message : '다시 시도해주세요.',
+        );
+      } finally {
+        setSending(false);
+      }
+      return;
+    }
     try {
-      completeTradePhotos(rental.id, checkpoint, photos);
+      completeTradePhotos(rentalId, checkpoint, photos);
       finished.current = true;
       navigation.goBack();
     } catch (error) {
@@ -94,7 +119,7 @@ export default function TradePhotoScreen({
           <Text style={styles.description}>{copy.done}</Text>
         </View>
         <View style={styles.bottomCta}>
-          <CtaButton title="다음" onPress={() => finish(captured)} />
+          <CtaButton title={sending ? '올리는 중...' : '다음'} onPress={() => finish(captured)} />
         </View>
       </SafeAreaView>
     );
@@ -106,11 +131,12 @@ export default function TradePhotoScreen({
       guide={copy.guide}
       guideCaption={`촬영 시각: ${formatFullDateTime(new Date())}`}
       showStep={false}
-      initialPhotos={records[photoRecordKey(rental.id, checkpoint)]?.photos}
+      initialPhotos={stage ? undefined : records[photoRecordKey(rentalId, checkpoint)]?.photos}
       onClose={() => navigation.goBack()}
       onPhotosChange={(photos) => {
+        if (stage) return; // 서버 거래는 로컬 임시 저장을 쓰지 않습니다
         try {
-          saveTradePhotoDraft(rental.id, checkpoint, photos);
+          saveTradePhotoDraft(rentalId, checkpoint, photos);
         } catch (error) {
           Alert.alert('사진 저장', error instanceof Error ? error.message : '다시 시도해주세요.');
         }

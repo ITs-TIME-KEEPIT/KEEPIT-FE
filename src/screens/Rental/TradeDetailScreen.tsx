@@ -6,7 +6,13 @@ import { useIsFocused } from '@react-navigation/native';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
-import { getRentalDetail } from '../../api/rental';
+import {
+  acceptRentalRequest,
+  advanceRental,
+  cancelRentalRequest,
+  getRentalDetail,
+  rejectRentalRequest,
+} from '../../api/rental';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import {
@@ -17,7 +23,12 @@ import {
   markLaundryNoticeSeen,
   useRentalState,
 } from '../../state/rentalStore';
-import type { Rental, RentalDetailResponse } from '../../types/rental';
+import type {
+  CheckpointStage,
+  RejectReason,
+  Rental,
+  RentalDetailResponse,
+} from '../../types/rental';
 import { formatDate, formatDday } from '../../utils/formatDate';
 import { isServerRentalId, STAGE_STEP, toRental } from '../../utils/tradeStage';
 
@@ -32,6 +43,7 @@ import InfoRow from '../../components/rental/InfoRow';
 import ItemSummary from '../../components/rental/ItemSummary';
 import LaundryNoticePopup from '../../components/rental/LaundryNoticePopup';
 import PersonRow from '../../components/rental/PersonRow';
+import RejectReasonSheet, { REJECT_REASONS } from '../../components/rental/RejectReasonSheet';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TradeDetail'>;
 
@@ -157,12 +169,29 @@ export default function TradeDetailScreen(props: Props) {
   );
 }
 
-/* 서버 거래 상세. 거래 진행 API 연동 전이라 보기 전용입니다 */
+// 전달·수령·반납은 서버가 단계 사진을 먼저 요구해서 촬영 화면으로 보냅니다 (사진 등록 후 촬영 화면이 단계를 처리)
+const PHOTO_STAGES = { HANDOVER: 'handoff', RECEIVE: 'receipt', RETURN: 'return' } as const;
+
+const REJECT_CODES: RejectReason[] = ['OWNER_USE', 'BAD_CONDITION', 'TOO_FAR'];
+
+const confirm = (title: string, message: string, ok: string, onOk: () => void) =>
+  Alert.alert(title, message, [
+    { text: '닫기', style: 'cancel' },
+    { text: ok, onPress: onOk },
+  ]);
+
+/* 서버 거래 상세. 내 차례인 단계의 버튼만 보여 주고, 처리 후 다시 불러옵니다 */
 function ServerTradeDetail({ navigation, route }: Props) {
   const rentalId = Number(route.params.rentalId);
   const [state, setState] = useState<{ data?: RentalDetailResponse; error?: string }>({});
+  const [reload, setReload] = useState(0);
+  const [busy, setBusy] = useState(false);
+  const [rejectOpen, setRejectOpen] = useState(false);
+  // 촬영 화면에서 단계를 처리하고 돌아오면 다시 불러옵니다
+  const focused = useIsFocused();
 
   useEffect(() => {
+    if (!focused) return;
     let alive = true;
     getRentalDetail(rentalId)
       .then((data) => alive && setState({ data }))
@@ -170,7 +199,23 @@ function ServerTradeDetail({ navigation, route }: Props) {
     return () => {
       alive = false;
     };
-  }, [rentalId]);
+  }, [rentalId, reload, focused]);
+
+  // 실패해도 화면은 그대로 두고 서버 메시지를 알려 줍니다
+  const run = async (request: () => Promise<unknown>) => {
+    setBusy(true);
+    try {
+      await request();
+      setReload((value) => value + 1);
+    } catch (error) {
+      Alert.alert(
+        '처리하지 못했어요',
+        error instanceof Error ? error.message : '다시 시도해주세요.',
+      );
+    } finally {
+      setBusy(false);
+    }
+  };
 
   const header = <Header type="back" title="거래 상세" onPressLeft={() => navigation.goBack()} />;
   const { data, error } = state;
@@ -184,7 +229,14 @@ function ServerTradeDetail({ navigation, route }: Props) {
     );
   }
 
-  const rental = toRental(data, String(data.ownerId));
+  const rental: Rental = {
+    ...toRental(data, String(data.ownerId)),
+    rejectReason:
+      data.rejectReason === 'ETC'
+        ? data.rejectReasonDetail
+        : data.rejectReason && REJECT_REASONS[REJECT_CODES.indexOf(data.rejectReason)],
+    cancelReason: data.cancelReason,
+  };
   const isOwner = data.viewerRole === 'OWNER';
   const borrowerWashes = data.laundryBy === 'BORROWER';
   // 문구는 기존 것을 쓰고, 누구 차례인지는 서버의 nextActionBy를 따릅니다
@@ -197,6 +249,79 @@ function ServerTradeDetail({ navigation, route }: Props) {
           ? TODO
           : WAITING,
   };
+
+  const myTurn = data.nextAction !== 'NONE' && data.nextActionBy === data.viewerRole;
+  const photoStage = data.nextAction in PHOTO_STAGES ? (data.nextAction as CheckpointStage) : null;
+
+  const accept = () =>
+    confirm('신청을 수락할까요?', '기간이 겹치는 다른 신청은 자동으로 무효돼요.', '수락', () =>
+      run(async () => {
+        const { invalidatedRentalIds } = await acceptRentalRequest(rentalId);
+        if (invalidatedRentalIds.length > 0)
+          Alert.alert(
+            '신청을 수락했어요',
+            `기간이 겹친 신청 ${invalidatedRentalIds.length}건은 무효 처리됐어요.`,
+          );
+      }),
+    );
+
+  const reject = (text: string) => {
+    setRejectOpen(false);
+    const index = REJECT_REASONS.indexOf(text as (typeof REJECT_REASONS)[number]);
+    run(() =>
+      rejectRentalRequest(
+        rentalId,
+        index >= 0 && index < REJECT_CODES.length
+          ? { reason: REJECT_CODES[index] }
+          : { reason: 'ETC', reasonDetail: text },
+      ),
+    );
+  };
+
+  const primary = !myTurn
+    ? null
+    : data.nextAction === 'WAIT_RESPONSE'
+      ? { title: '수락하기', onPress: accept }
+      : photoStage
+        ? {
+            title: PHOTO_BUTTONS[PHOTO_STAGES[photoStage]],
+            onPress: () =>
+              navigation.navigate('TradePhoto', {
+                rentalId: route.params.rentalId,
+                stage: photoStage,
+                ownerWashes: data.laundryBy === 'OWNER',
+              }),
+          }
+        : data.nextAction === 'COMPLETE'
+          ? {
+              title: '거래 완료',
+              onPress: () =>
+                confirm(
+                  '돌려받은 옷을 확인했나요?',
+                  '거래 완료 후에는 되돌릴 수 없어요.',
+                  '거래 완료',
+                  () => run(() => advanceRental(rentalId, 'complete')),
+                ),
+            }
+          : null;
+  const secondary =
+    myTurn && data.nextAction === 'WAIT_RESPONSE'
+      ? { title: '거절하기', onPress: () => setRejectOpen(true) }
+      : myTurn && data.nextAction === 'COMPLETE'
+        ? {
+            title: '사진 비교하기',
+            onPress: () =>
+              navigation.navigate('TradePhotoCompare', { rentalId: route.params.rentalId }),
+          }
+        : data.status === 'REQUESTED' && data.viewerRole === 'BORROWER'
+          ? {
+              title: '신청 취소',
+              onPress: () =>
+                confirm('신청을 취소할까요?', '등록자에게 보낸 신청이 사라져요.', '신청 취소', () =>
+                  run(() => cancelRentalRequest(rentalId)),
+                ),
+            }
+          : null;
 
   return (
     <SafeAreaView style={styles.container} edges={['top']}>
@@ -237,6 +362,23 @@ function ServerTradeDetail({ navigation, route }: Props) {
           />
         </View>
       </ScrollView>
+
+      {(primary || secondary) && (
+        <View style={styles.bottomCta} pointerEvents={busy ? 'none' : 'auto'}>
+          {primary && <CtaButton title={primary.title} onPress={primary.onPress} />}
+          {secondary && (
+            <View style={styles.secondary}>
+              <DefaultButton title={secondary.title} onPress={secondary.onPress} />
+            </View>
+          )}
+        </View>
+      )}
+
+      <RejectReasonSheet
+        visible={rejectOpen}
+        onReject={reject}
+        onClose={() => setRejectOpen(false)}
+      />
     </SafeAreaView>
   );
 }

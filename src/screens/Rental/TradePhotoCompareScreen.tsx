@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -19,8 +19,14 @@ import { useClothingItems } from '../../state/clothingStore';
 import { markPhotosReviewed, useRentalState } from '../../state/rentalStore';
 import { photoRecordKey, useTradePhotos } from '../../state/tradePhotoStore';
 import { formatDateTime } from '../../utils/formatDate';
+import { getRentalCheckpoints } from '../../api/rental';
+import { photoParts } from '../../api/clothingRegistration';
+import type { RentalCheckpointResponse } from '../../types/rental';
+import { isServerRentalId } from '../../utils/tradeStage';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'TradePhotoCompare'>;
+
+const STAGE_TITLES = ['1단계 · 등록 시', '2단계 · 전달 직전', '3단계 · 수령', '4단계 · 반납'];
 
 const GRID_GAP = 16;
 const SIDE_PADDING = 20;
@@ -37,6 +43,60 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
   const rental = rentals.find((item) => item.id === route.params.rentalId);
   const cloth = clothes.find((item) => item.id === rental?.clothId);
 
+  // shortcut: 숫자 id는 서버 거래라 체크포인트 API로 4단계 사진을 받습니다, mock 제거 시 이 분기만 남깁니다
+  const serverId = isServerRentalId(route.params.rentalId) ? Number(route.params.rentalId) : null;
+  const [server, setServer] = useState<{ data?: RentalCheckpointResponse; error?: string }>({});
+
+  useEffect(() => {
+    if (serverId === null) return;
+    let alive = true;
+    getRentalCheckpoints(serverId)
+      .then((data) => alive && setServer({ data }))
+      .catch((error: Error) => alive && setServer({ error: error.message }));
+    return () => {
+      alive = false;
+    };
+  }, [serverId]);
+
+  const tileSize = (width - SIDE_PADDING * 2 - GRID_GAP) / 2;
+
+  if (serverId !== null) {
+    if (!server.data) {
+      return (
+        <SafeAreaView style={styles.container} edges={['top']}>
+          <Header type="back" title="사진 비교" onPressLeft={() => navigation.goBack()} />
+          <Text style={styles.empty}>{server.error ?? '사진을 불러오고 있어요.'}</Text>
+        </SafeAreaView>
+      );
+    }
+    // 서버 사진 주소는 응답마다 새로 발급되고 잠시 뒤 만료됩니다
+    const stages = server.data.stages.map((stage, index) => ({
+      title: STAGE_TITLES[index],
+      by: stage.takenBy === 'OWNER' ? '등록자' : '대여자',
+      uri: stage.photos.find((photo) => photo.photoPart === photoParts[part])?.imageUrl,
+      at: stage.takenAt ?? undefined,
+    }));
+    return (
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <Header type="back" title="사진 비교" onPressLeft={() => navigation.goBack()} />
+        <CompareGrid
+          stages={stages}
+          part={part}
+          tileSize={tileSize}
+          onPart={setPart}
+          onView={setViewing}
+        />
+        {viewing !== null && (
+          <PhotoViewer
+            uris={stages.map((stage) => stage.uri)}
+            startIndex={viewing}
+            onClose={() => setViewing(null)}
+          />
+        )}
+      </SafeAreaView>
+    );
+  }
+
   if (!rental || !cloth) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
@@ -49,7 +109,6 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
   const handoff = records[photoRecordKey(rental.id, 'handoff')];
   const receipt = records[photoRecordKey(rental.id, 'receipt')];
   const returned = records[photoRecordKey(rental.id, 'return')];
-  const tileSize = (width - SIDE_PADDING * 2 - GRID_GAP) / 2;
   const registered = cloth.detail?.photos?.find((photo) => photo.part === part)?.uri;
 
   const stages = [
@@ -68,49 +127,13 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
     <SafeAreaView style={styles.container} edges={['top']}>
       <Header type="back" title="사진 비교" onPressLeft={() => navigation.goBack()} />
 
-      <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
-        <View style={styles.parts}>
-          {PHOTO_PARTS.map((item) =>
-            item === part ? (
-              <ChipActiveButton key={item} title={item} onPress={() => setPart(item)} />
-            ) : (
-              <ChipButton key={item} title={item} onPress={() => setPart(item)} />
-            ),
-          )}
-        </View>
-
-        <View style={styles.grid}>
-          {stages.map((stage, index) => (
-            <View key={stage.title} style={[styles.cell, { width: tileSize }]}>
-              <Pressable
-                onPress={() => setViewing(index)}
-                disabled={!stage.uri}
-                accessibilityRole="button"
-                accessibilityLabel={`${stage.title} 사진 크게 보기`}
-              >
-                <SquareImage
-                  size={tileSize}
-                  borderRadius={16}
-                  placeholder={
-                    <Image
-                      source={require('../../../assets/icons/camera-off.svg')}
-                      style={styles.missingPhotoIcon}
-                      contentFit="contain"
-                    />
-                  }
-                  source={stage.uri ? { uri: stage.uri } : undefined}
-                />
-              </Pressable>
-              <Text style={styles.stageTitle}>{stage.title}</Text>
-              <Text style={styles.stageMeta}>
-                {stage.uri
-                  ? `${stage.by} 촬영${stage.at ? ` · ${formatDateTime(new Date(stage.at))}` : ''}`
-                  : `${part} 사진 없음`}
-              </Text>
-            </View>
-          ))}
-        </View>
-      </ScrollView>
+      <CompareGrid
+        stages={stages}
+        part={part}
+        tileSize={tileSize}
+        onPart={setPart}
+        onView={setViewing}
+      />
 
       <View style={styles.bottomCta}>
         {rental.ownerId === currentUserId && rental.stage === 'returned' && (
@@ -138,6 +161,68 @@ export default function TradePhotoCompareScreen({ navigation, route }: Props) {
         />
       )}
     </SafeAreaView>
+  );
+}
+
+type Stage = { title: string; by: string; uri?: string; at?: number | string };
+
+function CompareGrid({
+  stages,
+  part,
+  tileSize,
+  onPart: setPart,
+  onView: setViewing,
+}: {
+  stages: Stage[];
+  part: PhotoPart;
+  tileSize: number;
+  onPart: (part: PhotoPart) => void;
+  onView: (index: number) => void;
+}) {
+  return (
+    <ScrollView contentContainerStyle={styles.body} showsVerticalScrollIndicator={false}>
+      <View style={styles.parts}>
+        {PHOTO_PARTS.map((item) =>
+          item === part ? (
+            <ChipActiveButton key={item} title={item} onPress={() => setPart(item)} />
+          ) : (
+            <ChipButton key={item} title={item} onPress={() => setPart(item)} />
+          ),
+        )}
+      </View>
+
+      <View style={styles.grid}>
+        {stages.map((stage, index) => (
+          <View key={stage.title} style={[styles.cell, { width: tileSize }]}>
+            <Pressable
+              onPress={() => setViewing(index)}
+              disabled={!stage.uri}
+              accessibilityRole="button"
+              accessibilityLabel={`${stage.title} 사진 크게 보기`}
+            >
+              <SquareImage
+                size={tileSize}
+                borderRadius={16}
+                placeholder={
+                  <Image
+                    source={require('../../../assets/icons/camera-off.svg')}
+                    style={styles.missingPhotoIcon}
+                    contentFit="contain"
+                  />
+                }
+                source={stage.uri ? { uri: stage.uri } : undefined}
+              />
+            </Pressable>
+            <Text style={styles.stageTitle}>{stage.title}</Text>
+            <Text style={styles.stageMeta}>
+              {stage.uri
+                ? `${stage.by} 촬영${stage.at ? ` · ${formatDateTime(new Date(stage.at))}` : ''}`
+                : `${part} 사진 없음`}
+            </Text>
+          </View>
+        ))}
+      </View>
+    </ScrollView>
   );
 }
 

@@ -22,7 +22,7 @@ export const STAGE_STEP: Record<Rental['stage'], TradeStep> = {
 
 // 내 거래 카드 상태 뱃지 문구
 export function stageBadge(
-  rental: Rental,
+  rental: Pick<Rental, 'stage' | 'createdAt'>,
   isOwner: boolean,
 ): { label: string; tone: 'primary' | 'gray' } {
   switch (rental.stage) {

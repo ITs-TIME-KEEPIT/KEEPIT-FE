@@ -9,14 +9,14 @@ import AreaInputField from '../common/AreaInputField';
 import CtaButton from '../common/CtaButton';
 import CtaDisabledButton from '../common/CtaDisabledButton';
 
-// 거절 사유 (선택지 4개 - 피그마 기준)
-const REASONS = [
+// 거절 사유 (선택지 4개 - 피그마 기준). 순서는 서버 사유 코드와 맞춥니다
+export const REJECT_REASONS = [
   '그 날짜엔 제가 입어야 해요',
   '옷 상태가 지금 빌려주기 어려워요',
   '거래 지역이 너무 멀어요',
   '기타 (직접 입력)',
 ] as const;
-const ETC = REASONS[3];
+const ETC = REJECT_REASONS[3];
 
 interface RejectReasonSheetProps {
   visible: boolean;
@@ -25,7 +25,7 @@ interface RejectReasonSheetProps {
 }
 
 export default function RejectReasonSheet({ visible, onReject, onClose }: RejectReasonSheetProps) {
-  const [reason, setReason] = useState<(typeof REASONS)[number] | null>(null);
+  const [reason, setReason] = useState<(typeof REJECT_REASONS)[number] | null>(null);
   const [etcText, setEtcText] = useState('');
 
   // 다시 열면 처음부터 고르도록 초기화
@@ -56,7 +56,7 @@ export default function RejectReasonSheet({ visible, onReject, onClose }: Reject
       <Text style={styles.description}>대여자에게 그대로 전달돼요</Text>
 
       <View style={styles.options}>
-        {REASONS.map((item) => (
+        {REJECT_REASONS.map((item) => (
           <RadioInputField
             key={item}
             label={item}
