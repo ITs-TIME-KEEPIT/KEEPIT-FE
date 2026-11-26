@@ -1,6 +1,5 @@
 import React from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Image } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -10,6 +9,7 @@ import CtaButton from '../../components/common/CtaButton';
 import Header from '../../components/common/Header';
 import SquareImage from '../../components/common/SquareImage';
 import InfoRow from '../../components/rental/InfoRow';
+import Keepee from '../../components/common/Keepee';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import { findDemoUser, useRentalState } from '../../state/rentalStore';
@@ -58,11 +58,7 @@ export default function TradeCompleteScreen({ navigation, route }: Props) {
       <Header type="close" onPressLeft={close} />
 
       <View style={styles.body}>
-        <Image
-          source={require('../../../assets/icons/char-happy.png')}
-          style={styles.hero}
-          contentFit="contain"
-        />
+        <Keepee motion="happy" style={styles.hero} />
         <Text style={styles.title}>거래가 끝났어요!</Text>
         <Text style={styles.description}>
           {isOwner ? '옷을 잘 돌려받았어요.' : '옷을 잘 돌려줬어요.'} 킵잇을 이용해 줘서 고마워요.

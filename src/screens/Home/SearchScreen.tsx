@@ -12,6 +12,7 @@ import ClothCard from '../../components/clothing/ClothCard';
 import FilterBar, { type CategoryChip } from '../../components/clothing/FilterBar';
 import FilterSheet from '../../components/bottomsheet/FilterSheet';
 import DateRangeSheet from '../../components/bottomsheet/DateRangeSheet';
+import Keepee from '../../components/common/Keepee';
 
 import { INITIAL_FILTER } from '../../types/filter';
 import type { DateRange, DetailFilter } from '../../types/filter';
@@ -191,11 +192,7 @@ export default function SearchScreen({
             ListEmptyComponent={
               filterData.loading || filterData.error ? undefined : (
                 <View style={styles.empty}>
-                  <Image
-                    source={require('../../../assets/icons/char-error.png')}
-                    style={styles.character}
-                    resizeMode="contain"
-                  />
+                  <Keepee motion="error" style={styles.character} />
                   <Text style={styles.emptyTitle}>{`'${query}'에 맞는 옷이 없어요`}</Text>
                   <Text style={styles.emptySub}>검색어나 필터를 바꿔보세요</Text>
                   {/* BRW-204: 필터가 걸려 있으면 필터 초기화 (홈 결과 없음과 같은 규칙) */}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
-import { View, Text, Image, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 import type { RootStackParamList } from '../../navigation/RootNavigator';
@@ -9,6 +9,7 @@ import { COLORS } from '../../constants/colors';
 import Header from '../../components/common/Header';
 import RoundImage from '../../components/common/RoundImage';
 import ClothCard from '../../components/clothing/ClothCard';
+import Keepee from '../../components/common/Keepee';
 
 import { useClothingItems } from '../../state/clothingStore';
 import { findDemoUser, useRentalState } from '../../state/rentalStore';
@@ -78,11 +79,7 @@ export default function UserProfileScreen({
 
         {list.length === 0 ? (
           <View style={styles.empty}>
-            <Image
-              source={require('../../../assets/icons/char-default.png')}
-              style={styles.character}
-              resizeMode="contain"
-            />
+            <Keepee motion="idle" style={styles.character} />
             <Text style={styles.emptyTitle}>
               {owned.length === 0
                 ? '아직 등록된 옷이 없어요'
