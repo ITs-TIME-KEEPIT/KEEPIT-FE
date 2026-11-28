@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import {
   View,
@@ -14,7 +14,7 @@ import { Image } from 'expo-image';
 
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 import { COLORS } from '../../constants/colors';
-import { DEMO_LOGIN_MODE } from '../../mocks/demoScenario';
+import { signInWithKakao } from '../../api/auth';
 
 const PAGES = [
   {
@@ -41,15 +41,23 @@ export default function OnboardingScreen({
   const { width } = useWindowDimensions();
   const [page, setPage] = useState(0);
 
-  // 카카오 로그인 하나로 가입·로그인을 함께 처리합니다 (AUTH-100)
-  // TODO: 카카오 OAuth API 연동 후 서버 응답의 신규 회원 여부로 demoMode를 대체
-  const handleKakaoLogin = (demoMode = DEMO_LOGIN_MODE) => {
-    if (!__DEV__) {
-      Alert.alert('안내', '카카오 로그인 연동 전입니다.');
-      return;
+  const loginPending = useRef(false);
+  const [loggingIn, setLoggingIn] = useState(false);
+
+  const handleKakaoLogin = async () => {
+    if (loginPending.current) return;
+    loginPending.current = true;
+    setLoggingIn(true);
+    try {
+      const status = await signInWithKakao();
+      if (status === 'PROFILE_REQUIRED') navigation.navigate('ProfileSetup');
+      else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    } catch (error) {
+      Alert.alert('카카오 로그인', error instanceof Error ? error.message : '다시 시도해주세요.');
+    } finally {
+      loginPending.current = false;
+      setLoggingIn(false);
     }
-    if (demoMode === 'new') navigation.navigate('ProfileSetup');
-    else navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
   };
 
   return (
@@ -85,22 +93,18 @@ export default function OnboardingScreen({
 
       <View style={styles.footer}>
         <Pressable
-          onPress={() => handleKakaoLogin()}
+          onPress={handleKakaoLogin}
+          disabled={loggingIn}
           accessibilityRole="button"
           accessibilityLabel="카카오로 시작하기"
           style={styles.kakaoButton}
         >
-          <Text style={styles.kakaoText}>카카오로 시작하기</Text>
+          <Text style={styles.kakaoText}>{loggingIn ? '로그인 중…' : '카카오로 시작하기'}</Text>
         </Pressable>
 
         <Text style={styles.loginGuide}>
           이미 가입하셨나요?{' '}
-          <Text
-            style={styles.loginLink}
-            // 시연: 이미 가입한 회원으로 바로 홈 진입
-            onPress={() => handleKakaoLogin('existing')}
-            accessibilityRole="link"
-          >
+          <Text style={styles.loginLink} onPress={handleKakaoLogin} accessibilityRole="link">
             로그인
           </Text>
         </Text>

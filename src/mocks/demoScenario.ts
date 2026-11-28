@@ -1,11 +1,12 @@
+import { API_DEMO_MODE } from '../constants/demoMode';
 import type { ClothItem } from '../types/clothing';
 
 // 프론트 공용 시연 fixture. API 응답 규격/실제 계정이 아닙니다.
 // 출처: KEEPIT 중간발표 시연 시나리오 (2026-11-03 읽기 전용 확인)
 // https://eschoi20030316.atlassian.net/wiki/spaces/4/pages/13729793/KEEPIT
 export const DEMO_IDS = {
-  owner: 'demo-user-subin',
-  borrower: 'demo-user-jimin',
+  owner: API_DEMO_MODE ? '1' : 'demo-user-subin',
+  borrower: API_DEMO_MODE ? '2' : 'demo-user-jimin',
   cloth: 'lavender-dress',
   request: 'demo-request-lavender',
   trade: 'demo-trade-lavender',
@@ -33,7 +34,7 @@ export const DEMO_USERS = {
 } as const;
 export type DemoRole = keyof typeof DEMO_USERS;
 // 기본 탐색은 지민. 등록 시연은 'owner'로 바꾸고 다시 실행합니다.
-export const DEMO_ACTIVE_ROLE: DemoRole = 'borrower';
+export const DEMO_ACTIVE_ROLE: DemoRole = API_DEMO_MODE ? 'owner' : 'borrower';
 export const DEMO_LOGIN_MODE: 'existing' | 'new' = 'existing';
 // Expo 카메라 수동 점검 때만 'camera'로 바꿉니다. 앱 등록 흐름과는 분리합니다.
 export const DEMO_START_SCREEN: 'login' | 'camera' = 'login';

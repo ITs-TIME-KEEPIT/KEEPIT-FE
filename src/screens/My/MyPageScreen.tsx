@@ -4,6 +4,9 @@ import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context'
 
 import type { MainTabScreenProps } from '../../navigation/RootNavigator';
 
+import { clearSession } from '../../api/auth';
+import { API_DEMO_MODE } from '../../constants/demoMode';
+import { DEMO_USERS } from '../../mocks/demoScenario';
 import { COLORS } from '../../constants/colors';
 import { useClothingItems } from '../../state/clothingStore';
 import {
@@ -47,7 +50,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
     { label: '내 등록 옷 관리', onPress: () => navigation.navigate('MyClothes') },
     { label: '받은 신청', onPress: () => navigation.navigate('ReceivedRequests') },
     { label: '알림', onPress: () => navigation.navigate('Notifications') },
-    { label: '로그아웃', onPress: () => setLogoutOpen(true) },
+    ...(!API_DEMO_MODE ? [{ label: '로그아웃', onPress: () => setLogoutOpen(true) }] : []),
     { label: '회원 탈퇴', onPress: () => navigation.navigate('Withdraw'), muted: true },
   ];
 
@@ -96,6 +99,23 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
           ))}
         </View>
 
+        {API_DEMO_MODE && (
+          <View style={styles.demo}>
+            <Text style={styles.demoTitle}>시연 계정</Text>
+            {(['owner', 'borrower'] as const).map((role) => {
+              const user = DEMO_USERS[role];
+              const label = role === 'owner' ? '옷 등록자' : '옷 대여자';
+              return (
+                <MenuRow
+                  key={user.id}
+                  label={`${label} ${user.name} (${user.id})${user.id === currentUserId ? ' · 사용 중' : ''}`}
+                  onPress={() => switchDemoUser(role)}
+                />
+              );
+            })}
+          </View>
+        )}
+
         <View style={styles.menus}>
           {menus.map((menu) => (
             <MenuRow
@@ -108,7 +128,7 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
         </View>
 
         {/* 시연용: 폰 한 대에서 등록자 ↔ 대여자 전환 */}
-        {__DEV__ && (
+        {__DEV__ && !API_DEMO_MODE && (
           <View style={styles.demo}>
             <Text style={styles.demoTitle}>시연용</Text>
             <MenuRow
@@ -141,11 +161,14 @@ export default function MyPageScreen({ navigation }: MainTabScreenProps<'MyPage'
         title="로그아웃 하시겠어요?"
         description={'로그아웃 시 새로운 대여 신청이나 거래 관련\n알림을 받지 못할 수 있어요.'}
         primaryLabel="로그아웃"
-        onPressPrimary={() => {
+        onPressPrimary={async () => {
           setLogoutOpen(false);
-          // TODO: 로그인 연동 후 저장된 로그인 정보 삭제
-          // 탭 안에서는 루트 스택을 초기화해야 온보딩으로 돌아갑니다
-          navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+          try {
+            await clearSession();
+            navigation.getParent()?.reset({ index: 0, routes: [{ name: 'Onboarding' }] });
+          } catch {
+            Alert.alert('로그아웃', '로그인 정보를 지우지 못했어요. 다시 시도해주세요.');
+          }
         }}
         secondaryLabel="취소"
         onPressSecondary={() => setLogoutOpen(false)}

@@ -1,8 +1,11 @@
 import { useFonts } from 'expo-font';
 import { NavigationContainer } from '@react-navigation/native';
+import { API_DEMO_MODE } from './src/constants/demoMode';
+import { useRentalState } from './src/state/rentalStore';
 import RootNavigator from './src/navigation/RootNavigator';
 
 export default function App() {
+  const { currentUserId } = useRentalState();
   const [fontsLoaded] = useFonts({
     'Pretendard-Bold': require('./assets/fonts/Pretendard-Bold.otf'),
     'Pretendard-ExtraBold': require('./assets/fonts/Pretendard-ExtraBold.otf'),
@@ -16,7 +19,7 @@ export default function App() {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer key={API_DEMO_MODE ? currentUserId : 'session'}>
       <RootNavigator />
     </NavigationContainer>
   );

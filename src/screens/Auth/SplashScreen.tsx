@@ -4,6 +4,7 @@ import { View, Text, StyleSheet } from 'react-native';
 import { Image } from 'expo-image';
 
 import type { RootStackParamList } from '../../navigation/RootNavigator';
+import { restoreSession } from '../../api/auth';
 import { COLORS } from '../../constants/colors';
 
 const SPLASH_MS = 1500;
@@ -13,9 +14,18 @@ export default function SplashScreen({
   navigation,
 }: NativeStackScreenProps<RootStackParamList, 'Splash'>) {
   useEffect(() => {
-    // TODO: 로그인 연동 후 저장된 로그인 정보가 있으면 바로 Main으로 이동
-    const timer = setTimeout(() => navigation.replace('Onboarding'), SPLASH_MS);
-    return () => clearTimeout(timer);
+    let active = true;
+    const session = restoreSession().catch(() => false);
+    const timer = setTimeout(async () => {
+      const signedIn = await session;
+      if (!active) return;
+      if (signedIn) navigation.replace('Main');
+      else navigation.replace('Onboarding');
+    }, SPLASH_MS);
+    return () => {
+      active = false;
+      clearTimeout(timer);
+    };
   }, [navigation]);
 
   return (
