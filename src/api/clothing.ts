@@ -1,4 +1,6 @@
 import { useEffect, useState } from 'react';
+import { API_DEMO_MODE } from '../constants/demoMode';
+import { getRentalState } from '../state/rentalStore';
 import { apiGet } from './client';
 import { MOCK_CLOTH_ITEMS } from '../mocks/clothItems';
 import { useClothingItems } from '../state/clothingStore';
@@ -132,6 +134,7 @@ function toCard(card: Card): ClothItem {
 }
 
 async function getCatalog() {
+  const demoUserId = API_DEMO_MODE ? getRentalState().currentUserId : undefined;
   const items = new Map<string, ClothItem>();
   // Swagger 기준 cursor 방식: 처음엔 cursor 없이, 다음 묶음은 응답의 nextCursor로 요청합니다
   let cursor: number | undefined;
@@ -141,6 +144,7 @@ async function getCatalog() {
       '/api/v1/clothes',
       { cursor, size: 50 },
     );
+    if (demoUserId && demoUserId !== getRentalState().currentUserId) return [];
     if (result.hasNext && (!result.content.length || result.nextCursor === undefined)) {
       throw new Error('옷 목록 페이지 정보가 올바르지 않습니다.');
     }
@@ -167,10 +171,12 @@ export function useClothingCatalog() {
 
   useEffect(() => {
     let active = true;
-    catalogRequest ??= getCatalog().finally(() => {
-      catalogRequest = undefined;
-    });
-    catalogRequest.then(
+    const request = API_DEMO_MODE
+      ? getCatalog()
+      : (catalogRequest ??= getCatalog().finally(() => {
+          catalogRequest = undefined;
+        }));
+    request.then(
       (items) => {
         if (active) setCatalog(items);
       },
@@ -183,7 +189,7 @@ export function useClothingCatalog() {
     };
   }, [attempt]);
 
-  const items = catalog ? [...local.filter((item) => !mockIds.has(item.id)), ...catalog] : local;
+  const items = API_DEMO_MODE ? catalog ?? [] : catalog ? [...local.filter((item) => !mockIds.has(item.id)), ...catalog] : local;
   return {
     items,
     catalog,

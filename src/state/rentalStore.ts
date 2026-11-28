@@ -1,5 +1,5 @@
 import { useSyncExternalStore } from 'react';
-import { DEMO_ACTIVE_ROLE, DEMO_IDS, DEMO_USERS } from '../mocks/demoScenario';
+import { DEMO_ACTIVE_ROLE, DEMO_IDS, DEMO_USERS, type DemoRole } from '../mocks/demoScenario';
 import { DEMO_PHONES } from '../mocks/rental';
 import type { LaundryNotice, Rental, TradeMethod, TradeStage } from '../types/rental';
 
@@ -129,11 +129,11 @@ export function reportRental(id: string, reason: string) {
 }
 
 // 시연용: 폰 한 대에서 등록자 <-> 대여자를 오갑니다 (발표 시연 후 삭제)
-export function switchDemoUser() {
-  setState({
-    ...state,
-    currentUserId: state.currentUserId === DEMO_IDS.owner ? DEMO_IDS.borrower : DEMO_IDS.owner,
-  });
+export function switchDemoUser(
+  role: DemoRole = state.currentUserId === DEMO_IDS.owner ? 'borrower' : 'owner',
+) {
+  const currentUserId = DEMO_USERS[role].id;
+  if (state.currentUserId !== currentUserId) setState({ ...state, currentUserId });
 }
 
 export function resetRentals() {

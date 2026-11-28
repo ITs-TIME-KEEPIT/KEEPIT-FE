@@ -1,10 +1,24 @@
-// shortcut: 서버 주소를 그대로 둠, 배포 환경이 생기면 EXPO_PUBLIC_API_BASE_URL로 분리
-const BASE_URL = process.env.EXPO_PUBLIC_API_BASE_URL ?? 'http://43.203.239.171:8080';
+import { API_DEMO_MODE } from '../constants/demoMode';
+import { getRentalState } from '../state/rentalStore';
 
-// shortcut: 로그인 연동 전까지 .env의 EXPO_PUBLIC_ACCESS_TOKEN을 씁니다, 카카오 로그인이 붙으면 저장된 토큰으로 교체
-const ACCESS_TOKEN = process.env.EXPO_PUBLIC_ACCESS_TOKEN;
-const authHeader = (): Record<string, string> =>
-  ACCESS_TOKEN ? { Authorization: `Bearer ${ACCESS_TOKEN}` } : {};
+const configuredBaseUrl = process.env.EXPO_PUBLIC_API_BASE_URL?.trim();
+
+function getBaseUrl() {
+  if (API_DEMO_MODE && !configuredBaseUrl) {
+    throw new ApiError('시연 서버 주소(EXPO_PUBLIC_API_BASE_URL)를 설정해주세요.', 0);
+  }
+  return configuredBaseUrl?.replace(/\/+$/, '') ?? 'http://43.203.239.171:8080';
+}
+
+let accessToken: string | undefined;
+export function setApiAccessToken(token?: string) {
+  accessToken = token;
+}
+
+function authHeader(token?: string): Record<string, string> {
+  const bearer = token ?? (API_DEMO_MODE ? getRentalState().currentUserId : accessToken);
+  return bearer ? { Authorization: `Bearer ${bearer}` } : {};
+}
 
 /* 서버 공통 응답 형식 */
 type ApiResponse<T> = {
@@ -35,9 +49,10 @@ export async function apiGet<T>(path: string, query: Query = {}): Promise<T> {
   }
   const qs = params.toString();
 
+  const baseUrl = getBaseUrl();
   let res: Response;
   try {
-    res = await fetch(`${BASE_URL}${path}${qs ? `?${qs}` : ''}`, { headers: authHeader() });
+    res = await fetch(`${baseUrl}${path}${qs ? `?${qs}` : ''}`, { headers: authHeader() });
   } catch {
     throw new ApiError('서버에 연결할 수 없습니다.', 0);
   }
@@ -45,8 +60,8 @@ export async function apiGet<T>(path: string, query: Query = {}): Promise<T> {
   return unwrapResponse<T>(res);
 }
 
-export const apiPost = <T>(path: string, payload: FormData | object) =>
-  send<T>('POST', path, payload);
+export const apiPost = <T>(path: string, payload?: FormData | object, token?: string) =>
+  send<T>('POST', path, payload, token);
 
 export const apiPatch = <T>(path: string, payload?: object) => send<T>('PATCH', path, payload);
 
@@ -54,16 +69,18 @@ async function send<T>(
   method: 'POST' | 'PATCH',
   path: string,
   payload?: FormData | object,
+  token?: string,
 ): Promise<T> {
+  const url = `${getBaseUrl()}${path}`;
   const multipart = payload instanceof FormData;
   let res: Response;
   try {
     res = multipart
-      ? await sendMultipart(method, path, payload)
-      : await fetch(`${BASE_URL}${path}`, {
+      ? await sendMultipart(method, url, payload, token)
+      : await fetch(url, {
           method,
           headers: {
-            ...authHeader(),
+            ...authHeader(token),
             ...(payload ? { 'Content-Type': 'application/json' } : {}),
           },
           body: payload && JSON.stringify(payload),
@@ -74,23 +91,28 @@ async function send<T>(
       0,
     );
   }
-  return unwrapResponse<T>(res);
+  return unwrapResponse<T>(res, token !== undefined);
 }
 
 // Expo의 기본 fetch(expo/fetch)는 React Native 파일 첨부({ uri, name, type })를 보내지 못해서
 // ("Unsupported FormDataPart implementation"), 파일 업로드만 React Native의 XMLHttpRequest로 보냅니다
-function sendMultipart(method: string, path: string, body: FormData) {
+function sendMultipart(method: string, url: string, body: FormData, token?: string) {
   return new Promise<Response>((resolve, reject) => {
     const xhr = new XMLHttpRequest();
-    xhr.open(method, `${BASE_URL}${path}`);
-    for (const [key, value] of Object.entries(authHeader())) xhr.setRequestHeader(key, value);
+    xhr.open(method, url);
+    for (const [key, value] of Object.entries(authHeader(token))) xhr.setRequestHeader(key, value);
     xhr.onload = () => resolve(new Response(xhr.responseText, { status: xhr.status }));
     xhr.onerror = () => reject(new Error('network'));
     xhr.send(body);
   });
 }
 
-async function unwrapResponse<T>(res: Response): Promise<T> {
+async function unwrapResponse<T>(res: Response, sensitive = false): Promise<T> {
+  if (!sensitive) {
+    console.log('[API URL]', res.url);
+    console.log('[API STATUS]', res.status);
+    console.log('[API RESPONSE]', await res.clone().text());
+  }
   if (res.status === 401 || res.status === 403) {
     throw new ApiError('서버에서 인증 또는 권한을 확인할 수 없어요.', res.status);
   }

@@ -17,12 +17,15 @@ import {
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Image as ExpoImage } from 'expo-image';
 import * as ImagePicker from 'expo-image-picker';
+import { ImageManipulator, SaveFormat } from 'expo-image-manipulator';
+import { registerProfile } from '../../api/auth';
+import { ApiError } from '../../api/client';
 
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { RootStackParamList } from '../../navigation/RootNavigator';
 
 import { COLORS } from '../../constants/colors';
-import { DEMO_ACTIVE_ROLE, DEMO_USERS } from '../../mocks/demoScenario';
+import { DEMO_USERS } from '../../mocks/demoScenario';
 import { findDemoUser, updateProfile, useRentalState } from '../../state/rentalStore';
 
 import Header from '../../components/common/Header';
@@ -38,11 +41,11 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   const isEdit = !!route.params?.edit;
   const { currentUserId } = useRentalState();
   const me = isEdit ? findDemoUser(currentUserId) : undefined;
-  const [nickname, setNickname] = useState<string>(
-    me?.name ?? (__DEV__ ? DEMO_USERS[DEMO_ACTIVE_ROLE].name : ''),
-  );
+  const [nickname, setNickname] = useState<string>(me?.name ?? '');
   const [photoUri, setPhotoUri] = useState(me?.photoUri);
   const [photoMenuOpen, setPhotoMenuOpen] = useState(false);
+  const submitting = useRef(false);
+  const [saving, setSaving] = useState(false);
   const pickingPhoto = useRef(false);
   const [phone, setPhone] = useState(me?.phone ?? '');
   // 수정 화면에서 기존 닉네임은 이미 확인된 상태
@@ -52,13 +55,13 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   const [showLengthError, setShowLengthError] = useState(false);
 
   // 닉네임 유효성 검사
-  const nicknameLength = Array.from(nickname).length;
+  const nicknameLength = Array.from(nickname.trim()).length;
 
-  const hasInvalidNicknameCharacters = /[^가-힣ㄱ-ㅎㅏ-ㅣa-zA-Z0-9]/.test(nickname);
+  const hasInvalidNicknameCharacters = /[^\p{L}\p{M}\p{N} ._·'’-]/u.test(nickname);
   const isNicknameValid =
     !hasInvalidNicknameCharacters && nicknameLength >= 2 && nicknameLength <= 10;
   const nicknameError = hasInvalidNicknameCharacters
-    ? '한글, 영문, 숫자만 입력 가능합니다.'
+    ? '닉네임에 사용할 수 없는 문자가 있어요.'
     : showLengthError
       ? '닉네임은 2~10자로 입력해주세요.'
       : nicknameCheck === 'taken'
@@ -73,7 +76,12 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   // 시작하기 활성화 조건
   const changed =
     !isEdit || nickname !== me?.name || phone !== me?.phone || photoUri !== me?.photoUri;
-  const canStart = isNicknameValid && isPhoneValid && nicknameCheck === 'available' && changed;
+  const canStart =
+    !saving &&
+    isNicknameValid &&
+    isPhoneValid &&
+    changed &&
+    (isEdit ? nicknameCheck === 'available' : nicknameCheck !== 'taken');
 
   // 닉네임 입력
   const handleNicknameChange = (text: string) => {
@@ -148,8 +156,8 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
   };
 
   // 프로필 설정 완료
-  const handleStart = () => {
-    if (!canStart) return;
+  const handleStart = async () => {
+    if (!canStart || submitting.current || pickingPhoto.current) return;
 
     // TODO: 서버에 프로필 수정 저장
     if (isEdit) {
@@ -158,10 +166,34 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
       return;
     }
 
-    // TODO: 서버에 프로필 저장 후 홈 화면으로 이동
-    if (__DEV__) {
-      updateProfile(currentUserId, { name: nickname, phone, photoUri });
+    submitting.current = true;
+    setSaving(true);
+    try {
+      const image = photoUri
+        ? await (
+            await ImageManipulator.manipulate(photoUri).renderAsync()
+          ).saveAsync({
+            format: SaveFormat.JPEG,
+            compress: 0.9,
+          })
+        : undefined;
+      await registerProfile(nickname, phone, image?.uri);
       navigation.reset({ index: 0, routes: [{ name: 'Main' }] });
+    } catch (error) {
+      if (error instanceof ApiError && error.code === 'AUTH_409_2') {
+        setNicknameCheck('taken');
+      } else if (
+        error instanceof ApiError &&
+        (error.status === 401 || error.code === 'AUTH_409_1')
+      ) {
+        Alert.alert('프로필 등록', '카카오 로그인을 다시 진행해주세요.');
+        navigation.goBack();
+      } else {
+        Alert.alert('프로필 등록', error instanceof Error ? error.message : '다시 시도해주세요.');
+      }
+    } finally {
+      submitting.current = false;
+      setSaving(false);
     }
   };
 
@@ -193,6 +225,7 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
                 setPhotoMenuOpen(true);
               }}
               accessibilityRole="button"
+              disabled={saving}
               accessibilityLabel="프로필 사진 선택"
               style={styles.profileImageButton}
             >
@@ -233,6 +266,7 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
                     placeholder="2~10자로 입력해주세요"
                     placeholderTextColor={COLORS.textSub}
                     value={nickname}
+                    editable={!saving}
                     onChangeText={handleNicknameChange}
                     maxLength={20}
                     autoCapitalize="none"
@@ -242,11 +276,13 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
                 </View>
 
                 {/* 중복 확인 */}
-                <SecondaryButton
-                  title="중복 확인"
-                  onPress={handleNicknameCheck}
-                  style={styles.duplicateButton}
-                />
+                {isEdit && (
+                  <SecondaryButton
+                    title="중복 확인"
+                    onPress={handleNicknameCheck}
+                    style={styles.duplicateButton}
+                  />
+                )}
               </View>
               {nicknameMessage && (
                 <Text
@@ -270,6 +306,7 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
                   placeholder="010-0000-0000"
                   placeholderTextColor={COLORS.textSub}
                   value={phone}
+                  editable={!saving}
                   onChangeText={handlePhoneChange}
                   keyboardType="phone-pad"
                   maxLength={13}
@@ -298,7 +335,7 @@ export default function ProfileSetupScreen({ navigation, route }: Props) {
           {canStart ? (
             <CtaButton title={isEdit ? '저장하기' : '시작하기'} onPress={handleStart} />
           ) : (
-            <CtaDisabledButton title={isEdit ? '저장하기' : '시작하기'} />
+            <CtaDisabledButton title={saving ? '저장 중…' : isEdit ? '저장하기' : '시작하기'} />
           )}
         </View>
       </KeyboardAvoidingView>

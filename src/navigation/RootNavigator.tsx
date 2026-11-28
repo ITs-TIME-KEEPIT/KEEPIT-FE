@@ -34,6 +34,7 @@ import TradeReportScreen from '../screens/Rental/TradeReportScreen';
 
 import TabBar, { type TabKey } from '../components/common/TabBar';
 
+import { API_DEMO_MODE } from '../constants/demoMode';
 import { DEMO_START_SCREEN } from '../mocks/demoScenario';
 import type { CheckpointStage, TradeMethod } from '../types/rental';
 
@@ -118,7 +119,9 @@ function MainTabs() {
 export default function RootNavigator() {
   return (
     <Stack.Navigator
-      initialRouteName={__DEV__ && DEMO_START_SCREEN === 'camera' ? 'CameraPreview' : 'Splash'}
+      initialRouteName={
+        API_DEMO_MODE ? 'Main' : __DEV__ && DEMO_START_SCREEN === 'camera' ? 'CameraPreview' : 'Splash'
+      }
     >
       {__DEV__ && (
         <Stack.Screen
